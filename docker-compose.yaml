@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: build/Dockerfile.app
+    image: frankenphp-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "mysql://root:secret@db:3306/app?serverVersion=8.4&charset=utf8mb4"
+    networks:
+      - franken-php
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - franken-php
+
+  composer:
+    build:
+      context: .
+      dockerfile: build/Dockerfile.composer
+    volumes:
+      - ./app:/app
+    depends_on:
+      - db
+    networks:
+      - franken-php
+
+volumes:
+  db_data:
+
+networks:
+  franken-php:
+    driver: bridge
