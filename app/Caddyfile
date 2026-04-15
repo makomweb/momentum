@@ -1,0 +1,7 @@
+http://localhost:8080
+
+root * /app/public
+encode gzip
+
+php_server {
+}

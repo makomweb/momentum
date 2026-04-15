@@ -1,19 +1,8 @@
 .PHONY: help build init symfony laravel up show-hint shell down composer-install maintain composer-update composer-require caddyfile logs open
 
-CADDYFILE_CMD = mkdir -p app && printf '%s\n' \
-	'http://localhost:8080' \
-	'' \
-	'root * /app/public' \
-	'encode gzip' \
-	'' \
-	'php_server {' \
-	'}' > app/Caddyfile
 
 help:
 	@echo "Available targets:"
-	@echo "  scaffold:"
-	@echo "    symfony             Scaffold a Symfony application"
-	@echo "    laravel             Scaffold a Laravel application"
 	@echo "  boot                  Build images, install dependencies, start the stack"
 	@echo "  up                    Start the stack"
 	@echo "  down                  Stop the stack"
@@ -27,15 +16,6 @@ help:
 	@echo "  logs                  View app logs"
 	@echo "  open                  Open the app in a browser"
 
-symfony:
-	@echo "Scaffolding Symfony application..."
-	docker compose run --rm composer create-project symfony/skeleton:"8.0.*" .
-	@$(CADDYFILE_CMD)
-
-laravel:
-	@echo "Scaffolding Laravel application..."
-	docker compose run --rm composer create-project laravel/laravel .
-	@$(CADDYFILE_CMD)
 
 boot: build composer-install up
 
@@ -76,10 +56,6 @@ composer-require:
 	@test -n "$(PKG)" || (echo "Error: specify package with PKG=vendor/package"; exit 1)
 	@echo "Adding package $(PKG)..."
 	docker-compose run --rm composer require $(PKG)
-
-caddyfile:
-	@echo "Creating ./app/Caddyfile..."
-	@$(CADDYFILE_CMD)
 
 logs:
 	docker-compose logs -f app
