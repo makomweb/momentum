@@ -1,4 +1,4 @@
-.PHONY: help build init symfony laravel up show-hint shell down composer-install maintain composer-update composer-require caddyfile logs open
+.PHONY: help build init symfony laravel up hint shell down composer-install maintain composer-update composer-require caddyfile logs open
 
 
 help:
@@ -7,7 +7,7 @@ help:
 	@echo "  up                    Start the stack"
 	@echo "  down                  Stop the stack"
 	@echo "  shell                 Open shell on app container"
-	@echo "  show-hint             Print local app URLs"
+	@echo "  hint                  Print local app URLs"
 	@echo "  build                 Build Docker images"
 	@echo "  composer-install      Run composer install"
 	@echo "  maintain              Run composer update -W"
@@ -27,11 +27,11 @@ up:
 	@echo "Starting the stack..."
 	docker-compose up -d
 	@echo "Stack started!"
-	@$(MAKE) show-hint
+	@$(MAKE) hint
 
-show-hint:
-	@echo "Application available at http://localhost:8080"
-	@echo "MySQL available at localhost:3306"
+hint:
+	@echo "App at http://localhost:8080"
+	@echo "Adminer at http://localhost:8085"
 	@echo "To view logs: make logs"
 
 shell:
