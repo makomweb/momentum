@@ -54,10 +54,11 @@ class ActivitiesCommand extends Command
         $activities = $this->activities->fetchActivities(intval($stravaUserId));
 
         $table = new Table($output);
-        $table->setHeaders(['Name', 'Start', 'Bewegungszeit', 'Verstr. Zeit', 'Distanz', 'Avg. Speed', 'Max Speed']);
+        $table->setHeaders(['ID', 'Name', 'Start', 'Bewegungszeit', 'Verstr. Zeit', 'Distanz', 'Avg. Speed', 'Max Speed']);
 
         foreach ($activities as $activity) {
             $table->addRow([
+                $activity->getId(),
                 $activity->getName(),
                 $activity->getStartTime()->format(\DateTimeInterface::RFC2822),
                 self::asString($activity->getMovingTime()),

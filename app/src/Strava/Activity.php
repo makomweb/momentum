@@ -8,6 +8,8 @@ final readonly class Activity implements \Stringable
 {
     /**
      * @param array{
+     *  id: int,
+     *  device_name: string,
      *  name: string,
      *  start_date: int,
      *  timezone: string,
@@ -21,6 +23,16 @@ final readonly class Activity implements \Stringable
      */
     public function __construct(private array $data)
     {
+    }
+
+    public function getId(): int
+    {
+        return $this->data['id'];
+    }
+
+    public function getDeviceName(): string
+    {
+        return $this->data['device_name'];
     }
 
     public function getName(): string
