@@ -4,6 +4,8 @@ namespace App\Command;
 
 use App\Strava\ApiDetails;
 use App\Strava\ApiToken;
+use App\Strava\ApiTokenCache;
+use App\Strava\Assert;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -21,6 +23,7 @@ class RefreshCommand extends Command
     public function __construct(
         private ApiDetails $apiDetails,
         private HttpClientInterface $httpClient,
+        private ApiTokenCache $cache,
     ) {
         parent::__construct();
     }
@@ -28,17 +31,28 @@ class RefreshCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('refresh_token', InputArgument::REQUIRED, 'Refresh token')
+            ->addArgument('strava_user_id', InputArgument::REQUIRED, 'Strava user id')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $refreshToken = $input->getArgument('refresh_token');
 
-        assert(is_string($refreshToken));
-        assert(!empty($refreshToken));
+        $stravaUserId = $input->getArgument('strava_user_id');
+        assert(is_string($stravaUserId));
+
+        $token = $this->cache->getToken(intval($stravaUserId));
+
+        var_dump([
+            'expires_at' => $token->getExpiresAt()->format('Y-m-d\TH:i:s\Z'),
+            'now' => new \DateTimeImmutable()->format('Y-m-d\TH:i:s\Z'),
+            'is_expired' => $token->isExpired(),
+        ]);
+
+        Assert::that(!$token->isExpired(), 'Token is expired!');
+
+        $refreshToken = $token->getRefreshToken();
 
         $accessToken = $this->fetchAccessToken($refreshToken);
 

@@ -51,6 +51,11 @@ final readonly class ApiToken
         );
     }
 
+    public function isExpired(): bool
+    {
+        return $this->getExpiresAt() < new \DateTimeImmutable();
+    }
+
     public function getExpiresIn(): int
     {
         return $this->data['expires_in'];

@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Strava\ApiDetails;
 use App\Strava\ApiToken;
+use App\Strava\ApiTokenCache;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -22,6 +23,7 @@ class ConnectCommand extends Command
     public function __construct(
         private ApiDetails $apiDetails,
         private HttpClientInterface $httpClient,
+        private ApiTokenCache $cache,
     ) {
         parent::__construct();
     }
@@ -52,9 +54,11 @@ class ConnectCommand extends Command
 
         var_dump($refreshToken);
 
-        $accessToken = $this->fetchAccessToken($refreshToken);
+        $this->cache->saveToken($refreshToken);
 
-        var_dump($accessToken);
+        // $accessToken = $this->fetchAccessToken($refreshToken);
+
+        // var_dump($accessToken);
 
         return Command::SUCCESS;
     }
