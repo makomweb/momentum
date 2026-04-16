@@ -52,13 +52,7 @@ class ConnectCommand extends Command
 
         $refreshToken = $this->fetchRefreshToken($code);
 
-        var_dump($refreshToken);
-
         $this->cache->saveToken($refreshToken);
-
-        // $accessToken = $this->fetchAccessToken($refreshToken);
-
-        // var_dump($accessToken);
 
         return Command::SUCCESS;
     }

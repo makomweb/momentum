@@ -29,6 +29,14 @@ final readonly class ApiToken
     {
     }
 
+    public function withAccessToken(ApiToken $token): self
+    {
+        return new self([
+            ...$this->data,
+            'access_token' => $token->getAccessToken(),
+        ]);
+    }
+
     public function getTokenType(): ApiTokenType
     {
         return ApiTokenType::from($this->data['token_type']);

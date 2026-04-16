@@ -39,16 +39,24 @@ class RefreshCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        try {
+            $this->refresh($input);
+            $io->success('Done ✅');
+
+            return Command::SUCCESS;
+        } catch (\Throwable $ex) {
+            $io->error(sprintf('%s', $ex));
+
+            return Command::FAILURE;
+        }
+    }
+
+    private function refresh(InputInterface $input): void
+    {
         $stravaUserId = $input->getArgument('strava_user_id');
         assert(is_string($stravaUserId));
 
         $token = $this->cache->getToken(intval($stravaUserId));
-
-        var_dump([
-            'expires_at' => $token->getExpiresAt()->format('Y-m-d\TH:i:s\Z'),
-            'now' => new \DateTimeImmutable()->format('Y-m-d\TH:i:s\Z'),
-            'is_expired' => $token->isExpired(),
-        ]);
 
         Assert::that(!$token->isExpired(), 'Token is expired!');
 
@@ -56,9 +64,7 @@ class RefreshCommand extends Command
 
         $accessToken = $this->fetchAccessToken($refreshToken);
 
-        var_dump($accessToken);
-
-        return Command::SUCCESS;
+        $this->cache->saveToken($token->withAccessToken($accessToken));
     }
 
     public function fetchAccessToken(string $refreshToken): ApiToken
