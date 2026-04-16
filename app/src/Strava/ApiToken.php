@@ -42,6 +42,15 @@ final readonly class ApiToken
         return ApiTokenType::from($this->data['token_type']);
     }
 
+    public function getAuthHeaderValue(): string
+    {
+        return sprintf(
+            '%s %s',
+            $this->getTokenType()->value,
+            $this->getAccessToken()
+        );
+    }
+
     public function getAccessToken(): string
     {
         return $this->data['access_token'];

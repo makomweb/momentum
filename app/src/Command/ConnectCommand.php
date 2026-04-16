@@ -32,6 +32,20 @@ class ConnectCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        try {
+            $this->connect($input, $output);
+            $io->success('Done ✅');
+
+            return Command::SUCCESS;
+        } catch (\Throwable $ex) {
+            $io->error(sprintf('%s', $ex));
+
+            return Command::FAILURE;
+        }
+    }
+
+    private function connect(InputInterface $input, OutputInterface $output): void
+    {
         $redirectUri = 'http://localhost/exchange-token';
 
         $url = sprintf(
@@ -53,8 +67,6 @@ class ConnectCommand extends Command
         $refreshToken = $this->fetchRefreshToken($code);
 
         $this->cache->saveToken($refreshToken);
-
-        return Command::SUCCESS;
     }
 
     private function fetchRefreshToken(string $code): ApiToken

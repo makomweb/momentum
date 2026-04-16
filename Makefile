@@ -60,6 +60,22 @@ composer-require:
 logs:
 	docker-compose logs -f app
 
+sa:
+	@echo "Run static code analysis..."
+	docker compose run --rm composer sa
+
+cs:
+	@echo "Fix code style..."
+	docker compose run --rm composer cs
+
+test:
+	@echo "Run tests..."
+	docker compose run --rm composer test
+
+arch:
+	@echo "Run architecture tests..."
+	docker compose run --rm composer arch
+
 qa:
 	@echo "Run QA scripts..."
 	docker compose run --rm composer qa
