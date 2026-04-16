@@ -62,7 +62,7 @@ logs:
 
 qa:
 	@echo "Run QA scripts..."
-	docker compose run --rm composer cs
+	docker compose run --rm composer qa
 
 open:
 	@if command -v xdg-open > /dev/null 2>&1; then \
