@@ -13,7 +13,16 @@ final readonly class ApiToken
      *  expires_in: int,
      *  access_token: string,
      *  refresh_token: string,
-     *  athlete: array<string, mixed>
+     *  athlete: array{
+     *   id: int,
+     *   username: string,
+     *   firstname: string,
+     *   lastname: string,
+     *   sex: string,
+     *   premium: bool,
+     *   profile_medium: string,
+     *   profile: string
+     *  }
      * } $data
      */
     public function __construct(private array $data)
