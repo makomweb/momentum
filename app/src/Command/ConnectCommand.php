@@ -48,14 +48,18 @@ class ConnectCommand extends Command
         $code = $helper->ask($input, $output, $question);
         assert(is_string($code));
 
-        $token = $this->fetchToken($code);
+        $refreshToken = $this->fetchRefreshToken($code);
 
-        var_dump($token);
+        var_dump($refreshToken);
+
+        $accessToken = $this->fetchAccessToken($refreshToken);
+
+        var_dump($accessToken);
 
         return Command::SUCCESS;
     }
 
-    private function fetchToken(string $code): ApiToken
+    private function fetchRefreshToken(string $code): ApiToken
     {
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
             'body' => [
@@ -63,6 +67,33 @@ class ConnectCommand extends Command
                 'client_secret' => $this->apiDetails->clientSecret,
                 'code' => $code,
                 'grant_type' => 'authorization_code',
+            ],
+        ]);
+
+        /** @var array{
+         *  token_type: string,
+         *  expires_at: int,
+         *  expires_in: int,
+         *  access_token: string,
+         *  refresh_token: string,
+         *  athlete: array{id: int, username: string, firstname: string, lastname: string, sex: string, premium: bool, profile_medium: string, profile: string}
+         * } $data
+         */
+        $data = $response->toArray();
+
+        return new ApiToken($data);
+    }
+
+    public function fetchAccessToken(ApiToken $token): ApiToken
+    {
+        $refreshToken = $token->getRefreshToken();
+
+        $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
+            'body' => [
+                'client_id' => $this->apiDetails->clientId,
+                'client_secret' => $this->apiDetails->clientSecret,
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $refreshToken,
             ],
         ]);
 

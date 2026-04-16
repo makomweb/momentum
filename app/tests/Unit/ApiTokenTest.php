@@ -4,6 +4,7 @@ namespace App\Tests\Unit;
 
 use App\Strava\ApiToken;
 use App\Strava\ApiTokenType;
+use App\Strava\Gender;
 use PHPUnit\Framework\TestCase;
 
 class ApiTokenTest extends TestCase
@@ -51,5 +52,6 @@ class ApiTokenTest extends TestCase
         self::assertEquals('Max Mustermann', $athlete->getName());
         self::assertEquals('http://example.com/image.png', $athlete->getProfile());
         self::assertEquals('http://example.com/image-medium.png', $athlete->getProfileMedium());
+        self::assertEquals(Gender::MALE, $athlete->getGender());
     }
 }
