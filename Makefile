@@ -60,6 +60,10 @@ composer-require:
 logs:
 	docker-compose logs -f app
 
+qa:
+	@echo "Run QA scripts..."
+	docker compose run --rm composer cs
+
 open:
 	@if command -v xdg-open > /dev/null 2>&1; then \
 		xdg-open http://localhost:8080 2>/dev/null & \

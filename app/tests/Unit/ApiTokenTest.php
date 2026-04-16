@@ -4,7 +4,6 @@ namespace App\Tests\Unit;
 
 use App\Strava\ApiToken;
 use App\Strava\ApiTokenType;
-use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 class ApiTokenTest extends TestCase
@@ -26,7 +25,7 @@ class ApiTokenTest extends TestCase
                 'premium' => false,
                 'profile_medium' => 'http://example.com/image-medium.png',
                 'profile' => 'http://example.com/image.png',
-            ]
+            ],
         ];
 
         $token = new ApiToken($data);
@@ -37,7 +36,7 @@ class ApiTokenTest extends TestCase
         self::assertEquals(
             0,
             date_diff(
-                new DateTimeImmutable('now'),
+                new \DateTimeImmutable('now'),
                 $token->getExpiresAt()
             )->days
         );

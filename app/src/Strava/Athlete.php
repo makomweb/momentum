@@ -8,7 +8,7 @@ final readonly class Athlete
 {
     /**
      * @param array{
-     *  id: integer,
+     *  id: int,
      *  username: string,
      *  firstname: string,
      *  lastname: string,
@@ -18,7 +18,9 @@ final readonly class Athlete
      *  profile: string
      * } $data
      */
-    public function __construct(private array $data) {}
+    public function __construct(private array $data)
+    {
+    }
 
     public function getId(): int
     {
@@ -32,7 +34,7 @@ final readonly class Athlete
 
     public function getName(): string
     {
-        return $this->data['firstname'] . ' ' . $this->data['lastname'];
+        return $this->data['firstname'].' '.$this->data['lastname'];
     }
 
     public function getGender(): Gender

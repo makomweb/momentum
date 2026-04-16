@@ -12,7 +12,7 @@ final readonly class ApiDetails
         #[Autowire('%strava_client_id%')]
         public string $clientId,
         #[Autowire('%strava_client_secret%')]
-        public string $clientSecret
+        public string $clientSecret,
     ) {
     }
 }

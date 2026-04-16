@@ -27,7 +27,6 @@ class FetchDataCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 

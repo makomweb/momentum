@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use DateTimeImmutable;
-
 final readonly class ApiToken
 {
     /**
@@ -18,7 +16,9 @@ final readonly class ApiToken
      *  athlete: array<string, mixed>
      * } $data
      */
-    public function __construct(private array $data) {}
+    public function __construct(private array $data)
+    {
+    }
 
     public function getTokenType(): ApiTokenType
     {
@@ -35,9 +35,9 @@ final readonly class ApiToken
         return $this->data['refresh_token'];
     }
 
-    public function getExpiresAt(): DateTimeImmutable
+    public function getExpiresAt(): \DateTimeImmutable
     {
-        return DateTimeImmutable::createFromTimestamp(
+        return \DateTimeImmutable::createFromTimestamp(
             $this->data['expires_at']
         );
     }

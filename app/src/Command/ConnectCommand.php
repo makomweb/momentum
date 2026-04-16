@@ -27,7 +27,7 @@ class ConnectCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        
+
         $redirectUri = 'http://localhost/exchange-token';
 
         $url = sprintf(
@@ -36,7 +36,7 @@ class ConnectCommand extends Command
             urlencode($redirectUri)
         );
 
-        $output->writeln("Open this URL in your browser:");
+        $output->writeln('Open this URL in your browser:');
         $output->writeln($url);
 
         $helper = $this->getHelper('question');
@@ -61,7 +61,7 @@ class ConnectCommand extends Command
                 'grant_type' => 'authorization_code',
             ],
         ]);
-        
+
         return $response->toArray();
     }
 }
