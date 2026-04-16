@@ -16,6 +16,9 @@
         "symfony/yaml": "8.0.*"
     },
     "require-dev": {
+        "deptrac/deptrac": "^4.6",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^13",
         "symfony/maker-bundle": "^1.67"
     },
@@ -60,7 +63,17 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "qa": [
+            "vendor/bin/phpstan analyse --memory-limit=1G",
+            "vendor/bin/php-cs-fixer fix",
+            "bin/phpunit",
+            "vendor/bin/deptrac analyse --report-uncovered"
+        ],
+        "sa": "vendor/bin/phpstan analyse --memory-limit=1G",
+        "test": "bin/phpunit",
+        "cs": "vendor/bin/php-cs-fixer fix",
+        "arch": "vendor/bin/deptrac analyse --report-uncovered"
     },
     "conflict": {
         "symfony/symfony": "*"
