@@ -9,7 +9,7 @@
         "ext-iconv": "*",
         "symfony/console": "8.0.*",
         "symfony/dotenv": "8.0.*",
-        "symfony/flex": "^2",
+        "symfony/flex": "^2.10",
         "symfony/framework-bundle": "8.0.*",
         "symfony/http-client": "8.0.*",
         "symfony/runtime": "8.0.*",
@@ -17,9 +17,9 @@
     },
     "require-dev": {
         "deptrac/deptrac": "^4.6",
-        "friendsofphp/php-cs-fixer": "^3.95",
-        "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^13",
+        "friendsofphp/php-cs-fixer": "^3.95.1",
+        "phpstan/phpstan": "^2.1.49",
+        "phpunit/phpunit": "^13.1.5",
         "symfony/maker-bundle": "^1.67"
     },
     "config": {
