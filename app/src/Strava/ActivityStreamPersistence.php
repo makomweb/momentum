@@ -38,7 +38,7 @@ final readonly class ActivityStreamPersistence
     {
         // Check if already persisted
         $existing = $this->repository->findByStravaId($stravaUserId, $activityId);
-        if ($existing !== null) {
+        if (null !== $existing) {
             return;
         }
 
@@ -53,12 +53,8 @@ final readonly class ActivityStreamPersistence
             }
         }
 
-        if ($activity === null) {
-            throw new \RuntimeException(sprintf(
-                'Activity with ID %d not found for user %d',
-                $activityId,
-                $stravaUserId
-            ));
+        if (null === $activity) {
+            throw new \RuntimeException(sprintf('Activity with ID %d not found for user %d', $activityId, $stravaUserId));
         }
 
         $this->repository->persist($stravaUserId, $activity);

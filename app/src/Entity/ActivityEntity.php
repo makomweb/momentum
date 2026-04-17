@@ -15,7 +15,7 @@ final class ActivityEntity
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    private int $id = 0;
 
     #[ORM\Column(type: 'integer')]
     private readonly int $stravaActivityId;
@@ -99,6 +99,22 @@ final class ActivityEntity
         $dataProperty->setAccessible(true);
         $data = $dataProperty->getValue($activity);
 
+        assert(is_array($data));
+        /** @var array{
+         *  id: int,
+         *  device_name: string,
+         *  name: string,
+         *  start_date: int,
+         *  timezone: string,
+         *  elapsed_time: int,
+         *  moving_time: int,
+         *  distance: float,
+         *  max_speed: float,
+         *  average_speed: float,
+         *  type: string
+         * } $data
+         */
+
         return new self(
             $data['id'],
             $stravaUserId,
@@ -106,7 +122,7 @@ final class ActivityEntity
         );
     }
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }

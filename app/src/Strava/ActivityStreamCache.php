@@ -35,6 +35,14 @@ final readonly class ActivityStreamCache
         }
 
         $data = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
+        assert(is_array($data));
+        /** @var array<string, array{
+         *     data: (int|float)[],
+         *     series_type: string,
+         *     resolution: string,
+         *     original_size: int
+         * }> $data
+         */
 
         return ActivityStream::fromArray($data);
     }
