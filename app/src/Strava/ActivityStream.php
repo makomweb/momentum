@@ -9,6 +9,7 @@ final readonly class ActivityStream
     public function __construct(
         public ?Series $time = null,
         public ?Series $distance = null,
+        public ?Series $velocity = null,
         public ?Series $heartrate = null,
     ) {
     }
@@ -26,6 +27,7 @@ final readonly class ActivityStream
         return new self(
             time: isset($data['time']) ? Series::fromArray($data['time']) : null,
             distance: isset($data['distance']) ? Series::fromArray($data['distance']) : null,
+            velocity: isset($data['velocity_smooth']) ? Series::fromArray($data['velocity_smooth']) : null,
             heartrate: isset($data['heartrate']) ? Series::fromArray($data['heartrate']) : null,
         );
     }
@@ -43,5 +45,10 @@ final readonly class ActivityStream
     public function hasDistanceData(): bool
     {
         return null !== $this->distance && $this->distance->getCount() > 0;
+    }
+
+    public function hasVelocityData(): bool
+    {
+        return null !== $this->velocity && $this->velocity->getCount() > 0;
     }
 }

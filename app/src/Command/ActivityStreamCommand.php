@@ -80,6 +80,12 @@ class ActivityStreamCommand extends Command
                 'resolution' => $activity->distance->resolution,
                 'original_size' => $activity->distance->originalSize,
             ] : null,
+            'velocity' => $activity->velocity ? [
+                'data' => $activity->velocity->data,
+                'series_type' => $activity->velocity->seriesType,
+                'resolution' => $activity->velocity->resolution,
+                'original_size' => $activity->velocity->originalSize,
+            ] : null,
             'heartrate' => $activity->heartrate ? [
                 'data' => $activity->heartrate->data,
                 'series_type' => $activity->heartrate->seriesType,
