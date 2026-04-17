@@ -6,15 +6,15 @@ namespace App\Strava;
 
 final readonly class Speed implements \Stringable
 {
-    private function __construct(private float $value, private SpeedUnit $unit)
+    public function __construct(public float $value, public SpeedUnit $unit)
     {
     }
 
-    public static function fromStrava(float $meterPerSecond, string $type): self
+    public static function fromStrava(float $metersPerSecond, string $type): self
     {
         Assert::that(in_array($type, ['Ride', 'Walk', 'Run', 'WeightTraining']), sprintf('Type %s not yet supported!', $type));
 
-        $speed = new Speed($meterPerSecond, SpeedUnit::METER_PER_SECOND);
+        $speed = new Speed($metersPerSecond, SpeedUnit::METER_PER_SECOND);
 
         return match ($type) {
             'Ride' => $speed->as(SpeedUnit::KILOMETER_PER_HOUR),
