@@ -2,9 +2,8 @@
 
 namespace App\Command;
 
-use App\Strava\ApiDetails;
+use App\Strava\ApiClient;
 use App\Strava\ApiToken;
-use App\Strava\ApiTokenCache;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -12,7 +11,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsCommand(
     name: 'app:connect',
@@ -20,11 +18,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 )]
 class ConnectCommand extends Command
 {
-    public function __construct(
-        private ApiDetails $apiDetails,
-        private HttpClientInterface $httpClient,
-        private ApiTokenCache $cache,
-    ) {
+    public function __construct(private ApiClient $apiClient)
+    {
         parent::__construct();
     }
 
@@ -34,7 +29,7 @@ class ConnectCommand extends Command
 
         try {
             $token = $this->connect($input, $output);
-            $io->success(sprintf('%s conntected ✅', $token->getAthlete()));
+            $io->success(sprintf('"%s" conntected ✅', $token->getAthlete()));
 
             return Command::SUCCESS;
         } catch (\Throwable $ex) {
@@ -46,16 +41,10 @@ class ConnectCommand extends Command
 
     private function connect(InputInterface $input, OutputInterface $output): ApiToken
     {
-        $redirectUri = 'http://localhost/exchange-token';
-
-        $url = sprintf(
-            'https://www.strava.com/oauth/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=activity:read_all',
-            $this->apiDetails->clientId,
-            urlencode($redirectUri)
-        );
+        $address = $this->apiClient->getInitAddress();
 
         $output->writeln('Open this URL in your browser:');
-        $output->writeln($url);
+        $output->writeln($address);
 
         $helper = $this->getHelper('question');
         assert($helper instanceof QuestionHelper);
@@ -64,62 +53,6 @@ class ConnectCommand extends Command
         $code = $helper->ask($input, $output, $question);
         assert(is_string($code));
 
-        $refreshToken = $this->fetchRefreshToken($code);
-
-        $this->cache->saveToken($refreshToken);
-
-        return $refreshToken;
-    }
-
-    private function fetchRefreshToken(string $code): ApiToken
-    {
-        $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
-            'body' => [
-                'client_id' => $this->apiDetails->clientId,
-                'client_secret' => $this->apiDetails->clientSecret,
-                'code' => $code,
-                'grant_type' => 'authorization_code',
-            ],
-        ]);
-
-        /** @var array{
-         *  token_type: string,
-         *  expires_at: int,
-         *  expires_in: int,
-         *  access_token: string,
-         *  refresh_token: string,
-         *  athlete: array{id: int, username: string, firstname: string, lastname: string, sex: string, premium: bool, profile_medium: string, profile: string}
-         * } $data
-         */
-        $data = $response->toArray();
-
-        return new ApiToken($data);
-    }
-
-    public function fetchAccessToken(ApiToken $token): ApiToken
-    {
-        $refreshToken = $token->getRefreshToken();
-
-        $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
-            'body' => [
-                'client_id' => $this->apiDetails->clientId,
-                'client_secret' => $this->apiDetails->clientSecret,
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $refreshToken,
-            ],
-        ]);
-
-        /** @var array{
-         *  token_type: string,
-         *  expires_at: int,
-         *  expires_in: int,
-         *  access_token: string,
-         *  refresh_token: string,
-         *  athlete: array{id: int, username: string, firstname: string, lastname: string, sex: string, premium: bool, profile_medium: string, profile: string}
-         * } $data
-         */
-        $data = $response->toArray();
-
-        return new ApiToken($data);
+        return $this->apiClient->fetchRefreshToken($code);
     }
 }

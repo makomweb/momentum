@@ -15,7 +15,7 @@ final readonly class ApiTokenCache
     public function getToken(int $stravaUserId): ApiToken
     {
         $item = $this->pool->getItem(strval($stravaUserId));
-        assert($item->isHit(), sprintf('No API token for %d', $stravaUserId));
+        assert($item->isHit(), sprintf('No API token for "%d" - run ApiClient::connect() first!', $stravaUserId));
         $value = $item->get();
         assert($value instanceof ApiToken);
 
