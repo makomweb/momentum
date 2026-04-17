@@ -106,7 +106,7 @@ final readonly class Activities
         return $filePath;
     }
 
-    private function fetchStreams(int $stravaUserId, int $activityId): ActivityStream
+    public function fetchStreams(int $stravaUserId, int $activityId): ActivityStream
     {
         $token = $this->cache->getToken($stravaUserId);
 
