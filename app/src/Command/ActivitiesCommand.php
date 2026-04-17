@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Strava\Activities;
+use App\Strava\MissingTokenException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -39,6 +40,10 @@ class ActivitiesCommand extends Command
             $io->success('Done ✅');
 
             return Command::SUCCESS;
+        } catch (MissingTokenException $ex) {
+            $io->error(sprintf('%s (Run app:auth first!)', $ex->getMessage()));
+
+            return Command::FAILURE;
         } catch (\Throwable $ex) {
             $io->error(sprintf('%s', $ex));
 

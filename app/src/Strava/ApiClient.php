@@ -95,10 +95,10 @@ final readonly class ApiClient
          */
         $data = $response->toArray();
 
-        $newToken = new ApiToken($data);
+        $token = $token->withData($data);
 
-        $this->cache->saveToken($token->withAccessToken($newToken));
+        $this->cache->saveToken($token);
 
-        return $newToken;
+        return $token;
     }
 }

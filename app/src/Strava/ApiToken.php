@@ -29,12 +29,20 @@ final readonly class ApiToken
     {
     }
 
-    // TODO: Replace with "withData()"!
-    public function withAccessToken(ApiToken $token): self
+    /**
+     * @param array{
+     *  token_type: string,
+     *  expires_at: int,
+     *  expires_in: int,
+     *  access_token: string,
+     *  refresh_token: string
+     * } $data
+     */
+    public function withData(array $data): self
     {
         return new self([
             ...$this->data,
-            'access_token' => $token->getAccessToken(),
+            ...$data,
         ]);
     }
 
