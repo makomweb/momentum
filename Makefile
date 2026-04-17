@@ -21,11 +21,11 @@ boot: build composer-install up
 
 build:
 	@echo "Building Docker images..."
-	docker-compose build
+	docker compose build
 
 up:
 	@echo "Starting the stack..."
-	docker-compose up -d
+	docker compose up -d
 	@echo "Stack started!"
 	@$(MAKE) hint
 
@@ -40,25 +40,25 @@ shell:
 
 down:
 	@echo "Stopping the stack..."
-	docker-compose down
+	docker compose down
 
 composer-install:
 	@echo "Running composer install..."
-	docker-compose run --rm composer install
+	docker compose run --rm composer install
 
 maintain:
 	@echo "Running composer update -W..."
-	docker-compose run --rm composer update -W
+	docker compose run --rm composer update -W
 
 composer-update: maintain
 
 composer-require:
 	@test -n "$(PKG)" || (echo "Error: specify package with PKG=vendor/package"; exit 1)
 	@echo "Adding package $(PKG)..."
-	docker-compose run --rm composer require $(PKG)
+	docker compose run --rm composer require $(PKG)
 
 logs:
-	docker-compose logs -f app
+	docker compose logs -f app
 
 sa:
 	@echo "Run static code analysis..."
