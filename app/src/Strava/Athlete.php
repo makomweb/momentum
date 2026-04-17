@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-final readonly class Athlete
+final readonly class Athlete implements \Stringable
 {
     /**
      * @param array{
@@ -50,5 +50,10 @@ final readonly class Athlete
     public function getProfileMedium(): string
     {
         return $this->data['profile_medium'];
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s (Strava-ID: %d)', $this->getName(), $this->getId());
     }
 }
