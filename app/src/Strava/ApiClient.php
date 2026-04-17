@@ -16,7 +16,8 @@ final readonly class ApiClient
     ) {
     }
 
-    public function getInitAddress(): string
+    /** Get the address to perform authorization */
+    public function getAuthorizationAddress(): string
     {
         return sprintf(
             'https://www.strava.com/oauth/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=activity:read_all',
@@ -25,7 +26,8 @@ final readonly class ApiClient
         );
     }
 
-    public function fetchRefreshToken(string $code): ApiToken
+    /** Request a token (OAuth 2.0: exchange code with token) */
+    public function requestToken(string $code): ApiToken
     {
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
             'body' => [
@@ -54,20 +56,24 @@ final readonly class ApiClient
         return $token;
     }
 
-    public function fetchAccessToken(int $stravaUserId): ApiToken
+    public function refreshTokenFor(int $stravaUserId): ApiToken
     {
         $token = $this->cache->getToken($stravaUserId);
 
-        return $this->doFetchAccessToken($token);
+        return $token->isExpired()
+            ? $this->refreshToken($token)
+            : $token;
     }
 
-    private function doFetchAccessToken(ApiToken $token): ApiToken
+    /**
+     * Obtain a fresh token by provding the initial token
+     * (OAuth 2.0: refresh token).
+     */
+    private function refreshToken(ApiToken $token): ApiToken
     {
-        Assert::that(!$token->isExpired(), 'Token is expired!');
-
         $refreshToken = $token->getRefreshToken();
 
-        assert(!empty($refreshToken));
+        Assert::that(!empty($refreshToken), 'No refresh token available!');
 
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
             'body' => [
@@ -89,10 +95,10 @@ final readonly class ApiClient
          */
         $data = $response->toArray();
 
-        $accessToken = new ApiToken($data);
+        $newToken = new ApiToken($data);
 
-        $this->cache->saveToken($token->withAccessToken($accessToken));
+        $this->cache->saveToken($token->withAccessToken($newToken));
 
-        return $accessToken;
+        return $newToken;
     }
 }

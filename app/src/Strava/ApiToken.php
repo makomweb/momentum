@@ -29,6 +29,7 @@ final readonly class ApiToken
     {
     }
 
+    // TODO: Replace with "withData()"!
     public function withAccessToken(ApiToken $token): self
     {
         return new self([

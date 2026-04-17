@@ -13,12 +13,12 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:connect',
-    description: 'Generate connect URL',
+    name: 'app:auth',
+    description: 'Authorize a Strava user (authentication happens offside)',
 )]
-class ConnectCommand extends Command
+class AuthorizeCommand extends Command
 {
-    public function __construct(private ApiClient $apiClient)
+    public function __construct(private ApiClient $client)
     {
         parent::__construct();
     }
@@ -28,8 +28,8 @@ class ConnectCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $token = $this->connect($input, $output);
-            $io->success(sprintf('"%s" conntected ✅', $token->getAthlete()));
+            $token = $this->authorize($input, $output);
+            $io->success(sprintf('"%s" authorized ✅', $token->getAthlete()));
 
             return Command::SUCCESS;
         } catch (\Throwable $ex) {
@@ -39,9 +39,9 @@ class ConnectCommand extends Command
         }
     }
 
-    private function connect(InputInterface $input, OutputInterface $output): ApiToken
+    private function authorize(InputInterface $input, OutputInterface $output): ApiToken
     {
-        $address = $this->apiClient->getInitAddress();
+        $address = $this->client->getAuthorizationAddress();
 
         $output->writeln('Open this URL in your browser:');
         $output->writeln($address);
@@ -53,6 +53,6 @@ class ConnectCommand extends Command
         $code = $helper->ask($input, $output, $question);
         assert(is_string($code));
 
-        return $this->apiClient->fetchRefreshToken($code);
+        return $this->client->requestToken($code);
     }
 }

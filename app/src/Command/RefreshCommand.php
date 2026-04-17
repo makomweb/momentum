@@ -13,11 +13,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:refresh',
-    description: 'Gain access token by providing a refresh token',
+    description: 'Obtain a fresh token by providing the previous token',
 )]
 class RefreshCommand extends Command
 {
-    public function __construct(private ApiClient $apiClient)
+    public function __construct(private ApiClient $client)
     {
         parent::__construct();
     }
@@ -25,7 +25,7 @@ class RefreshCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('strava_user_id', InputArgument::REQUIRED, 'Strava user id')
+            ->addArgument('strava_user_id', InputArgument::REQUIRED, 'Strava user ID')
         ;
     }
 
@@ -35,7 +35,7 @@ class RefreshCommand extends Command
 
         try {
             $token = $this->refresh($input);
-            $io->success(sprintf('Access token for "%s" updated ✅', $token->getAthlete()));
+            $io->success(sprintf('Token for "%s" refreshed ✅', $token->getAthlete()));
 
             return Command::SUCCESS;
         } catch (\Throwable $ex) {
@@ -50,6 +50,6 @@ class RefreshCommand extends Command
         $stravaUserId = $input->getArgument('strava_user_id');
         assert(is_string($stravaUserId));
 
-        return $this->apiClient->fetchAccessToken(intval($stravaUserId));
+        return $this->client->refreshTokenFor(intval($stravaUserId));
     }
 }

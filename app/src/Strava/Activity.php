@@ -43,7 +43,7 @@ final readonly class Activity implements \Stringable
     public function getStartTime(): \DateTimeImmutable
     {
         $result = preg_match('/\)\s(.+)$/', $this->data['timezone'], $matches);
-        assert(1 === $result, 'There should be time zone information!');
+        Assert::that(1 === $result, 'There should be time zone information!');
 
         $tz = new \DateTimeZone($matches[1]); // e.g. "Europe/Berlin"
 

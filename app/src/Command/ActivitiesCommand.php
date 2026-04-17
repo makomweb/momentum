@@ -26,7 +26,7 @@ class ActivitiesCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('strava_user_id', InputArgument::REQUIRED, 'Strava user id')
+            ->addArgument('strava_user_id', InputArgument::REQUIRED, 'Strava user ID')
         ;
     }
 
