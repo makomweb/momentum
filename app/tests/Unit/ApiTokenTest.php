@@ -5,6 +5,7 @@ namespace App\Tests\Unit;
 use App\Strava\ApiToken;
 use App\Strava\ApiTokenType;
 use App\Strava\Gender;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 class ApiTokenTest extends TestCase
@@ -37,7 +38,7 @@ class ApiTokenTest extends TestCase
         self::assertEquals(
             0,
             date_diff(
-                new \DateTimeImmutable('now'),
+                DateTimeImmutable::createFromTimestamp(1776340597),
                 $token->getExpiresAt()
             )->days
         );

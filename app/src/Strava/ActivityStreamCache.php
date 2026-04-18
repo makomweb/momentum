@@ -34,15 +34,15 @@ final readonly class ActivityStreamCache
             throw new \RuntimeException(sprintf('Failed to read cache file: %s', $filePath));
         }
 
-        $data = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
-        assert(is_array($data));
-        /** @var array<string, array{
+        /**
+         * @var array<string, array{
          *     data: (int|float)[],
          *     series_type: string,
          *     resolution: string,
          *     original_size: int
          * }> $data
          */
+        $data = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
 
         return ActivityStream::fromArray($data);
     }

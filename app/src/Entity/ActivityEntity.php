@@ -97,10 +97,9 @@ final class ActivityEntity
         $reflection = new \ReflectionClass($activity);
         $dataProperty = $reflection->getProperty('data');
         $dataProperty->setAccessible(true);
-        $data = $dataProperty->getValue($activity);
 
-        assert(is_array($data));
-        /** @var array{
+        /**
+         * @var array{
          *  id: int,
          *  device_name: string,
          *  name: string,
@@ -114,6 +113,7 @@ final class ActivityEntity
          *  type: string
          * } $data
          */
+        $data = $dataProperty->getValue($activity);
 
         return new self(
             $data['id'],
