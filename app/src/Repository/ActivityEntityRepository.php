@@ -6,47 +6,72 @@ namespace App\Repository;
 
 use App\Entity\ActivityEntity;
 use App\Strava\Activity;
+use App\Strava\ActivityEntityRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<ActivityEntity>
  */
-final class ActivityEntityRepository extends ServiceEntityRepository
+final class ActivityEntityRepository extends ServiceEntityRepository implements ActivityEntityRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ActivityEntity::class);
     }
 
-    public function findByStravaId(int $stravaUserId, int $stravaActivityId): ?ActivityEntity
+    public function findByStravaId(int $stravaUserId, int $stravaActivityId): ?Activity
     {
-        return $this->findOneBy([
+        $entity = $this->findOneBy([
             'stravaUserId' => $stravaUserId,
             'stravaActivityId' => $stravaActivityId,
         ]);
+
+        if ($entity instanceof ActivityEntity) {
+            return self::fromEntity($entity);
+        }
+
+        return null;
     }
 
-    public function persist(int $stravaUserId, Activity $activity): ActivityEntity
+    public function persist(int $stravaUserId, Activity $activity): void
     {
         $existing = $this->findByStravaId($stravaUserId, $activity->getId());
 
-        if ($existing instanceof ActivityEntity) {
-            return $existing;
+        if ($existing instanceof Activity) {
+            throw new \Exception(sprintf('Activity with ID "%d" already present!', $activity->getId()));
         }
 
         $entity = ActivityEntity::fromActivity($stravaUserId, $activity);
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
-
-        return $entity;
     }
 
-    /**
-     * @return ActivityEntity[]
-     */
+    /** @return Activity[] */
     public function findByStravaUser(int $stravaUserId): array
     {
-        return $this->findBy(['stravaUserId' => $stravaUserId], ['createdAt' => 'DESC']);
+        /** @var ActivityEntity[] $entities */
+        $entities = $this->findBy(['stravaUserId' => $stravaUserId], ['createdAt' => 'DESC']);
+
+        return array_map(self::fromEntity(...), $entities);
+    }
+
+    private static function fromEntity(ActivityEntity $entity): Activity
+    {
+        return new Activity(
+            data: [
+                'id' => $entity->getStravaActivityId(),
+                'device_name' => $entity->getDeviceName(),
+                'name' => $entity->getName(),
+                'start_date' => $entity->getStartDate(),
+                'timezone' => $entity->getTimezone(),
+                'elapsed_time' => $entity->getElapsedTime(),
+                'moving_time' => $entity->getMovingTime(),
+                'distance' => $entity->getDistance(),
+                'max_speed' => $entity->getMaxSpeed(),
+                'average_speed' => $entity->getAverageSpeed(),
+                'type' => $entity->getType(),
+            ]
+        );
     }
 }

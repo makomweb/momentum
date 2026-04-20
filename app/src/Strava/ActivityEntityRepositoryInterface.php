@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use App\Entity\ActivityEntity;
-
 interface ActivityEntityRepositoryInterface
 {
-    public function findByStravaId(int $stravaUserId, int $stravaActivityId): ?ActivityEntity;
+    public function findByStravaId(int $stravaUserId, int $stravaActivityId): ?Activity;
 
-    public function persist(int $stravaUserId, Activity $activity): ActivityEntity;
+    public function persist(int $stravaUserId, Activity $activity): void;
 
     /**
-     * @return ActivityEntity[]
+     * @return Activity[]
      */
     public function findByStravaUser(int $stravaUserId): array;
 }
