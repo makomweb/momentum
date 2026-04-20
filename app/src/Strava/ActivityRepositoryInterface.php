@@ -8,7 +8,9 @@ use App\Strava\API\Activity;
 
 interface ActivityRepositoryInterface
 {
-    public function findByStravaId(int $stravaUserId, int $stravaActivityId): ?Activity;
+    public function findOrNull(int $stravaUserId, int $stravaActivityId): ?Activity;
+
+    public function findLastOrNull(int $stravaUserId): ?Activity;
 
     public function persist(int $stravaUserId, Activity $activity): void;
 

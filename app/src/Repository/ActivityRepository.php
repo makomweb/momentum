@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\ActivityEntity;
+use App\Entity\Activity as ActivityEntity;
 use App\Strava\ActivityRepositoryInterface;
 use App\Strava\API\Activity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -13,14 +13,14 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<ActivityEntity>
  */
-final class ActivityEntityRepository extends ServiceEntityRepository implements ActivityRepositoryInterface
+final class ActivityRepository extends ServiceEntityRepository implements ActivityRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ActivityEntity::class);
     }
 
-    public function findByStravaId(int $stravaUserId, int $stravaActivityId): ?Activity
+    public function findOrNull(int $stravaUserId, int $stravaActivityId): ?Activity
     {
         $entity = $this->findOneBy([
             'stravaUserId' => $stravaUserId,
@@ -34,15 +34,26 @@ final class ActivityEntityRepository extends ServiceEntityRepository implements 
         return null;
     }
 
-    public function persist(int $stravaUserId, Activity $activity): void
+    public function findLastOrNull(int $stravaUserId): ?Activity
     {
-        $existing = $this->findByStravaId($stravaUserId, $activity->getId());
+        $entity = $this->findOneBy(
+            ['stravaUserId' => $stravaUserId],
+            ['startDate' => 'DESC']
+        );
 
-        if ($existing instanceof Activity) {
-            return;
+        if ($entity instanceof ActivityEntity) {
+            return self::fromEntity($entity);
         }
 
-        $entity = ActivityEntity::fromActivity($stravaUserId, $activity);
+        return null;
+    }
+
+    public function persist(int $stravaUserId, Activity $activity): void
+    {
+        $existing = $this->findOrNull($stravaUserId, $activity->getId());
+        assert(is_null($existing), sprintf('Already persisted %s!', $activity));
+
+        $entity = new ActivityEntity($stravaUserId, $activity->getId(), $activity->data);
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
     }
@@ -58,20 +69,6 @@ final class ActivityEntityRepository extends ServiceEntityRepository implements 
 
     private static function fromEntity(ActivityEntity $entity): Activity
     {
-        return new Activity(
-            data: [
-                'id' => $entity->getStravaActivityId(),
-                'device_name' => $entity->getDeviceName(),
-                'name' => $entity->getName(),
-                'start_date' => $entity->getStartDate(),
-                'timezone' => $entity->getTimezone(),
-                'elapsed_time' => $entity->getElapsedTime(),
-                'moving_time' => $entity->getMovingTime(),
-                'distance' => $entity->getDistance(),
-                'max_speed' => $entity->getMaxSpeed(),
-                'average_speed' => $entity->getAverageSpeed(),
-                'type' => $entity->getType(),
-            ]
-        );
+        return new Activity($entity->getData());
     }
 }

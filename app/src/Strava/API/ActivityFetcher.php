@@ -23,7 +23,7 @@ final readonly class ActivityFetcher
         int $stravaUserId,
         int $page = 1,
         int $perPage = 200,
-        ?int $before = null,
+        ?int $after = null,
     ): array {
         $token = $this->tokenProvider->getToken($stravaUserId);
 
@@ -34,8 +34,8 @@ final readonly class ActivityFetcher
             'per_page' => $perPage,
         ];
 
-        if (null !== $before) {
-            $query['before'] = $before;
+        if ($after) {
+            $query['after'] = $after;
         }
 
         $response = $this->httpClient->request('GET', 'https://www.strava.com/api/v3/athlete/activities', [

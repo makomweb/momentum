@@ -21,7 +21,7 @@ final readonly class Activity implements \Stringable
      *  type: string
      * } $data
      */
-    public function __construct(private array $data)
+    public function __construct(public array $data)
     {
     }
 
