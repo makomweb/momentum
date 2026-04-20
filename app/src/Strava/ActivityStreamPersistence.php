@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use App\Strava\API\ActivityDownloader;
 use App\Strava\API\ActivityStream;
+use App\Strava\API\ActivityStreamDownloader;
 
 final readonly class ActivityStreamPersistence
 {
     public function __construct(
-        private ActivityDownloader $downloader,
         private ActivityStreamCache $cache,
-        private ActivityRepositoryInterface $repository,
+        private ActivityStreamDownloader $downloader,
     ) {
     }
 
-    public function fetchAndPersist(int $stravaUserId, int $activityId): ActivityStream
+    public function get(int $stravaUserId, int $activityId): ActivityStream
     {
         if ($this->cache->isCached($stravaUserId, $activityId)) {
             $cached = $this->cache->get($stravaUserId, $activityId);
@@ -25,41 +24,9 @@ final readonly class ActivityStreamPersistence
             }
         }
 
-        $stream = $this->downloader->fetchStreams($stravaUserId, $activityId);
+        $stream = $this->downloader->download($stravaUserId, $activityId);
 
         $this->cache->set($stravaUserId, $activityId, $stream);
-
-        return $stream;
-    }
-
-    public function persistActivity(int $stravaUserId, int $activityId): void
-    {
-        $existing = $this->repository->findByStravaId($stravaUserId, $activityId);
-        if (null !== $existing) {
-            return;
-        }
-
-        $activities = $this->downloader->fetchActivities($stravaUserId);
-        $activity = null;
-
-        foreach ($activities as $act) {
-            if ($act->getId() === $activityId) {
-                $activity = $act;
-                break;
-            }
-        }
-
-        if (null === $activity) {
-            throw new \RuntimeException(sprintf('Activity with ID %d not found for user %d', $activityId, $stravaUserId));
-        }
-
-        $this->repository->persist($stravaUserId, $activity);
-    }
-
-    public function fetchAndCacheStreams(int $stravaUserId, int $activityId): ActivityStream
-    {
-        $stream = $this->fetchAndPersist($stravaUserId, $activityId);
-        $this->persistActivity($stravaUserId, $activityId);
 
         return $stream;
     }

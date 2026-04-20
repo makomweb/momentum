@@ -51,4 +51,12 @@ final readonly class ActivityStream
     {
         return null !== $this->velocity && $this->velocity->getCount() > 0;
     }
+
+    public function hasData(): bool
+    {
+        return $this->hasHeartRateData()
+            || $this->hasTimeData()
+            || $this->hasDistanceData()
+            || $this->hasVelocityData();
+    }
 }

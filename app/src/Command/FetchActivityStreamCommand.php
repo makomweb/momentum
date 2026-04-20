@@ -2,7 +2,8 @@
 
 namespace App\Command;
 
-use App\Strava\API\ActivityDownloader;
+use App\Strava\ActivityStreamPersistence;
+use App\Strava\API\ActivityStream;
 use App\Strava\API\ApiException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,8 +19,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class FetchActivityStreamCommand extends Command
 {
-    public function __construct(private ActivityDownloader $downloader)
-    {
+    public function __construct(
+        private ActivityStreamPersistence $persistence,
+    ) {
         parent::__construct();
     }
 
@@ -36,8 +38,10 @@ class FetchActivityStreamCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $filePath = $this->fetchActivity($input);
-            $io->success(sprintf('Activity stream dumped to: %s ✅', $filePath));
+            $stream = $this->fetchStream($input);
+            $stream->hasData()
+                ? $io->success('Activity stream has data ✅')
+                : $io->success('Activity stream does not have data ❌');
 
             return Command::SUCCESS;
         } catch (ApiException $ex) {
@@ -51,25 +55,14 @@ class FetchActivityStreamCommand extends Command
         }
     }
 
-    private function fetchActivity(InputInterface $input): string
+    private function fetchStream(InputInterface $input): ActivityStream
     {
-        $userId = $input->getOption('strava_user_id');
-        assert(is_string($userId));
+        $stravaUserId = $input->getOption('strava_user_id');
+        assert(is_string($stravaUserId));
 
-        $activityId = $input->getArgument('strava_activity_id');
-        assert(is_string($activityId));
+        $stravaActivityId = $input->getArgument('strava_activity_id');
+        assert(is_string($stravaActivityId));
 
-        $varDir = dirname(__DIR__, 2).'/var';
-        if (!is_dir($varDir)) {
-            throw new \RuntimeException(sprintf('var directory does not exist: %s', $varDir));
-        }
-
-        $filePath = $this->downloader->dumpActivity(
-            intval($userId),
-            intval($activityId),
-            $varDir
-        );
-
-        return $filePath;
+        return $this->persistence->get(intval($stravaUserId), intval($stravaActivityId));
     }
 }
