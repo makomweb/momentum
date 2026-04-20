@@ -61,7 +61,7 @@ final class ActivityEntity
      *  id: int,
      *  device_name: string,
      *  name: string,
-     *  start_date: int,
+     *  start_date: int|string,
      *  timezone: string,
      *  elapsed_time: int,
      *  moving_time: int,
@@ -80,7 +80,7 @@ final class ActivityEntity
         $this->stravaUserId = $stravaUserId;
         $this->name = $activityData['name'];
         $this->deviceName = $activityData['device_name'];
-        $this->startDate = $activityData['start_date'];
+        $this->startDate = is_string($activityData['start_date']) ? intval($activityData['start_date']) : $activityData['start_date'];
         $this->timezone = $activityData['timezone'];
         $this->elapsedTime = $activityData['elapsed_time'];
         $this->movingTime = $activityData['moving_time'];

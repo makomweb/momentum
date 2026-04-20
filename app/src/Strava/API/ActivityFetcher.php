@@ -14,21 +14,35 @@ final readonly class ActivityFetcher
     ) {
     }
 
-    /** @return Activity[] */
-    public function fetch(int $stravaUserId, int $page = 1, int $perPage = 5): array
-    {
+    /**
+     * Fetch activities with pagination and optional time filtering.
+     *
+     * @return Activity[]
+     */
+    public function fetch(
+        int $stravaUserId,
+        int $page = 1,
+        int $perPage = 200,
+        ?int $before = null,
+    ): array {
         $token = $this->tokenProvider->getToken($stravaUserId);
 
         Assert::that(!$token->isExpired(), 'Token is expired!');
+
+        $query = [
+            'page' => $page,
+            'per_page' => $perPage,
+        ];
+
+        if (null !== $before) {
+            $query['before'] = $before;
+        }
 
         $response = $this->httpClient->request('GET', 'https://www.strava.com/api/v3/athlete/activities', [
             'headers' => [
                 'Authorization' => $token->getAuthHeaderValue(),
             ],
-            'query' => [
-                'page' => $page,
-                'per_page' => $perPage,
-            ],
+            'query' => $query,
         ]);
 
         /**

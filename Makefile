@@ -3,7 +3,7 @@
 
 help:
 	@echo "Available targets:"
-	@echo "  boot                  Build images, install dependencies, start the stack"
+	@echo "  boot                  Build images, install dependencies, start the stack, init database"
 	@echo "  up                    Start the stack"
 	@echo "  down                  Stop the stack"
 	@echo "  shell                 Open shell on app container"
@@ -17,7 +17,7 @@ help:
 	@echo "  open                  Open the app in a browser"
 
 
-boot: build composer-install up
+boot: build composer-install up create-database create-schema
 
 build:
 	@echo "Building Docker images..."
@@ -56,6 +56,14 @@ composer-require:
 	@test -n "$(PKG)" || (echo "Error: specify package with PKG=vendor/package"; exit 1)
 	@echo "Adding package $(PKG)..."
 	docker compose run --rm composer require $(PKG)
+
+create-database:
+	@echo "Create database"
+	docker compose exec -it app bin/console doctrine:database:create --if-not-exists
+
+create-schema:
+	@echo "Create database schema"
+	docker compose exec -it app bin/console doctrine:schema:update --force
 
 logs:
 	docker compose logs -f app

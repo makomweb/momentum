@@ -39,7 +39,7 @@ final class ActivityEntityRepository extends ServiceEntityRepository implements 
         $existing = $this->findByStravaId($stravaUserId, $activity->getId());
 
         if ($existing instanceof Activity) {
-            throw new \Exception(sprintf('Activity with ID "%d" already present!', $activity->getId()));
+            return;
         }
 
         $entity = ActivityEntity::fromActivity($stravaUserId, $activity);
