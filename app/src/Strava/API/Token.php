@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Strava\API;
 
-final readonly class ApiToken
+final readonly class Token
 {
     /**
      * @param array{
@@ -46,9 +46,9 @@ final readonly class ApiToken
         ]);
     }
 
-    public function getTokenType(): ApiTokenType
+    public function getTokenType(): TokenType
     {
-        return ApiTokenType::from($this->data['token_type']);
+        return TokenType::from($this->data['token_type']);
     }
 
     public function getAuthHeaderValue(): string

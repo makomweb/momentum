@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit;
 
-use App\Strava\Distance;
+use App\Strava\API\Distance;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

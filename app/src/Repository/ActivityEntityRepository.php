@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\ActivityEntity;
-use App\Strava\Activity;
-use App\Strava\ActivityEntityRepositoryInterface;
+use App\Strava\ActivityRepositoryInterface;
+use App\Strava\API\Activity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<ActivityEntity>
  */
-final class ActivityEntityRepository extends ServiceEntityRepository implements ActivityEntityRepositoryInterface
+final class ActivityEntityRepository extends ServiceEntityRepository implements ActivityRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

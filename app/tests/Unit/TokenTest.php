@@ -2,12 +2,12 @@
 
 namespace App\Tests\Unit;
 
-use App\Strava\ApiToken;
-use App\Strava\ApiTokenType;
-use App\Strava\Gender;
+use App\Strava\API\Gender;
+use App\Strava\API\Token;
+use App\Strava\API\TokenType;
 use PHPUnit\Framework\TestCase;
 
-class ApiTokenTest extends TestCase
+class TokenTest extends TestCase
 {
     public function test_deserialize(): void
     {
@@ -29,9 +29,9 @@ class ApiTokenTest extends TestCase
             ],
         ];
 
-        $token = new ApiToken($data);
+        $token = new Token($data);
 
-        self::assertEquals(ApiTokenType::BEARER, $token->getTokenType());
+        self::assertEquals(TokenType::BEARER, $token->getTokenType());
         self::assertNotEmpty($token->getAccessToken());
         self::assertNotEmpty($token->getRefreshToken());
         self::assertEquals(

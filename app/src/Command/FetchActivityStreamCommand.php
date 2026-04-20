@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Strava\Activities;
-use App\Strava\StravaException;
+use App\Strava\API\ActivityDownloader;
+use App\Strava\API\ApiException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,12 +13,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:activity',
-    description: 'Fetch details about a specific activity',
+    name: 'app:stream',
+    description: 'Fetch stream about a specific activity',
 )]
-class FetchActivityCommand extends Command
+class FetchActivityStreamCommand extends Command
 {
-    public function __construct(private Activities $activities)
+    public function __construct(private ActivityDownloader $downloader)
     {
         parent::__construct();
     }
@@ -40,7 +40,7 @@ class FetchActivityCommand extends Command
             $io->success(sprintf('Activity stream dumped to: %s ✅', $filePath));
 
             return Command::SUCCESS;
-        } catch (StravaException $ex) {
+        } catch (ApiException $ex) {
             $io->error($ex->getMessage());
 
             return Command::FAILURE;
@@ -64,7 +64,7 @@ class FetchActivityCommand extends Command
             throw new \RuntimeException(sprintf('var directory does not exist: %s', $varDir));
         }
 
-        $filePath = $this->activities->dumpActivity(
+        $filePath = $this->downloader->dumpActivity(
             intval($userId),
             intval($activityId),
             $varDir

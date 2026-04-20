@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Strava\Activities;
-use App\Strava\MissingTokenException;
+use App\Strava\API\ActivityDownloader;
+use App\Strava\API\MissingTokenException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -16,10 +16,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     name: 'app:activities',
     description: 'Fetch activitites for the specified Strava user',
 )]
-class ActivitiesCommand extends Command
+class FetchCommand extends Command
 {
     public function __construct(
-        private Activities $activities,
+        private ActivityDownloader $downloader,
     ) {
         parent::__construct();
     }
@@ -56,7 +56,7 @@ class ActivitiesCommand extends Command
         $stravaUserId = $input->getArgument('strava_user_id');
         assert(is_string($stravaUserId));
 
-        $activities = $this->activities->fetchActivities(intval($stravaUserId));
+        $activities = $this->downloader->fetchActivities(intval($stravaUserId));
 
         $table = new Table($output);
         $table->setHeaders(['ID', 'Name', 'Start', 'Bewegungszeit', 'Verstr. Zeit', 'Distanz', 'Avg. Speed', 'Max Speed']);

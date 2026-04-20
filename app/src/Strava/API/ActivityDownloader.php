@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Strava\API;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final readonly class Activities
+final readonly class ActivityDownloader
 {
     public function __construct(
         private HttpClientInterface $httpClient,
-        private ApiTokenCache $cache,
+        private TokenProviderInterface $tokenProvider,
     ) {
     }
 
     /** @return Activity[] */
     public function fetchActivities(int $stravaUserId, int $page = 1, int $perPage = 5): array
     {
-        $token = $this->cache->getToken($stravaUserId);
+        $token = $this->tokenProvider->getToken($stravaUserId);
 
         Assert::that(!$token->isExpired(), 'Token is expired!');
 
@@ -108,7 +108,7 @@ final readonly class Activities
 
     public function fetchStreams(int $stravaUserId, int $activityId): ActivityStream
     {
-        $token = $this->cache->getToken($stravaUserId);
+        $token = $this->tokenProvider->getToken($stravaUserId);
 
         Assert::that(!$token->isExpired(), 'Token is expired!');
 

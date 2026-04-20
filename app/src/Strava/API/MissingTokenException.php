@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Strava\API;
 
-final class MissingTokenException extends StravaException
+final class MissingTokenException extends ApiException
 {
     public function __construct(int $stravaUserId)
     {

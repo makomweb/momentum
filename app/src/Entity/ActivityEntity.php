@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Strava\Activity;
+use App\Strava\API\Activity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]

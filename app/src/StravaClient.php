@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App;
 
+use App\Strava\API\Assert;
+use App\Strava\API\Token;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final readonly class ApiClient
+final readonly class StravaClient
 {
     public function __construct(
-        private ApiDetails $apiDetails,
+        private StravaDetails $apiDetails,
         private HttpClientInterface $httpClient,
-        private ApiTokenCache $cache,
+        private StravaTokenCache $cache,
         private string $redirectUri = 'http://localhost/exchange-token',
     ) {
     }
@@ -27,7 +29,7 @@ final readonly class ApiClient
     }
 
     /** Request a token (OAuth 2.0: exchange code with token) */
-    public function requestToken(string $code): ApiToken
+    public function requestToken(string $code): Token
     {
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
             'body' => [
@@ -49,14 +51,14 @@ final readonly class ApiClient
          */
         $data = $response->toArray();
 
-        $token = new ApiToken($data);
+        $token = new Token($data);
 
         $this->cache->saveToken($token);
 
         return $token;
     }
 
-    public function refreshTokenFor(int $stravaUserId): ApiToken
+    public function refreshTokenFor(int $stravaUserId): Token
     {
         $token = $this->cache->getToken($stravaUserId);
 
@@ -69,7 +71,7 @@ final readonly class ApiClient
      * Obtain a fresh token by provding the initial token
      * (OAuth 2.0: refresh token).
      */
-    private function refreshToken(ApiToken $token): ApiToken
+    private function refreshToken(Token $token): Token
     {
         $refreshToken = $token->getRefreshToken();
 

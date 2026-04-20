@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Strava\API;
 
-enum ApiTokenType: string
+enum TokenType: string
 {
     case BEARER = 'Bearer';
 }

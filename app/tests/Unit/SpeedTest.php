@@ -2,8 +2,8 @@
 
 namespace App\Tests\Unit;
 
-use App\Strava\Speed;
-use App\Strava\SpeedUnit;
+use App\Strava\API\Speed;
+use App\Strava\API\SpeedUnit;
 use PHPUnit\Framework\TestCase;
 
 class SpeedTest extends TestCase

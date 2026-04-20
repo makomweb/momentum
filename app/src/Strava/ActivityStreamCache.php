@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Strava\API\ActivityStream;
+
 final readonly class ActivityStreamCache
 {
     public function __construct(

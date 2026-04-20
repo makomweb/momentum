@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final readonly class ApiDetails
+final readonly class StravaDetails
 {
     public function __construct(
         #[Autowire('%strava_client_id%')]

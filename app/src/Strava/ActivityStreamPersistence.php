@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Strava\API\ActivityDownloader;
+use App\Strava\API\ActivityStream;
+
 final readonly class ActivityStreamPersistence
 {
     public function __construct(
-        private Activities $activities,
+        private ActivityDownloader $downloader,
         private ActivityStreamCache $cache,
-        private ActivityEntityRepositoryInterface $repository,
+        private ActivityRepositoryInterface $repository,
     ) {
     }
 
@@ -22,7 +25,7 @@ final readonly class ActivityStreamPersistence
             }
         }
 
-        $stream = $this->activities->fetchStreams($stravaUserId, $activityId);
+        $stream = $this->downloader->fetchStreams($stravaUserId, $activityId);
 
         $this->cache->set($stravaUserId, $activityId, $stream);
 
@@ -36,7 +39,7 @@ final readonly class ActivityStreamPersistence
             return;
         }
 
-        $activities = $this->activities->fetchActivities($stravaUserId);
+        $activities = $this->downloader->fetchActivities($stravaUserId);
         $activity = null;
 
         foreach ($activities as $act) {

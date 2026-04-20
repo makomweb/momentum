@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Strava\ApiClient;
-use App\Strava\ApiToken;
+use App\Strava\API\Token;
+use App\StravaClient;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class RefreshCommand extends Command
 {
-    public function __construct(private ApiClient $client)
+    public function __construct(private StravaClient $client)
     {
         parent::__construct();
     }
@@ -45,7 +45,7 @@ class RefreshCommand extends Command
         }
     }
 
-    private function refresh(InputInterface $input): ApiToken
+    private function refresh(InputInterface $input): Token
     {
         $stravaUserId = $input->getArgument('strava_user_id');
         assert(is_string($stravaUserId));

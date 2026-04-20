@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Strava\API;
 
-final class AlreadyDownloadedException extends StravaException
+final class AlreadyDownloadedException extends ApiException
 {
     public function __construct(string $filePath)
     {
