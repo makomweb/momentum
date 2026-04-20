@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Strava\ActivityStreamPersistence;
+use App\Strava\ActivityStreamCache;
 use App\Strava\API\ActivityStream;
 use App\Strava\API\ApiException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class FetchActivityStreamCommand extends Command
 {
     public function __construct(
-        private ActivityStreamPersistence $persistence,
+        private ActivityStreamCache $cache,
     ) {
         parent::__construct();
     }
@@ -63,6 +63,6 @@ class FetchActivityStreamCommand extends Command
         $stravaActivityId = $input->getArgument('strava_activity_id');
         assert(is_string($stravaActivityId));
 
-        return $this->persistence->get(intval($stravaUserId), intval($stravaActivityId));
+        return $this->cache->get(intval($stravaUserId), intval($stravaActivityId));
     }
 }

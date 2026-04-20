@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     name: 'app:activities',
     description: 'Fetch activitites for the specified Strava user',
 )]
-class FetchCommand extends Command
+class FetchActivitiesCommand extends Command
 {
     public function __construct(
         private ActivityFetcher $fetcher,
