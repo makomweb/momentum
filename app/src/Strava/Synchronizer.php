@@ -21,15 +21,20 @@ final readonly class Synchronizer
     public function sync(int $stravaUserId, ReportProgressInterface $progress): void
     {
         $page = 0;
-        $pageSize = 20; //200;
+        $pageSize = 200;
         $last = $this->repository->findLastOrNull($stravaUserId);
 
-        //do {
+        if ($last) {
+            $progress->onStart($last);
+        }
+
+        do {
             $activities = $this->fetcher->fetch(
                 stravaUserId: $stravaUserId,
                 page: ++$page,
                 perPage: $pageSize,
                 after: $last ? $last->getStartDateUniversalTime()->getTimestamp() : null
+                // after: new \DateTimeImmutable('2026-01-01 00:00:01Z')->getTimestamp()
             );
 
             foreach ($activities as $activity) {
@@ -42,7 +47,7 @@ final readonly class Synchronizer
 
                 $progress->onActivity($activity);
             }
-        //} while (!empty($activities));
+        } while (!empty($activities));
 
         $progress->onFinish();
     }

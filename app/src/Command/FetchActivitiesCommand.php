@@ -66,6 +66,15 @@ class FetchActivitiesCommand extends Command
             ) {
             }
 
+            public function onStart(?Activity $activity): void
+            {
+                if ($activity) {
+                    $this->io->info(sprintf('🚀 Start synchronizing after %s', $activity));
+                } else {
+                    $this->io->info('🚀 Start synchronizing');
+                }
+            }
+
             public function onActivity(Activity $activity): void
             {
                 $this->io->writeln($activity);

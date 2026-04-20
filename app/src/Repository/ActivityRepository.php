@@ -42,9 +42,6 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
         );
 
         if ($entity instanceof ActivityEntity) {
-            var_dump([
-                'last_entity' => $entity
-            ]);
             return self::fromEntity($entity);
         }
 
