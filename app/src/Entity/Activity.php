@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Strava\API\Activity as StravaApiActivity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -13,24 +14,24 @@ final class Activity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(unique: true)]
     private int $id = 0;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     private readonly int $stravaUserId;
 
     #[ORM\Column(type: 'bigint')]
     private readonly int $stravaActivityId;
 
-    #[ORM\Column(type: 'integer', name: 'start_date')]
-    private readonly int $startDate;
+    #[ORM\Column]
+    private readonly \DateTimeImmutable $startDate;
 
     /**
      * @var array{
      *  id: int,
      *  device_name: string,
      *  name: string,
-     *  start_date: int,
+     *  start_date: string,
      *  timezone: string,
      *  elapsed_time: int,
      *  moving_time: int,
@@ -48,7 +49,7 @@ final class Activity
      *  id: int,
      *  device_name: string,
      *  name: string,
-     *  start_date: int,
+     *  start_date: string,
      *  timezone: string,
      *  elapsed_time: int,
      *  moving_time: int,
@@ -58,15 +59,26 @@ final class Activity
      *  type: string
      * } $data
      */
-    public function __construct(
+    private function __construct(
         int $stravaUserId,
         int $stravaActivityId,
+        \DateTimeImmutable $startDateUtc,
         array $data,
     ) {
         $this->stravaUserId = $stravaUserId;
         $this->stravaActivityId = $stravaActivityId;
-        $this->startDate = $data['start_date'];
+        $this->startDate = $startDateUtc;
         $this->data = $data;
+    }
+
+    public static function fromActivity(int $stravaUserId, StravaApiActivity $activity): self
+    {
+        return new self(
+            $stravaUserId,
+            $activity->getId(),
+            $activity->getStartDateUniversalTime(),
+            $activity->data
+        );
     }
 
     public function getId(): int
@@ -84,7 +96,7 @@ final class Activity
         return $this->stravaActivityId;
     }
 
-    public function getStartDate(): int
+    public function getStartDate(): \DateTimeImmutable
     {
         return $this->startDate;
     }
@@ -94,7 +106,7 @@ final class Activity
      *  id: int,
      *  device_name: string,
      *  name: string,
-     *  start_date: int,
+     *  start_date: string,
      *  timezone: string,
      *  elapsed_time: int,
      *  moving_time: int,

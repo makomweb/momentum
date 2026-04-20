@@ -11,7 +11,7 @@ final readonly class Activity implements \Stringable
      *  id: int,
      *  device_name: string,
      *  name: string,
-     *  start_date: int,
+     *  start_date: string,
      *  timezone: string,
      *  elapsed_time: int,
      *  moving_time: int,
@@ -21,8 +21,40 @@ final readonly class Activity implements \Stringable
      *  type: string
      * } $data
      */
-    public function __construct(public array $data)
+    private function __construct(public array $data)
     {
+    }
+
+    /**
+     * @param array{
+     *  id: int,
+     *  device_name: string,
+     *  name: string,
+     *  start_date: string,
+     *  timezone: string,
+     *  elapsed_time: int,
+     *  moving_time: int,
+     *  distance: float,
+     *  max_speed: float,
+     *  average_speed: float,
+     *  type: string
+     * } $data
+     */
+    public static function fromRawData(array $data): self
+    {
+        return new self([
+            'id' => $data['id'],
+            'device_name' => $data['device_name'],
+            'name' => $data['name'],
+            'start_date' => $data['start_date'],
+            'timezone' => $data['timezone'],
+            'elapsed_time' => $data['elapsed_time'],
+            'moving_time' => $data['moving_time'],
+            'distance' => $data['distance'],
+            'max_speed' => $data['max_speed'],
+            'average_speed' => $data['average_speed'],
+            'type' => $data['type'],
+        ]);
     }
 
     public function getId(): int
@@ -40,7 +72,12 @@ final readonly class Activity implements \Stringable
         return $this->data['name'];
     }
 
-    public function getStartTime(): \DateTimeImmutable
+    public function getStartDateUniversalTime(): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable($this->data['start_date']);
+    }
+
+    public function getStartDateLocalTime(): \DateTimeImmutable
     {
         $result = preg_match('/\)\s(.+)$/', $this->data['timezone'], $matches);
         Assert::that(1 === $result, 'There should be time zone information!');
@@ -48,8 +85,7 @@ final readonly class Activity implements \Stringable
 
         $tz = new \DateTimeZone($matches[1]); // e.g. "Europe/Berlin"
 
-        // start_date is UTC: make it local time!
-        return (new \DateTimeImmutable($this->data['start_date'].''))->setTimezone($tz);
+        return $this->getStartDateUniversalTime()->setTimezone($tz);
     }
 
     public function getElapsedTime(): \DateInterval
@@ -90,7 +126,7 @@ final readonly class Activity implements \Stringable
         return sprintf(
             '%s %s',
             $this->getName(),
-            $this->getStartTime()->format(\DateTimeInterface::RFC2822)
+            $this->getStartDateLocalTime()->format(\DateTimeInterface::RFC2822)
         );
     }
 }

@@ -42,6 +42,9 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
         );
 
         if ($entity instanceof ActivityEntity) {
+            var_dump([
+                'last_entity' => $entity
+            ]);
             return self::fromEntity($entity);
         }
 
@@ -53,7 +56,7 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
         $existing = $this->findOrNull($stravaUserId, $activity->getId());
         assert(is_null($existing), sprintf('Already persisted %s!', $activity));
 
-        $entity = new ActivityEntity($stravaUserId, $activity->getId(), $activity->data);
+        $entity = ActivityEntity::fromActivity($stravaUserId, $activity);
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
     }
@@ -69,6 +72,6 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
 
     private static function fromEntity(ActivityEntity $entity): Activity
     {
-        return new Activity($entity->getData());
+        return Activity::fromRawData($entity->getData());
     }
 }

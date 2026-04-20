@@ -50,7 +50,7 @@ final readonly class ActivityFetcher
          *  id: int,
          *  device_name: string,
          *  name: string,
-         *  start_date: int,
+         *  start_date: string,
          *  timezone: string,
          *  elapsed_time: int,
          *  moving_time: int,
@@ -63,7 +63,7 @@ final readonly class ActivityFetcher
         $activities = $response->toArray();
 
         return array_map(
-            static fn (array $data) => new Activity($data),
+            static fn (array $data) => Activity::fromRawData($data),
             $activities
         );
     }
