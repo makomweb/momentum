@@ -94,14 +94,10 @@ final class AuthController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function logout(Request $request): Response
     {
-        // Clear Strava token from session (cache is session-only, auto-cleared)
-        $session = $request->getSession();
-        $session->remove('strava_user_id');
-
-        // Symfony security will handle session invalidation via logout listener
-        $session->invalidate();
+        // Symfony security will handle the actual logout via logout listener
+        // This method will never be reached as logout is handled by security filter
+        // But Symfony requires a controller for the logout route
         $this->addFlash('success', 'You have been logged out.');
-
         return $this->redirectToRoute('login');
     }
 }

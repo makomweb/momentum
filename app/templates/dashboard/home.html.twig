@@ -74,6 +74,7 @@
         <div class="container-fluid">
             <span class="navbar-brand">🏃 Run Forge</span>
             <form method="post" action="{{ path('logout') }}" class="logout-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
         </div>
