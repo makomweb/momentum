@@ -2,9 +2,7 @@
 
 namespace App\Command;
 
-use App\Strava\API\Activity;
-use App\Strava\API\MissingTokenException;
-use App\Strava\ReportProgressInterface;
+use App\Strava\API\ApiException;
 use App\Strava\Synchronizer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -40,14 +38,14 @@ class FetchActivitiesCommand extends Command
         assert(is_string($stravaUserId));
         $stravaUserId = (int) $stravaUserId;
 
-        $io->info(sprintf('Syncing activities for Strava user %d...', $stravaUserId));
+        $io->title(sprintf('Syncing activities for Strava user %d', $stravaUserId));
 
         try {
-            $this->synchronizer->sync($stravaUserId, self::createProgressAdapter($io));
+            $this->synchronizer->sync($stravaUserId, new ReportProgressAdapter($io));
 
             return Command::SUCCESS;
-        } catch (MissingTokenException $ex) {
-            $io->error(sprintf('%s (Run app:auth first!)', $ex->getMessage()));
+        } catch (ApiException $ex) {
+            $io->error($ex->getMessage());
 
             return Command::FAILURE;
         } catch (\Throwable $ex) {
@@ -55,41 +53,5 @@ class FetchActivitiesCommand extends Command
 
             return Command::FAILURE;
         }
-    }
-
-    private static function createProgressAdapter(SymfonyStyle $io): ReportProgressInterface
-    {
-        return new class($io) implements ReportProgressInterface {
-            public function __construct(
-                private readonly SymfonyStyle $io,
-                public int $count = 0,
-            ) {
-            }
-
-            public function onStart(?Activity $activity): void
-            {
-                if ($activity) {
-                    $this->io->info(sprintf('🚀 Start synchronizing after %s', $activity));
-                } else {
-                    $this->io->info('🚀 Start synchronizing');
-                }
-            }
-
-            public function onActivity(Activity $activity): void
-            {
-                $this->io->writeln($activity);
-                ++$this->count;
-            }
-
-            public function onException(Activity $activity, \Throwable $ex): void
-            {
-                $this->io->error(sprintf('Error at: %s\\n %s', $activity, $ex));
-            }
-
-            public function onFinish(): void
-            {
-                $this->io->success(sprintf('Synchronized "%d" activities ✅', $this->count));
-            }
-        };
     }
 }

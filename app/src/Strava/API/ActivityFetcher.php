@@ -27,7 +27,7 @@ final readonly class ActivityFetcher
     ): array {
         $token = $this->tokenProvider->getToken($stravaUserId);
 
-        Assert::that(!$token->isExpired(), 'Token is expired!');
+        Assert::that(!$token->isExpired(), new TokenExpiredException($stravaUserId));
 
         $query = [
             'page' => $page,

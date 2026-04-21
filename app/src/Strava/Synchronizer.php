@@ -25,7 +25,7 @@ final readonly class Synchronizer
         $last = $this->repository->findLastOrNull($stravaUserId);
 
         if ($last) {
-            $progress->onStart($last);
+            $progress->reportStart($last);
         }
 
         do {
@@ -45,10 +45,10 @@ final readonly class Synchronizer
 
                 $this->repository->persist($stravaUserId, $activity);
 
-                $progress->onActivity($activity);
+                $progress->report($activity);
             }
         } while (!empty($activities));
 
-        $progress->onFinish();
+        $progress->reportFinish();
     }
 }
