@@ -8,7 +8,7 @@ use App\Strava\API\Activity as StravaApiActivity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'activity')]
+#[ORM\Table(name: 'activities')]
 #[ORM\UniqueConstraint(name: 'unique_strava_activity_id', columns: ['strava_user_id', 'strava_activity_id'])]
 final class Activity
 {

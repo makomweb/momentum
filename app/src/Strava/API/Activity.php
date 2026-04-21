@@ -28,7 +28,7 @@ final readonly class Activity implements \Stringable
     /**
      * @param array{
      *  id: int,
-     *  device_name: string,
+     *  device_name: string|bool,
      *  name: string,
      *  start_date: string,
      *  timezone: string,
@@ -44,7 +44,7 @@ final readonly class Activity implements \Stringable
     {
         return new self([
             'id' => $data['id'],
-            'device_name' => $data['device_name'],
+            'device_name' => is_string($data['device_name']) ? $data['device_name'] : '<unknown>',
             'name' => $data['name'],
             'start_date' => $data['start_date'],
             'timezone' => $data['timezone'],

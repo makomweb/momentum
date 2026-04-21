@@ -23,6 +23,11 @@ final class ReportProgressAdapter implements ReportProgressInterface
         }
     }
 
+    public function skip(Activity $current): void
+    {
+        $this->io->writeln(sprintf('Skip: %s', $current));
+    }
+
     public function report(Activity $current): void
     {
         $this->io->writeln($current);
