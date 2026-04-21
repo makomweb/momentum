@@ -48,7 +48,7 @@ final readonly class AuthenticationMiddleware implements EventSubscriberInterfac
         $stravaUserId = $session->get('strava_user_id');
 
         // No user logged in, redirect to login
-        if (!$stravaUserId) {
+        if (!$stravaUserId || !is_int($stravaUserId)) {
             $response = new Response('', Response::HTTP_FOUND);
             $response->headers->set('Location', '/login');
             $event->setResponse($response);
@@ -68,9 +68,9 @@ final readonly class AuthenticationMiddleware implements EventSubscriberInterfac
         }
     }
 
-    private function isProtectedRoute(?string $routeName): bool
+    private function isProtectedRoute(mixed $routeName): bool
     {
-        if (!$routeName) {
+        if (!is_string($routeName)) {
             return false;
         }
 

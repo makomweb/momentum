@@ -54,14 +54,14 @@ final class AuthController extends AbstractController
         try {
             $token = $this->client->requestToken($code);
             $stravaUserId = $token->getAthlete()->getId();
-            $athleteName = $token->getAthlete()->getFirstName() . ' ' . $token->getAthlete()->getLastName();
+            $athleteName = $token->getAthlete()->getName();
 
             // Store Strava user ID in session
             $session = $request->getSession();
             $session->set('strava_user_id', $stravaUserId);
             $session->set('athlete_name', $athleteName);
 
-            $this->addFlash('success', sprintf('Welcome, %s! 🎉', $token->getAthlete()->getFirstName()));
+            $this->addFlash('success', sprintf('Welcome! 🎉'));
 
             return $this->redirectToRoute('home');
         } catch (\Throwable $ex) {
@@ -85,7 +85,7 @@ final class AuthController extends AbstractController
         $session = $request->getSession();
         $stravaUserId = $session->get('strava_user_id');
 
-        if (!$stravaUserId) {
+        if (!$stravaUserId || !is_int($stravaUserId)) {
             return false;
         }
 
