@@ -7,9 +7,9 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/doctrine-bundle": "^3.2",
+        "doctrine/doctrine-bundle": "^3.2.2",
         "doctrine/doctrine-migrations-bundle": "^4.0",
-        "doctrine/orm": "^3.6",
+        "doctrine/orm": "^3.6.3",
         "symfony/console": "8.0.*",
         "symfony/dotenv": "8.0.*",
         "symfony/flex": "^2.10",
@@ -23,8 +23,8 @@
     "require-dev": {
         "deptrac/deptrac": "^4.6",
         "friendsofphp/php-cs-fixer": "^3.95.1",
-        "phpstan/phpstan": "^2.1.49",
-        "phpunit/phpunit": "^13.1.5",
+        "phpstan/phpstan": "^2.1.50",
+        "phpunit/phpunit": "^13.1.7",
         "symfony/maker-bundle": "^1.67",
         "symfony/stopwatch": "8.0.*",
         "symfony/web-profiler-bundle": "8.0.*"
