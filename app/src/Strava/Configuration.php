@@ -21,8 +21,8 @@ final readonly class Configuration
 
     public function getAuthorizationAddress(): string
     {
-        Assert::that(!empty($this->clientId), 'Environment variable "STRAVA_CLIENT_ID" must be configured!');
-        Assert::that(!empty($this->redirectUri), 'Environment variable "STRAVA_REDIRECT_URI" must be configured!');
+        Assert::that(!empty($this->clientId), 'Env var "STRAVA_CLIENT_ID" must be set!');
+        Assert::that(!empty($this->redirectUri), 'Env var "STRAVA_REDIRECT_URI" must be set!');
 
         return sprintf(
             'https://www.strava.com/oauth/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=activity:read_all',
