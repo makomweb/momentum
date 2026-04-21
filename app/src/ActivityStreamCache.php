@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App;
 
 use App\Strava\API\ActivityStream;
 use App\Strava\API\ActivityStreamDownloader;
 use App\Strava\API\Assert;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class ActivityStreamCache
 {
     public function __construct(
         private ActivityStreamDownloader $downloader,
+        #[Autowire('%activity_stream_cache_dir%')]
         private string $cacheDir,
     ) {
     }

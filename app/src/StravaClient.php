@@ -6,6 +6,7 @@ namespace App;
 
 use App\Strava\API\Assert;
 use App\Strava\API\Token;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class StravaClient
@@ -14,8 +15,10 @@ final readonly class StravaClient
         private StravaDetails $apiDetails,
         private HttpClientInterface $httpClient,
         private StravaTokenCache $cache,
-        private string $redirectUri = 'http://localhost/exchange-token',
+        #[Autowire('%strava_redirect_uri%')]
+        private string $redirectUri,
     ) {
+        Assert::that(!empty($redirectUri), 'Environment variable "STRAVA_REDIRECT_URI" must be configured!');
     }
 
     /** Get the address to perform authorization */
