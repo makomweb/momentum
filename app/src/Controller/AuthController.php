@@ -10,7 +10,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 final class AuthController extends AbstractController
 {
@@ -19,10 +18,10 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/login', name: 'login', methods: ['GET'])]
-    public function login(): Response
+    public function login(Request $request): Response
     {
         // If already logged in, redirect to home
-        if ($this->isAuthenticated()) {
+        if ($this->isAuthenticated($request)) {
             return $this->redirectToRoute('home');
         }
 
@@ -55,10 +54,12 @@ final class AuthController extends AbstractController
         try {
             $token = $this->client->requestToken($code);
             $stravaUserId = $token->getAthlete()->getId();
+            $athleteName = $token->getAthlete()->getFirstName() . ' ' . $token->getAthlete()->getLastName();
 
             // Store Strava user ID in session
-            $this->getSession()->set('strava_user_id', $stravaUserId);
-            $this->getSession()->set('athlete_name', $token->getAthlete()->getFirstName() . ' ' . $token->getAthlete()->getLastName());
+            $session = $request->getSession();
+            $session->set('strava_user_id', $stravaUserId);
+            $session->set('athlete_name', $athleteName);
 
             $this->addFlash('success', sprintf('Welcome, %s! 🎉', $token->getAthlete()->getFirstName()));
 
@@ -71,17 +72,18 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/logout', name: 'logout', methods: ['POST', 'GET'])]
-    public function logout(): Response
+    public function logout(Request $request): Response
     {
-        $this->getSession()->invalidate();
+        $request->getSession()->invalidate();
         $this->addFlash('success', 'You have been logged out.');
 
         return $this->redirectToRoute('login');
     }
 
-    private function isAuthenticated(): bool
+    private function isAuthenticated(Request $request): bool
     {
-        $stravaUserId = $this->getSession()->get('strava_user_id');
+        $session = $request->getSession();
+        $stravaUserId = $session->get('strava_user_id');
 
         if (!$stravaUserId) {
             return false;
@@ -94,14 +96,9 @@ final class AuthController extends AbstractController
             return true;
         } catch (MissingTokenException) {
             // Token cache expired, user needs to re-authenticate
-            $this->getSession()->invalidate();
+            $session->invalidate();
 
             return false;
         }
-    }
-
-    private function getSession()
-    {
-        return $this->container->get('session');
     }
 }
