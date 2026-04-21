@@ -23,7 +23,7 @@ final class DashboardController extends AbstractController
         $stravaUserId = $session->get('strava_user_id');
 
         return $this->render('dashboard/home.html.twig', [
-            'athlete_name' => $user->getAthleteName() ?? 'Runner',
+            'athlete_name' => $user->getName(),
             'strava_user_id' => $stravaUserId,
         ]);
     }

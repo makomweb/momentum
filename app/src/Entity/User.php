@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Strava\API\Athlete;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
@@ -21,27 +22,35 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'bigint', unique: true)]
     private int $stravaId;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $athleteName = null;
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $name;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $email = null;
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $profilePicture;
 
-    #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $profilePictureMedium;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
-
-    public function __construct(
+    private function __construct(
         int $stravaId,
-        ?string $athleteName = null,
-        ?string $email = null,
+        string $name,
+        string $profilePicture,
+        string $profilePictureMedium,
     ) {
         $this->stravaId = $stravaId;
-        $this->athleteName = $athleteName;
-        $this->email = $email;
-        $this->createdAt = new \DateTimeImmutable();
+        $this->name = $name;
+        $this->profilePicture = $profilePicture;
+        $this->profilePictureMedium = $profilePictureMedium;
+    }
+
+    public static function fromStravaUser(Athlete $athlete): self
+    {
+        return new self(
+            $athlete->getId(),
+            $athlete->getName(),
+            $athlete->getProfile(),
+            $athlete->getProfileMedium()
+        );
     }
 
     public function getId(): int
@@ -54,36 +63,9 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->stravaId;
     }
 
-    public function getAthleteName(): ?string
+    public function getName(): string
     {
-        return $this->athleteName;
-    }
-
-    public function setAthleteName(?string $athleteName): void
-    {
-        $this->athleteName = $athleteName;
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(?string $email): void
-    {
-        $this->email = $email;
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function getCreatedAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
+        return $this->name;
     }
 
     // UserInterface implementation
@@ -95,6 +77,16 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUsername(): string
     {
         return $this->getUserIdentifier();
+    }
+
+    public function getProfilePicture(): string
+    {
+        return $this->profilePicture;
+    }
+
+    public function getProfilePictureMedium(): string
+    {
+        return $this->profilePictureMedium;
     }
 
     public function getRoles(): array
@@ -120,6 +112,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __toString(): string
     {
-        return sprintf('%s (Strava ID: %d)', $this->athleteName ?? 'User', $this->stravaId);
+        return sprintf('%s (Strava ID: %d)', $this->name, $this->stravaId);
     }
 }

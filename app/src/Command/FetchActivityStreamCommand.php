@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\ActivityStreamCache;
+use App\Strava\ActivityStreamCache;
 use App\Strava\API\ActivityStream;
 use App\Strava\API\ApiException;
 use Symfony\Component\Console\Attribute\AsCommand;

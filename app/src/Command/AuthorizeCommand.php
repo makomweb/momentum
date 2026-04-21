@@ -3,7 +3,8 @@
 namespace App\Command;
 
 use App\Strava\API\Token;
-use App\StravaClient;
+use App\Strava\Client;
+use App\Strava\Configuration;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -18,8 +19,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class AuthorizeCommand extends Command
 {
-    public function __construct(private StravaClient $client)
-    {
+    public function __construct(
+        private Configuration $config,
+        private Client $client,
+    ) {
         parent::__construct();
     }
 
@@ -41,7 +44,7 @@ class AuthorizeCommand extends Command
 
     private function authorize(InputInterface $input, OutputInterface $output): Token
     {
-        $address = $this->client->getAuthorizationAddress();
+        $address = $this->config->getAuthorizationAddress();
 
         $output->writeln('Open this URL in your browser:');
         $output->writeln($address);

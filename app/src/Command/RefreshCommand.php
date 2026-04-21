@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\Strava\API\Token;
-use App\StravaClient;
+use App\Strava\Client;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class RefreshCommand extends Command
 {
-    public function __construct(private StravaClient $client)
+    public function __construct(private Client $client)
     {
         parent::__construct();
     }

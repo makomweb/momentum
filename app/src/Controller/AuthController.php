@@ -6,19 +6,21 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use App\StravaClient;
+use App\Strava\Client;
+use App\Strava\Configuration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class AuthController extends AbstractController
 {
     public function __construct(
-        private StravaClient $client,
+        private Configuration $configuration,
+        private Client $client,
         private UserRepository $userRepository,
         private TokenStorageInterface $tokenStorage,
     ) {
@@ -32,10 +34,8 @@ final class AuthController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
-        $authUrl = $this->client->getAuthorizationAddress();
-
         return $this->render('auth/login.html.twig', [
-            'auth_url' => $authUrl,
+            'auth_url' => $this->configuration->getAuthorizationAddress(),
         ]);
     }
 
@@ -60,25 +60,18 @@ final class AuthController extends AbstractController
 
         try {
             $token = $this->client->requestToken($code);
-            $stravaUserId = $token->getAthlete()->getId();
-            $athleteName = $token->getAthlete()->getName();
-            $email = $token->getAthlete()->getUsername();
+            $stravaUser = $token->getAthlete();
 
             // Create or fetch user
-            $user = $this->userRepository->findByStravaId($stravaUserId);
+            $user = $this->userRepository->findByStravaId($stravaUser->getId());
             if (!$user) {
-                $user = new User($stravaUserId, $athleteName, $email);
-                $this->userRepository->save($user, true);
-            } else {
-                // Update athlete info
-                $user->setAthleteName($athleteName);
-                $user->setEmail($email);
+                $user = User::fromStravaUser($stravaUser);
                 $this->userRepository->save($user, true);
             }
 
             // Store Strava user ID in session for later API access
             $session = $request->getSession();
-            $session->set('strava_user_id', $stravaUserId);
+            $session->set('strava_user_id', $stravaUser->getId());
 
             // Create authentication token and set it for Remember Me support
             $authToken = new UsernamePasswordToken($user, 'main', $user->getRoles());
@@ -87,7 +80,7 @@ final class AuthController extends AbstractController
             // Store in session for persistence across requests
             $session->set('_security_main', serialize($authToken));
 
-            $this->addFlash('success', sprintf('Welcome %s! 🎉', $athleteName));
+            $this->addFlash('success', sprintf('Welcome %s! 🎉', $user->getName()));
 
             return $this->redirectToRoute('home');
         } catch (\Throwable $ex) {

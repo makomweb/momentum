@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Strava;
 
 use App\Strava\API\ActivityStream;
 use App\Strava\API\ActivityStreamDownloader;

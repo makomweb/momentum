@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Strava\API\MissingTokenException;
-use App\StravaClient;
+use App\Strava\Client;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -18,7 +18,7 @@ final readonly class AuthenticationMiddleware implements EventSubscriberInterfac
 
     public function __construct(
         private RouterInterface $router,
-        private StravaClient $client,
+        private Client $client,
     ) {
     }
 
