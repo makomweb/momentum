@@ -16,13 +16,13 @@ final class DashboardController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function home(): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
+        assert($user instanceof User);
 
         return $this->render('dashboard/home.html.twig', [
             'name' => $user->getName(),
             'strava_user_id' => $user->getStravaId(),
-            'profile_picture' => $user->getProfilePictureMedium()
+            'profile_picture' => $user->getProfilePictureMedium(),
         ]);
     }
 }
