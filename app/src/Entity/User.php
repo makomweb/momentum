@@ -15,6 +15,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    /** @phpstan-ignore property.onlyRead */
     private int $id;
 
     #[ORM\Column(type: 'bigint', unique: true)]
@@ -107,7 +108,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return null;
     }
 
-    public function getSalt(): ?string
+    public function getSalt(): null
     {
         return null;
     }
