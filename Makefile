@@ -88,6 +88,18 @@ qa:
 	@echo "Run QA scripts..."
 	docker compose run --rm composer qa
 
+cc: clear
+clear: cache-clear cache-pool-clear
+	@echo "All caches cleared (app + pool)"
+
+cache-clear:
+	@echo "Clearing Symfony application cache..."
+	docker compose exec -it app bin/console cache:clear
+
+cache-pool-clear:
+	@echo "Clearing cache pools..."
+	docker compose exec -it app bin/console cache:pool:clear --all
+
 open:
 	@if command -v xdg-open > /dev/null 2>&1; then \
 		xdg-open http://localhost:8080 2>/dev/null & \
