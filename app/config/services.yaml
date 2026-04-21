@@ -9,6 +9,7 @@
 parameters:
     strava_client_id: '%env(string:STRAVA_CLIENT_ID)%'
     strava_client_secret: '%env(string:STRAVA_CLIENT_SECRET)%'
+    strava_redirect_uri: '%env(string:STRAVA_REDIRECT_URI)%'
     activity_stream_cache_dir: '%kernel.project_dir%/var'
 
 services:
@@ -27,3 +28,7 @@ services:
     App\Strava\ActivityStreamCache:
         arguments:
             $cacheDir: '%activity_stream_cache_dir%'
+
+    App\StravaClient:
+        arguments:
+            $redirectUri: '%strava_redirect_uri%'
