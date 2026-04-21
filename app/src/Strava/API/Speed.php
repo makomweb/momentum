@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Assert\Assert;
+
 final readonly class Speed implements \Stringable
 {
     public function __construct(public float $value, public SpeedUnit $unit)

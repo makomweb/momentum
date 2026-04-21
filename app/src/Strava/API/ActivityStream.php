@@ -47,7 +47,9 @@ final readonly class ActivityStream
         return new self(
             time: isset($data['time']) ? Series::fromArray($data['time']) : null,
             distance: isset($data['distance']) ? Series::fromArray($data['distance']) : null,
-            velocity: isset($data['velocity_smooth']) ? Series::fromArray($data['velocity_smooth']) : null,
+            velocity: isset($data['velocity_smooth'])
+                ? Series::fromArray($data['velocity_smooth'])
+                : (isset($data['velocity']) ? Series::fromArray($data['velocity']) : null),
             heartrate: isset($data['heartrate']) ? Series::fromArray($data['heartrate']) : null,
         );
     }

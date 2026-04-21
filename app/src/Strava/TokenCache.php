@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use App\Strava\API\Assert;
+use App\Assert\Assert;
 use App\Strava\API\MissingTokenException;
 use App\Strava\API\Token;
 use App\Strava\API\TokenProviderInterface;

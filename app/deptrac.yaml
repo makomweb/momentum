@@ -9,6 +9,8 @@ deptrac:
       collectors:
         - type: classLike
           value: .*App\\RunForge\\.*
+        - type: classLike
+          value: .*App\\Assert\\.*
     - name: Generic
       collectors:
         - type: classLike
