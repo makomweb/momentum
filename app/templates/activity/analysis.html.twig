@@ -170,7 +170,7 @@
             ],
             datasets: [
                 {
-                    label: 'Actual Velocity (m/s)',
+                    label: 'Velocity',
                     data: [
                         {% for point in analysis.velocityRawPoints %}
                             {{ point.value }}{{ not loop.last ? ',' : '' }}
@@ -185,7 +185,7 @@
                     pointHoverRadius: 5
                 },
                 {
-                    label: 'Moving Average (10-period)',
+                    label: 'Velocity avg. ({{ analysis.movingAveragePeriod }}-period)',
                     data: [
                         {% for point in analysis.velocityAveragePoints %}
                             {{ point.value }}{{ not loop.last ? ',' : '' }}

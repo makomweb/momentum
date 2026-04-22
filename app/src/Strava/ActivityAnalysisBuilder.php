@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\RunForge\ActivityAnalysisData;
 use App\Strava\API\Activity as StravaActivity;
-use App\Strava\API\ActivityStream;
+use App\Strava\API\ActivityStream as StravaActivityStream;
 
 final class ActivityAnalysisBuilder
 {
-    private const MOVING_AVERAGE_PERIOD = 10;
+    private const MOVING_AVERAGE_PERIOD = 50;
 
     public function buildFromStream(
         StravaActivity $activity,
-        ActivityStream $stream,
+        StravaActivityStream $stream,
     ): ActivityAnalysisData {
         $activityName = $activity->getName();
         $distance = $activity->data['distance'];
@@ -35,6 +36,7 @@ final class ActivityAnalysisBuilder
                 heartRatePoints: [],
                 hasVelocityData: false,
                 hasHeartRateData: false,
+                movingAveragePeriod: self::MOVING_AVERAGE_PERIOD,
             );
         }
 
@@ -70,6 +72,7 @@ final class ActivityAnalysisBuilder
             heartRatePoints: $heartRatePoints,
             hasVelocityData: !empty($velocityRawPoints),
             hasHeartRateData: !empty($heartRatePoints),
+            movingAveragePeriod: self::MOVING_AVERAGE_PERIOD,
         );
     }
 }

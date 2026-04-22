@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\RunForge;
 
 final readonly class ActivityAnalysisData
 {
@@ -20,6 +20,7 @@ final readonly class ActivityAnalysisData
         public array $heartRatePoints,
         public bool $hasVelocityData,
         public bool $hasHeartRateData,
+        public int $movingAveragePeriod,
     ) {
     }
 
