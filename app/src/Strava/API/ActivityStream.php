@@ -81,4 +81,48 @@ final readonly class ActivityStream
             || $this->hasDistanceData()
             || $this->hasVelocityData();
     }
+
+    /**
+     * @return \Generator<array{value: float|int, time_stamp: \DateTimeImmutable}>
+     */
+    public function yieldSeries(\DateTimeImmutable $start, string $name): \Generator
+    {
+        assert(in_array($name, ['distance', 'velocity', 'heartrate']));
+
+        assert($this->hasTimeData());
+
+        assert(match ($name) {
+            'distance' => $this->hasDistanceData(),
+            'velocity' => $this->hasVelocityData(),
+            'heartrate' => $this->hasHeartRateData(),
+        });
+
+        assert(!is_null($this->time));
+        assert(!is_null($this->distance));
+        assert(!is_null($this->velocity));
+        assert(!is_null($this->heartrate));
+
+        assert(match ($name) {
+            'distance' => $this->time->getCount() == $this->distance->getCount(),
+            'velocity' => $this->time->getCount() == $this->velocity->getCount(),
+            'heartrate' => $this->time->getCount() == $this->heartrate->getCount(),
+        });
+
+        for ($i = 0; $i < $this->time->getCount(); ++$i) {
+            $offset = $this->time->getDataPoint($i);
+            $value = match ($name) {
+                'distance' => $this->distance->getDataPoint($i),
+                'velocity' => $this->velocity->getDataPoint($i),
+                'heartrate' => $this->heartrate->getDataPoint($i),
+            };
+
+            assert(!is_null($value));
+
+            assert(is_int($offset));
+            $offset = \DateInterval::createFromDateString("$offset seconds");
+            assert($offset instanceof \DateInterval);
+
+            yield ['value' => $value, 'time_stamp' => $start->add($offset)];
+        }
+    }
 }

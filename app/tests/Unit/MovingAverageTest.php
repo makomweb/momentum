@@ -8,40 +8,36 @@ use PHPUnit\Framework\TestCase;
 
 class MovingAverageTest extends TestCase
 {
-    public function test_decorate_with_moving_average(): void
+    public function test_create_from_activity_stream(): void
     {
-        // Deserialize ActivityStream from file
         $filePath = __DIR__.'/../data/activity_stream_14417573_18155703383.json';
-        $activityStream = ActivityStream::fromJsonFile($filePath);
 
-        // Verify the stream has velocity data
-        self::assertTrue($activityStream->hasVelocityData());
-        self::assertNotNull($activityStream->velocity);
-        self::assertNotNull($activityStream->time);
-        self::assertEquals(7887, $activityStream->velocity->getCount());
+        $stream = ActivityStream::fromJsonFile($filePath);
 
-        // Decorate the ActivityStream with a MovingAverage over the velocity series
-        $period = 5;
-        $movingAverage = MovingAverage::ema($period);
+        self::assertTrue($stream->hasVelocityData());
+        self::assertNotNull($stream->velocity);
+        self::assertNotNull($stream->time);
+        self::assertEquals(7887, $stream->velocity->getCount());
 
-        // Process velocity data
-        for ($i = 0; $i < $activityStream->velocity->getCount(); ++$i) {
-            $velocity = (float) $activityStream->velocity->getDataPoint($i);
-            $timeOffset = (int) $activityStream->time->getDataPoint($i);
-            $movingAverage->next($velocity, $timeOffset);
-        }
+        $start = new \DateTimeImmutable();
 
-        // Assert the moving average is properly initialized
-        self::assertEquals($period, $movingAverage->period);
-        self::assertEquals('EMA-5', $movingAverage->getName());
+        $ema = array_reduce(
+            iterator_to_array($stream->yieldSeries($start, 'velocity')),
+            /** @param array{value: float|int, time_stamp: DateTimeImmutable} $data */
+            static fn (MovingAverage $carry, array $data) => $carry->withData($data),
+            MovingAverage::create(start: $start, period: 5)
+        );
 
-        // Assert that we have accumulated values
-        self::assertNotEmpty($movingAverage->values);
-        self::assertEquals($period, count($movingAverage->values));
-
-        // Assert the final moving average value is reasonable and within expected range for velocity data
-        $finalValue = $movingAverage->getValue();
-        self::assertGreaterThan(1, $finalValue);
-        self::assertLessThan(15, $finalValue);
+        self::assertEquals('(E)MA-5', $ema->getName());
+        $value = $ema->getValue();
+        self::assertGreaterThan(1, $value);
+        self::assertLessThan(15, $value);
+        self::assertEquals(
+            0,
+            date_diff(
+                $start,
+                $ema->getTimestamp()
+            )->days
+        );
     }
 }

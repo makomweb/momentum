@@ -6,20 +6,8 @@ namespace App\RunForge;
 
 final class InitialAverage extends Average
 {
-    private function __construct(
-        public \DateTimeImmutable $timestamp,
-        int|float $initial,
-    ) {
-        parent::__construct(0, $initial);
-    }
-
-    public static function create(): self
+    public function __construct(\DateTimeImmutable $timestamp)
     {
-        return new self(new \DateTimeImmutable(), 0);
-    }
-
-    public function __toString(): string
-    {
-        return $this->timestamp->format(\DateTimeInterface::RFC2822);
+        parent::__construct($timestamp, 0.0);
     }
 }

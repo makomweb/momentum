@@ -8,7 +8,7 @@ use App\Assert\Assert;
 
 final class MovingAverage implements \Stringable
 {
-    /** @param array<int|float> $values */
+    /** @param float[] $values */
     private function __construct(
         public int $period,
         private Average $average,
@@ -16,19 +16,14 @@ final class MovingAverage implements \Stringable
     ) {
     }
 
-    public static function ema(int $period): self
+    public static function create(\DateTimeImmutable $start, int $period): self
     {
-        Assert::that(
+        assert(
             $period > 0,
             new \InvalidArgumentException('Period must be greater than 0')
         );
 
-        return new self($period, InitialAverage::create());
-    }
-
-    public static function sma(int $period): self
-    {
-        return self::ema($period);
+        return new self($period, new InitialAverage($start));
     }
 
     public function clone(): self
@@ -40,25 +35,41 @@ final class MovingAverage implements \Stringable
         );
     }
 
-    public function next(int|float $value, int $timeOffsetSeconds): self
+    /** @param array{value: float|int, time_stamp: \DateTimeImmutable} $data */
+    public function withData(array $data): self
     {
-        $this->values[] = $value;
+        $value = $data['value'];
+        $timestamp = $data['time_stamp'];
 
-        if (count($this->values) > $this->period) {
-            array_shift($this->values);
+        return $this->withTimestamp($value, $timestamp);
+    }
+
+    public function withTimestamp(int|float $value, \DateTimeImmutable $timestamp): self
+    {
+        // push a new value into the buffer
+        $values = [...$this->values, $value];
+
+        // when there are less or equal values than the desired:
+        if (count($values) <= $this->period) {
+            // calculate simple average
+            $average = Average::simple($values, $timestamp);
+        } else {
+            // otherwise remove oldest value + calculate exponential average
+            array_shift($values);
+            $average = Average::exponential($this->average, $values, $timestamp);
         }
 
-        if (count($this->values) >= $this->period) {
-            $numericValues = $this->values;
-            $this->average = Average::exponential($this->average, $numericValues, $timeOffsetSeconds);
-        }
+        return new self($this->period, $average, $values);
+    }
 
-        return $this;
+    public function getTimestamp(): \DateTimeImmutable
+    {
+        return $this->average->timestamp;
     }
 
     public function getName(): string
     {
-        return sprintf('EMA-%d', $this->period);
+        return sprintf('(E)MA-%d', $this->period);
     }
 
     public function getValue(): float
@@ -74,9 +85,10 @@ final class MovingAverage implements \Stringable
     public function __toString(): string
     {
         return sprintf(
-            '%s: %.2F',
+            '%s: %.2F (%s)',
+            $this->getTimestamp()->format(\DateTimeImmutable::RFC2822),
+            $this->getValue(),
             $this->getName(),
-            $this->getValue()
         );
     }
 }
