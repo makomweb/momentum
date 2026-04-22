@@ -164,25 +164,42 @@
         const velocityCtx = document.getElementById('velocityChart').getContext('2d');
         const velocityData = {
             labels: [
-                {% for point in analysis.velocityPoints %}
+                {% for point in analysis.velocityRawPoints %}
                     '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
                 {% endfor %}
             ],
-            datasets: [{
-                label: 'Velocity (m/s)',
-                data: [
-                    {% for point in analysis.velocityPoints %}
-                        {{ point.value }}{{ not loop.last ? ',' : '' }}
-                    {% endfor %}
-                ],
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 0,
-                pointHoverRadius: 5
-            }]
+            datasets: [
+                {
+                    label: 'Actual Velocity (m/s)',
+                    data: [
+                        {% for point in analysis.velocityRawPoints %}
+                            {{ point.value }}{{ not loop.last ? ',' : '' }}
+                        {% endfor %}
+                    ],
+                    borderColor: 'rgba(102, 126, 234, 0.4)',
+                    backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                    borderWidth: 1,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0,
+                    pointHoverRadius: 5
+                },
+                {
+                    label: 'Moving Average (10-period)',
+                    data: [
+                        {% for point in analysis.velocityAveragePoints %}
+                            {{ point.value }}{{ not loop.last ? ',' : '' }}
+                        {% endfor %}
+                    ],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    borderWidth: 2.5,
+                    tension: 0.4,
+                    fill: false,
+                    pointRadius: 0,
+                    pointHoverRadius: 5
+                }
+            ]
         };
 
         new Chart(velocityCtx, {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use App\RunForge\MovingAverage;
 use App\Strava\API\Activity as StravaActivity;
 use App\Strava\API\ActivityStream;
 
@@ -21,59 +20,55 @@ final class ActivityAnalysisBuilder
         $elapsedTime = $activity->data['elapsed_time'];
         $startDate = $activity->getStartDateLocalTime();
 
-        $velocityPoints = [];
+        $velocityRawPoints = [];
+        $velocityAveragePoints = [];
         $heartRatePoints = [];
 
-        // Check if we have time data (required for everything else)
-        if (!$stream->hasTimeData()) {
+        // Check if we have all required data
+        if (!$stream->hasTimeData() || !$stream->hasVelocityData() || !$stream->hasHeartRateData()) {
             return new ActivityAnalysisData(
                 activityName: $activityName,
                 distance: $distance,
                 elapsedTime: $elapsedTime,
-                velocityPoints: [],
+                velocityRawPoints: [],
+                velocityAveragePoints: [],
                 heartRatePoints: [],
                 hasVelocityData: false,
                 hasHeartRateData: false,
             );
         }
 
-        // Build velocity chart if data is available
-        if ($stream->hasVelocityData()) {
-            $velocityAvg = MovingAverage::create('velocity', $startDate, self::MOVING_AVERAGE_PERIOD);
-            foreach ($stream->yieldSeries($startDate, 'velocity') as $point) {
-                $velocityAvg = $velocityAvg->with($point['value'], $point['time_stamp']);
-                // Only add after warmup period to avoid initial ramp
-                if (count($velocityAvg->values) >= self::MOVING_AVERAGE_PERIOD) {
-                    $velocityPoints[] = [
-                        'timestamp' => $velocityAvg->getTimestamp()->format('H:i:s'),
-                        'value' => round($velocityAvg->getValue(), 2),
-                    ];
-                }
-            }
-        }
+        // Use the yield() method which handles moving averages internally
+        foreach ($stream->yield($startDate, self::MOVING_AVERAGE_PERIOD) as $point) {
+            $timestamp = $point['time_stamp']->format('H:i:s');
 
-        // Build heart rate chart if data is available
-        if ($stream->hasHeartRateData()) {
-            $heartRateAvg = MovingAverage::create('heart_rate', $startDate, self::MOVING_AVERAGE_PERIOD);
-            foreach ($stream->yieldSeries($startDate, 'heart_rate') as $point) {
-                $heartRateAvg = $heartRateAvg->with($point['value'], $point['time_stamp']);
-                // Only add after warmup period to avoid initial ramp
-                if (count($heartRateAvg->values) >= self::MOVING_AVERAGE_PERIOD) {
-                    $heartRatePoints[] = [
-                        'timestamp' => $heartRateAvg->getTimestamp()->format('H:i:s'),
-                        'value' => round($heartRateAvg->getValue(), 2),
-                    ];
-                }
-            }
+            // Collect all raw velocity points
+            $velocityRawPoints[] = [
+                'timestamp' => $timestamp,
+                'value' => round($point['velocity'], 2),
+            ];
+
+            // Collect all average points (simple MA during warmup, exponential MA after)
+            $velocityAveragePoints[] = [
+                'timestamp' => $timestamp,
+                'value' => round($point['velocity_avg'], 2),
+            ];
+
+            // Collect heart rate points
+            $heartRatePoints[] = [
+                'timestamp' => $timestamp,
+                'value' => round($point['heart_rate'], 1),
+            ];
         }
 
         return new ActivityAnalysisData(
             activityName: $activityName,
             distance: $distance,
             elapsedTime: $elapsedTime,
-            velocityPoints: $velocityPoints,
+            velocityRawPoints: $velocityRawPoints,
+            velocityAveragePoints: $velocityAveragePoints,
             heartRatePoints: $heartRatePoints,
-            hasVelocityData: !empty($velocityPoints),
+            hasVelocityData: !empty($velocityRawPoints),
             hasHeartRateData: !empty($heartRatePoints),
         );
     }
