@@ -100,6 +100,58 @@
             color: #999;
             margin: 0;
         }
+        .analysis-link {
+            display: inline-block;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+        .analysis-link:hover {
+            text-decoration: none;
+        }
+        .analysis-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .analysis-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .analysis-link:hover .analysis-card {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+        .analysis-link:hover .analysis-card::before {
+            opacity: 1;
+        }
+        .analysis-card h3 {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .analysis-card p {
+            position: relative;
+            z-index: 1;
+            opacity: 0.95;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -144,6 +196,13 @@
 
         <div class="features-section">
             <h2>🚀 Available Features</h2>
+            
+            <a href="{{ path('activity_analysis') }}" class="analysis-link">
+                <div class="analysis-card">
+                    <h3>📈 Latest Activity Analysis</h3>
+                    <p>View detailed graphical analysis of your most recent activity with moving average trends.</p>
+                </div>
+            </a>
             
             <div class="feature-card">
                 <h3>📊 Activity Sync</h3>
