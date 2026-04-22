@@ -87,14 +87,14 @@ final readonly class ActivityStream
      */
     public function yieldSeries(\DateTimeImmutable $start, string $name): \Generator
     {
-        assert(in_array($name, ['distance', 'velocity', 'heartrate']));
+        assert(in_array($name, ['distance', 'velocity', 'heart_rate']));
 
         assert($this->hasTimeData());
 
         assert(match ($name) {
             'distance' => $this->hasDistanceData(),
             'velocity' => $this->hasVelocityData(),
-            'heartrate' => $this->hasHeartRateData(),
+            'heart_rate' => $this->hasHeartRateData(),
         });
 
         assert(!is_null($this->time));
@@ -105,7 +105,7 @@ final readonly class ActivityStream
         assert(match ($name) {
             'distance' => $this->time->getCount() == $this->distance->getCount(),
             'velocity' => $this->time->getCount() == $this->velocity->getCount(),
-            'heartrate' => $this->time->getCount() == $this->heartrate->getCount(),
+            'heart_rate' => $this->time->getCount() == $this->heartrate->getCount(),
         });
 
         for ($i = 0; $i < $this->time->getCount(); ++$i) {
@@ -113,7 +113,7 @@ final readonly class ActivityStream
             $value = match ($name) {
                 'distance' => $this->distance->getDataPoint($i),
                 'velocity' => $this->velocity->getDataPoint($i),
-                'heartrate' => $this->heartrate->getDataPoint($i),
+                'heart_rate' => $this->heartrate->getDataPoint($i),
             };
 
             assert(!is_null($value));

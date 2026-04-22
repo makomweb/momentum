@@ -10,25 +10,27 @@ final class MovingAverage implements \Stringable
 {
     /** @param float[] $values */
     private function __construct(
+        private string $name,
         public int $period,
         private Average $average,
         public array $values = [],
     ) {
     }
 
-    public static function create(\DateTimeImmutable $start, int $period): self
+    public static function create(string $name, \DateTimeImmutable $start, int $period): self
     {
         assert(
             $period > 0,
             new \InvalidArgumentException('Period must be greater than 0')
         );
 
-        return new self($period, new InitialAverage($start));
+        return new self($name, $period, new InitialAverage($start));
     }
 
     public function clone(): self
     {
         return new self(
+            $this->name,
             $this->period,
             $this->average->clone(),
             $this->values
@@ -59,7 +61,7 @@ final class MovingAverage implements \Stringable
             $average = Average::exponential($this->average, $values, $timestamp);
         }
 
-        return new self($this->period, $average, $values);
+        return new self($this->name, $this->period, $average, $values);
     }
 
     public function getTimestamp(): \DateTimeImmutable
@@ -69,7 +71,7 @@ final class MovingAverage implements \Stringable
 
     public function getName(): string
     {
-        return sprintf('(E)MA-%d', $this->period);
+        return sprintf('%s (EMA-%d)', $this->name, $this->period);
     }
 
     public function getValue(): float
