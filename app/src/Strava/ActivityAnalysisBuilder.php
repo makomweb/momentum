@@ -19,7 +19,7 @@ final class ActivityAnalysisBuilder
         $activityName = $activity->getName();
         $distance = $activity->data['distance'];
         $elapsedTime = $activity->data['elapsed_time'];
-        $startDate = $activity->getStartDateUniversalTime();
+        $startDate = $activity->getStartDateLocalTime();
 
         $velocityPoints = [];
         $heartRatePoints = [];
@@ -45,7 +45,7 @@ final class ActivityAnalysisBuilder
                 // Only add after warmup period to avoid initial ramp
                 if (count($velocityAvg->values) >= self::MOVING_AVERAGE_PERIOD) {
                     $velocityPoints[] = [
-                        'timestamp' => $velocityAvg->getTimestamp(),
+                        'timestamp' => $velocityAvg->getTimestamp()->format('H:i:s'),
                         'value' => round($velocityAvg->getValue(), 2),
                     ];
                 }
@@ -60,7 +60,7 @@ final class ActivityAnalysisBuilder
                 // Only add after warmup period to avoid initial ramp
                 if (count($heartRateAvg->values) >= self::MOVING_AVERAGE_PERIOD) {
                     $heartRatePoints[] = [
-                        'timestamp' => $heartRateAvg->getTimestamp(),
+                        'timestamp' => $heartRateAvg->getTimestamp()->format('H:i:s'),
                         'value' => round($heartRateAvg->getValue(), 2),
                     ];
                 }

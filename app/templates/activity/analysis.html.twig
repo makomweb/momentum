@@ -165,7 +165,7 @@
         const velocityData = {
             labels: [
                 {% for point in analysis.velocityPoints %}
-                    '{{ point.timestamp|date('H:i:s') }}'{{ not loop.last ? ',' : '' }}
+                    '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
                 {% endfor %}
             ],
             datasets: [{
@@ -221,7 +221,7 @@
         const heartRateData = {
             labels: [
                 {% for point in analysis.heartRatePoints %}
-                    '{{ point.timestamp|date('H:i:s') }}'{{ not loop.last ? ',' : '' }}
+                    '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
                 {% endfor %}
             ],
             datasets: [{

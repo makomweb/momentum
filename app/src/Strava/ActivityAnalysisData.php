@@ -7,8 +7,8 @@ namespace App\Strava;
 final readonly class ActivityAnalysisData
 {
     /**
-     * @param array<int, array{timestamp: \DateTimeImmutable, value: float}> $velocityPoints
-     * @param array<int, array{timestamp: \DateTimeImmutable, value: float}> $heartRatePoints
+     * @param array<int, array{timestamp: string, value: float}> $velocityPoints
+     * @param array<int, array{timestamp: string, value: float}> $heartRatePoints
      */
     public function __construct(
         public string $activityName,
