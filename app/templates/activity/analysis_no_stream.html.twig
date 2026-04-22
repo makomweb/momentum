@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Analysis - Run Forge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            padding-top: 20px;
+        }
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        .container-custom {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .empty-state h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .empty-state p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        .activity-name {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #f0f0f0;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .action-link {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+        .action-link:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+        .action-link-secondary {
+            background: #6c757d;
+        }
+        .action-link-secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <span class="navbar-brand">🏃 Run Forge</span>
+            <a href="{{ path('home') }}" style="color: #667eea; text-decoration: none;">← Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container-custom">
+        <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h2>No Stream Data Available</h2>
+            <div class="activity-name">{{ activity_name }}</div>
+            <p>This activity doesn't have stream data yet, or there was an error fetching it.</p>
+            <p style="color: #999; font-size: 0.95rem;">Stream data includes velocity, heart rate, and elevation information over time.</p>
+
+            <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; text-align: left;">
+                <p style="font-weight: 600; margin-bottom: 1rem; color: #333;">Try fetching the stream data:</p>
+                <code style="display: block; padding: 0.5rem; background: white; border-radius: 4px;">
+                    docker compose exec app bin/console app:stream &lt;ACTIVITY_ID&gt;
+                </code>
+            </div>
+
+            <a href="{{ path('activity_analysis') }}" class="action-link">Retry</a>
+            <a href="{{ path('home') }}" class="action-link action-link-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
