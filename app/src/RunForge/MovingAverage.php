@@ -37,16 +37,7 @@ final class MovingAverage implements \Stringable
         );
     }
 
-    /** @param array{value: float|int, time_stamp: \DateTimeImmutable} $data */
-    public function withData(array $data): self
-    {
-        $value = $data['value'];
-        $timestamp = $data['time_stamp'];
-
-        return $this->withTimestamp($value, $timestamp);
-    }
-
-    public function withTimestamp(int|float $value, \DateTimeImmutable $timestamp): self
+    public function with(int|float $value, \DateTimeImmutable $timestamp): self
     {
         // push a new value into the buffer
         $values = [...$this->values, $value];
@@ -78,7 +69,7 @@ final class MovingAverage implements \Stringable
     {
         Assert::that(
             !$this->average instanceof InitialAverage,
-            new \InvalidArgumentException('Should not be initial. Aggregate some candles first!')
+            new \InvalidArgumentException('Should not be initial. Collect some values first!')
         );
 
         return $this->average->value;

@@ -32,8 +32,8 @@ class MovingAverageTest extends TestCase
 
         $ema = array_reduce(
             iterator_to_array($this->stream->yieldSeries($start, 'velocity')),
-            /** @param array{value: float|int, time_stamp: DateTimeImmutable} $data */
-            static fn (MovingAverage $carry, array $data) => $carry->withData($data),
+            /** @param array{value: float|int, time_stamp: \DateTimeImmutable} $data */
+            static fn (MovingAverage $carry, array $data) => $carry->with($data['value'], $data['time_stamp']),
             MovingAverage::create('Speed', start: $start, period: 10)
         );
 
@@ -57,8 +57,8 @@ class MovingAverageTest extends TestCase
 
         $ema = array_reduce(
             iterator_to_array($this->stream->yieldSeries($start, 'heart_rate')),
-            /** @param array{value: float|int, time_stamp: DateTimeImmutable} $data */
-            static fn (MovingAverage $carry, array $data) => $carry->withData($data),
+            /** @param array{value: float|int, time_stamp: \DateTimeImmutable} $data */
+            static fn (MovingAverage $carry, array $data) => $carry->with($data['value'], $data['time_stamp']),
             MovingAverage::create('HF', start: $start, period: 10)
         );
 
@@ -80,24 +80,37 @@ class MovingAverageTest extends TestCase
     {
         $start = new \DateTimeImmutable();
         $series = iterator_to_array(
-            $this->stream->yieldMovingAverages('heart_rate', $start, 10)
+            $this->stream->yield($start, 10)
         );
 
         self::assertCount(7887, $series);
 
-        $ema = array_last($series);
-        assert($ema instanceof MovingAverage);
+        foreach ($series as $data) {
+            $timestamp = $data['time_stamp'];
+            self::assertEquals(
+                0,
+                date_diff($start, $timestamp)->days
+            );
+            self::assertGreaterThanOrEqual($start, $timestamp);
 
-        self::assertEquals('heart_rate (EMA-10)', $ema->getName());
-        $value = $ema->getValue();
-        self::assertGreaterThan(60.0, $value);
-        self::assertLessThan(180.0, $value);
-        self::assertEquals(
-            0,
-            date_diff(
-                $start,
-                $ema->getTimestamp()
-            )->days
-        );
+            $distance = $data['distance'];
+            self::assertGreaterThanOrEqual(0.0, $distance);
+
+            $heartRate = $data['heart_rate'];
+            self::assertGreaterThan(60.0, $heartRate);
+            self::assertLessThan(180.0, $heartRate);
+
+            $heartRateAvg = $data['heart_rate_avg'];
+            self::assertGreaterThan(60.0, $heartRateAvg);
+            self::assertLessThan(180.0, $heartRateAvg);
+
+            $velocity = $data['velocity'];
+            self::assertGreaterThanOrEqual(0.0, $velocity);
+            self::assertLessThan(50.0, $velocity);
+
+            $velocityAvg = $data['velocity_avg'];
+            self::assertGreaterThanOrEqual(0.0, $velocityAvg);
+            self::assertLessThan(50.0, $velocityAvg);
+        }
     }
 }

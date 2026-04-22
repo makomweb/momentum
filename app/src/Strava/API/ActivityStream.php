@@ -129,40 +129,62 @@ final readonly class ActivityStream
     }
 
     /**
-     * @return \Generator<MovingAverage>
+     * @return \Generator<array{
+     *  time_stamp: \DateTimeImmutable,
+     *  distance: float,
+     *  heart_rate: int,
+     *  heart_rate_avg: float,
+     *  velocity: float,
+     *  velocity_avg: float,
+     * }>
      */
-    public function yieldMovingAverages(string $name, \DateTimeImmutable $start, int $period): \Generator
+    public function yield(\DateTimeImmutable $start, int $period): \Generator
     {
-        assert(in_array($name, ['distance', 'velocity', 'heart_rate']));
-
-        assert(match ($name) {
-            'distance' => $this->hasDistanceData(),
-            'velocity' => $this->hasVelocityData(),
-            'heart_rate' => $this->hasHeartRateData(),
-        });
+        assert($this->hasTimeData());
 
         assert(!is_null($this->time));
         assert(!is_null($this->distance));
         assert(!is_null($this->velocity));
         assert(!is_null($this->heartrate));
 
-        $initial = MovingAverage::create($name, $start, $period);
+        assert($this->hasDistanceData());
+        assert($this->hasVelocityData());
+        assert($this->hasHeartRateData());
+
+        assert($this->time->getCount() == $this->distance->getCount());
+        assert($this->time->getCount() == $this->velocity->getCount());
+        assert($this->time->getCount() == $this->heartrate->getCount());
+
+        $velocityAvg = MovingAverage::create('velocity', $start, $period);
+        $heartRateAvg = MovingAverage::create('heart_rate', $start, $period);
 
         for ($i = 0; $i < $this->time->getCount(); ++$i) {
             $offset = $this->time->getDataPoint($i);
-            $value = match ($name) {
-                'distance' => $this->distance->getDataPoint($i),
-                'velocity' => $this->velocity->getDataPoint($i),
-                'heart_rate' => $this->heartrate->getDataPoint($i),
-            };
-
-            assert(!is_null($value));
+            $distance = $this->distance->getDataPoint($i);
+            $velocity = $this->velocity->getDataPoint($i);
+            $heartRate = $this->heartrate->getDataPoint($i);
 
             assert(is_int($offset));
             $offset = \DateInterval::createFromDateString("$offset seconds");
             assert($offset instanceof \DateInterval);
 
-            yield $initial->withData(['value' => $value, 'time_stamp' => $start->add($offset)]);
+            assert(is_numeric($distance));
+            assert(is_numeric($velocity));
+            assert(is_int($heartRate));
+
+            $timeStamp = $start->add($offset);
+
+            $heartRateAvg = $heartRateAvg->with($heartRate, $timeStamp);
+            $velocityAvg = $velocityAvg->with($velocity, $timeStamp);
+
+            yield [
+                'time_stamp' => $timeStamp,
+                'distance' => $distance,
+                'heart_rate' => $heartRate,
+                'heart_rate_avg' => $heartRateAvg->getValue(),
+                'velocity' => $velocity,
+                'velocity_avg' => $velocityAvg->getValue(),
+            ];
         }
     }
 }
