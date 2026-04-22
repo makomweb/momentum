@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\RunForge\MovingAverage;
+
 final readonly class ActivityStream
 {
     public function __construct(
@@ -123,6 +125,44 @@ final readonly class ActivityStream
             assert($offset instanceof \DateInterval);
 
             yield ['value' => $value, 'time_stamp' => $start->add($offset)];
+        }
+    }
+
+    /**
+     * @return \Generator<MovingAverage>
+     */
+    public function yieldMovingAverages(string $name, \DateTimeImmutable $start, int $period): \Generator
+    {
+        assert(in_array($name, ['distance', 'velocity', 'heart_rate']));
+
+        assert(match ($name) {
+            'distance' => $this->hasDistanceData(),
+            'velocity' => $this->hasVelocityData(),
+            'heart_rate' => $this->hasHeartRateData(),
+        });
+
+        assert(!is_null($this->time));
+        assert(!is_null($this->distance));
+        assert(!is_null($this->velocity));
+        assert(!is_null($this->heartrate));
+
+        $initial = MovingAverage::create($name, $start, $period);
+
+        for ($i = 0; $i < $this->time->getCount(); ++$i) {
+            $offset = $this->time->getDataPoint($i);
+            $value = match ($name) {
+                'distance' => $this->distance->getDataPoint($i),
+                'velocity' => $this->velocity->getDataPoint($i),
+                'heart_rate' => $this->heartrate->getDataPoint($i),
+            };
+
+            assert(!is_null($value));
+
+            assert(is_int($offset));
+            $offset = \DateInterval::createFromDateString("$offset seconds");
+            assert($offset instanceof \DateInterval);
+
+            yield $initial->withData(['value' => $value, 'time_stamp' => $start->add($offset)]);
         }
     }
 }

@@ -74,4 +74,30 @@ class MovingAverageTest extends TestCase
             )->days
         );
     }
+
+    #[Test]
+    public function yield_moving_averages(): void
+    {
+        $start = new \DateTimeImmutable();
+        $series = iterator_to_array(
+            $this->stream->yieldMovingAverages('heart_rate', $start, 10)
+        );
+
+        self::assertCount(7887, $series);
+
+        $ema = array_last($series);
+        assert($ema instanceof MovingAverage);
+
+        self::assertEquals('heart_rate (EMA-10)', $ema->getName());
+        $value = $ema->getValue();
+        self::assertGreaterThan(60.0, $value);
+        self::assertLessThan(180.0, $value);
+        self::assertEquals(
+            0,
+            date_diff(
+                $start,
+                $ema->getTimestamp()
+            )->days
+        );
+    }
 }
