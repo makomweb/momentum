@@ -6,7 +6,6 @@ namespace App\Strava;
 
 use App\Strava\API\Activity as StravaActivity;
 use App\Strava\API\ActivityStream as StravaActivityStream;
-use App\Strava\API\Speed;
 
 final class ActivityAnalysisBuilder
 {
@@ -29,26 +28,21 @@ final class ActivityAnalysisBuilder
         $hasVelocityData = false;
         $hasHeartRateData = false;
 
-        // Determine target speed unit based on activity type
-        $targetSpeedUnit = Speed::fromStrava(0, $activityType)->unit;
-
         // Use the yield() method which handles moving averages internally
         foreach ($stream->yield($startDate, self::MOVING_AVERAGE_PERIOD) as $point) {
             $timestamp = $point['time_stamp']->format('H:i:s');
 
             // Collect all raw velocity points if available
             if ($stream->hasVelocityData()) {
-                $rawSpeed = Speed::fromStrava($point['velocity'], $activityType);
                 $velocityRawPoints[] = [
                     'timestamp' => $timestamp,
-                    'value' => round($rawSpeed->value, 2),
+                    'value' => round($point['velocity'], 2),
                 ];
 
                 // Collect all average points (simple MA during warmup, exponential MA after)
-                $avgSpeed = Speed::fromStrava($point['velocity_avg'], $activityType);
                 $velocityAveragePoints[] = [
                     'timestamp' => $timestamp,
-                    'value' => round($avgSpeed->value, 2),
+                    'value' => round($point['velocity_avg'], 2),
                 ];
                 $hasVelocityData = true;
             }
