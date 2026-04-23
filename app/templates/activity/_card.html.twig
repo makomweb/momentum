@@ -25,10 +25,13 @@
         </div>
 
         <div class="activity-stats">
+            {%- set type_lower = activity.data.type | lower -%}
+            {%- if activity.data.distance > 0 -%}
             <div class="stat">
                 <span class="stat-label">Distance</span>
                 <span class="stat-value">{{ (activity.data.distance / 1000) | round(1) }} km</span>
             </div>
+            {%- endif -%}
             <div class="stat">
                 <span class="stat-label">Duration</span>
                 <span class="stat-value">{{ (activity.data.moving_time / 60) | round(0) }} min</span>
@@ -38,6 +41,12 @@
                 <span class="stat-label">{{ speed.unit.value == 'min/km' ? 'Pace' : 'Speed' }}</span>
                 <span class="stat-value">{{ speed }}</span>
             </div>
+            {%- if activity.data.heart_rate is defined and activity.data.heart_rate > 0 -%}
+            <div class="stat">
+                <span class="stat-label">Avg HR</span>
+                <span class="stat-value">{{ activity.data.heart_rate | round(0) }} bpm</span>
+            </div>
+            {%- endif -%}
         </div>
 
         <div class="activity-card-hover-indicator">
