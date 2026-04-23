@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command;
+namespace App\Async\Handler;
 
 use App\Strava\API\Activity;
 use App\Strava\ReportProgressInterface;

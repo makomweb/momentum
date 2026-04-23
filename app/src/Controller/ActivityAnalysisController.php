@@ -35,13 +35,33 @@ final class ActivityAnalysisController extends AbstractController
             return $this->render('activity/analysis_empty.html.twig');
         }
 
+        return $this->analyzeActivity($user, $activity->getId());
+    }
+
+    #[Route('/activity/{id}/analysis', name: 'activity_analysis_by_id', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function analyzeActivityById(int $id): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        return $this->analyzeActivity($user, $id);
+    }
+
+    private function analyzeActivity(User $user, int $stravaActivityId): Response
+    {
+        $activity = $this->activityRepository->findOrNull($user->getStravaId(), $stravaActivityId);
+
+        if (null === $activity) {
+            return $this->render('activity/analysis_empty.html.twig');
+        }
+
         try {
             $stream = $this->streamCache->get(
                 $user->getStravaId(),
                 $activity->getId()
             );
         } catch (\Exception) {
-            // If stream fetch fails, show error state
             return $this->render('activity/analysis_no_stream.html.twig', [
                 'activity_name' => $activity->getName(),
             ]);

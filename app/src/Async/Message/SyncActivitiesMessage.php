@@ -6,5 +6,7 @@ namespace App\Async\Message;
 
 final readonly class SyncActivitiesMessage
 {
-    public function __construct(public int $stravaUserId) {}
+    public function __construct(public int $stravaUserId)
+    {
+    }
 }

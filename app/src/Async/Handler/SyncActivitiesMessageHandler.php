@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Async\Handler;
 
 use App\Async\Message\SyncActivitiesMessage;
-use App\Command\ReportProgressAdapter;
 use App\Strava\Synchronizer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -22,6 +22,7 @@ final readonly class SyncActivitiesMessageHandler
     {
         $stravaUserId = $message->stravaUserId;
         $this->logger->info(sprintf('Syncing activities for user "%d"', $stravaUserId));
-        $this->synchronizer->sync($stravaUserId, new ReportProgressAdapter($this->logger));
+        $adapter = new ReportProgressAdapter($this->logger);
+        $this->synchronizer->sync($stravaUserId, $adapter);
     }
 }

@@ -5,152 +5,465 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Run Forge</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background: #f8f9fa;
-            padding-top: 20px;
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 8px 16px rgba(102, 126, 234, 0.2);
         }
+
+        * {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--light-bg);
+            color: #333;
+        }
+
         .navbar {
             background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            padding: 1rem 0;
         }
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .welcome-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        .welcome-card h1 {
-            font-size: 2.5rem;
+
+        .navbar-brand {
+            font-size: 1.3rem;
             font-weight: bold;
-            margin-bottom: 0.5rem;
+            color: var(--primary-color) !important;
         }
-        .welcome-card p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        .features-section {
-            margin-top: 3rem;
-        }
-        .feature-card {
-            background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #667eea;
-        }
-        .feature-card h3 {
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-        .logout-form {
-            display: inline;
-        }
-        .logout-btn {
-            background: #DC3545;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .logout-btn:hover {
-            background: #C82333;
-            transform: translateY(-2px);
-        }
+
         .navbar-user-section {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.2rem;
         }
+
         .profile-avatar {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #667eea;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
         .profile-avatar:hover {
-            transform: scale(1.1);
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
+
         .user-info {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            justify-content: center;
+            text-align: right;
         }
+
         .user-name {
             font-weight: 600;
             color: #333;
             margin: 0;
             font-size: 0.95rem;
         }
+
         .user-id {
             font-size: 0.75rem;
             color: #999;
             margin: 0;
         }
-        .analysis-link {
-            display: inline-block;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s ease;
-        }
-        .analysis-link:hover {
-            text-decoration: none;
-        }
-        .analysis-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .logout-btn {
+            background: var(--danger-color);
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
             transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+        }
+
+        .dashboard-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .sync-button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .sync-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .sync-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .sync-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .activities-section {
+            margin-bottom: 3rem;
+        }
+
+        .activities-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .activities-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+        }
+
+        @media (min-width: 768px) {
+            .activities-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .activities-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .activity-link {
+            text-decoration: none;
+            color: inherit;
+            transition: none;
+        }
+
+        .activity-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
             position: relative;
             overflow: hidden;
         }
-        .analysis-card::before {
+
+        .activity-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .activity-link:hover .activity-card {
+            transform: translateY(-8px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--primary-color);
+        }
+
+        .activity-link:hover .activity-card::before {
+            opacity: 1;
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .activity-type-icon {
+            font-size: 2rem;
+            min-width: 3rem;
+            text-align: center;
+        }
+
+        .activity-info-basic {
+            flex: 1;
+        }
+
+        .activity-name {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .activity-date {
+            margin: 0.3rem 0 0 0;
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .activity-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.03);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .activity-card-hover-indicator {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        .analysis-link:hover .analysis-card {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
-        }
-        .analysis-link:hover .analysis-card::before {
+
+        .activity-link:hover .activity-card-hover-indicator {
             opacity: 1;
         }
-        .analysis-card h3 {
-            position: relative;
-            z-index: 1;
-            margin-bottom: 0.5rem;
-            font-size: 1.3rem;
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
         }
-        .analysis-card p {
-            position: relative;
-            z-index: 1;
-            opacity: 0.95;
-            margin: 0;
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #999;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state-button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .empty-state-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1050;
+        }
+
+        .toast {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.success .toast-icon {
+            color: var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--danger-color);
+        }
+
+        .toast-icon {
+            font-size: 1.3rem;
+            min-width: 1.5rem;
+        }
+
+        @media (max-width: 576px) {
+            .header-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .sync-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .navbar-user-section {
+                gap: 0.5rem;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .activities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toast-container {
+                right: 1rem;
+                left: 1rem;
+            }
+
+            .toast {
+                min-width: auto;
+            }
+
+            .activity-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .stat-value {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -171,7 +484,7 @@
                     <p class="user-id">ID: {{ strava_user_id }}</p>
                 </div>
                 
-                <form method="post" action="{{ path('logout') }}" class="logout-form">
+                <form method="post" action="{{ path('logout') }}" class="logout-form" style="display: inline;">
                     <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
                     <button type="submit" class="logout-btn">Logout</button>
                 </form>
@@ -180,52 +493,149 @@
     </nav>
 
     <div class="dashboard-container">
-        <div class="welcome-card">
-            <div style="display: flex; align-items: center; gap: 1.5rem;">
-                {% if profile_picture %}
-                    <img src="{{ profile_picture }}" alt="{{ name }}" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.8); object-fit: cover;">
-                {% else %}
-                    <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border: 3px solid rgba(255,255,255,0.8);">👤</div>
-                {% endif %}
-                <div>
-                    <h1>Welcome, {{ name }}! 👋</h1>
-                    <p>You're successfully authenticated with Strava ID: {{ strava_user_id }}</p>
-                </div>
+        <div class="header-section">
+            <div class="header-title">
+                <h1>Your Activities</h1>
+                <span style="font-size: 2rem;">📊</span>
             </div>
+            <button class="sync-button" id="syncButton" onclick="syncActivities()">
+                <span id="syncIcon">↻</span>
+                <span id="syncText">Sync from Strava</span>
+            </button>
         </div>
 
-        <div class="features-section">
-            <h2>🚀 Available Features</h2>
-            
-            <a href="{{ path('activity_analysis') }}" class="analysis-link">
-                <div class="analysis-card">
-                    <h3>📈 Latest Activity Analysis</h3>
-                    <p>View detailed graphical analysis of your most recent activity with moving average trends.</p>
+        <div class="activities-section">
+            <div class="activities-title">
+                <span>Recent Activities</span>
+                <span id="activityCount" style="font-size: 0.9rem; color: #999;"></span>
+            </div>
+
+            {% if activities is not empty %}
+                <div class="activities-grid" id="activitiesContainer">
+                    {% for activity in activities %}
+                        {% include 'activity/_card.html.twig' %}
+                    {% endfor %}
                 </div>
-            </a>
-            
-            <div class="feature-card">
-                <h3>📊 Activity Sync</h3>
-                <p>Your Strava activities are synced and stored locally for analysis and tracking.</p>
-            </div>
-
-            <div class="feature-card">
-                <h3>⚡ Real-time Updates</h3>
-                <p>Stay updated with the latest activity data from your Strava account.</p>
-            </div>
-
-            <div class="feature-card">
-                <h3>🔒 Secure Authentication</h3>
-                <p>Your Strava token is securely cached and automatically refreshed when needed.</p>
-            </div>
-        </div>
-
-        <div style="margin-top: 3rem; padding: 2rem; background: white; border-radius: 8px; text-align: center; border-left: 4px solid #28A745;">
-            <h4>✅ OAuth Authentication Working!</h4>
-            <p>If you see this page, your authentication flow is complete and working correctly.</p>
-            <p><small>Session ID stored. You can now access protected resources.</small></p>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>No activities yet</h3>
+                    <p>Click the "Sync from Strava" button to fetch your activities</p>
+                    <button class="empty-state-button" onclick="syncActivities()">
+                        Sync Now
+                    </button>
+                </div>
+            {% endif %}
         </div>
     </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        async function syncActivities() {
+            const button = document.getElementById('syncButton');
+            const icon = document.getElementById('syncIcon');
+            const text = document.getElementById('syncText');
+
+            button.disabled = true;
+            icon.classList.add('sync-spinner');
+            icon.style.display = 'inline-block';
+            text.textContent = 'Syncing...';
+
+            showToast('Sync started in background', 'success');
+
+            try {
+                const response = await fetch('/api/activities/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Sync failed');
+                }
+
+                // Wait a bit, then refresh activities
+                setTimeout(async () => {
+                    await refreshActivities();
+                    showToast('Activities synced successfully!', 'success');
+                }, 2000);
+
+            } catch (error) {
+                showToast('Error syncing activities. Please try again.', 'error');
+                console.error('Sync error:', error);
+            } finally {
+                button.disabled = false;
+                icon.classList.remove('sync-spinner');
+                icon.style.display = 'inline';
+                text.textContent = 'Sync from Strava';
+            }
+        }
+
+        async function refreshActivities() {
+            try {
+                const response = await fetch('/api/activities/recent');
+                const activities = await response.json();
+
+                const container = document.getElementById('activitiesContainer');
+                
+                if (activities.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-state-icon">📭</div>
+                            <h3>No activities yet</h3>
+                            <p>Click the "Sync from Strava" button to fetch your activities</p>
+                        </div>
+                    `;
+                    document.getElementById('activityCount').textContent = '';
+                    return;
+                }
+
+                // Reload the page to show fresh data with proper formatting
+                location.reload();
+
+            } catch (error) {
+                console.error('Error refreshing activities:', error);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                success: '✓',
+                error: '✕',
+                info: 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type]}</span>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Update activity count on load
+        function updateActivityCount() {
+            const count = document.querySelectorAll('.activity-card').length;
+            const countEl = document.getElementById('activityCount');
+            if (count > 0) {
+                countEl.textContent = `(${count})`;
+            }
+        }
+
+        // Call on page load
+        document.addEventListener('DOMContentLoaded', updateActivityCount);
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

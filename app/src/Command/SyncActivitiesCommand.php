@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Async\Message\SyncActivitiesMessage;
-use App\Strava\API\ApiException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
