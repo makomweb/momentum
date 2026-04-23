@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use App\RunForge\ActivityAnalysisData;
-use App\RunForge\AnalysisMetadata;
 use App\Strava\API\Activity as StravaActivity;
 use App\Strava\API\ActivityStream as StravaActivityStream;
 
@@ -32,7 +30,8 @@ final class ActivityAnalysisBuilder
 
         // Check if we have time data (required for both)
         if (!$stream->hasTimeData()) {
-            $metadata = AnalysisMetadata::fromActivityType($activityType, $activity->getSpeed());
+            $metadata = AnalysisMetadata::fromActivityType($activityType, $activity->getAverageSpeed());
+
             return new ActivityAnalysisData(
                 activityName: $activityName,
                 distance: $distance,
@@ -76,7 +75,7 @@ final class ActivityAnalysisBuilder
             }
         }
 
-        $metadata = AnalysisMetadata::fromActivityType($activityType, $activity->getSpeed());
+        $metadata = AnalysisMetadata::fromActivityType($activityType, $activity->getAverageSpeed());
 
         return new ActivityAnalysisData(
             activityName: $activityName,

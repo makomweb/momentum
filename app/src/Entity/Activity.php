@@ -126,4 +126,17 @@ final class Activity
     {
         return Speed::fromStrava((float) $this->data['average_speed'], $this->data['type']);
     }
+
+    public function getStartDateLocalTime(): \DateTimeImmutable
+    {
+        $result = preg_match('/\)\s(.+)$/', $this->data['timezone'], $matches);
+        if (1 !== $result) {
+            // Fallback to UTC if timezone not available
+            return $this->startDate;
+        }
+
+        $tz = new \DateTimeZone($matches[1]);
+
+        return $this->startDate->setTimezone($tz);
+    }
 }

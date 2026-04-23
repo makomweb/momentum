@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\RunForge;
+namespace App\Strava;
 
 use App\Strava\API\Speed;
 
