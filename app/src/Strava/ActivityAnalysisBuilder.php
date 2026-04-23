@@ -28,24 +28,6 @@ final class ActivityAnalysisBuilder
         $hasVelocityData = false;
         $hasHeartRateData = false;
 
-        // Check if we have time data (required for both)
-        if (!$stream->hasTimeData()) {
-            $metadata = AnalysisMetadata::fromActivityType($activityType, $activity->getAverageSpeed());
-
-            return new ActivityAnalysisData(
-                activityName: $activityName,
-                distance: $distance,
-                elapsedTime: $elapsedTime,
-                velocityRawPoints: [],
-                velocityAveragePoints: [],
-                heartRatePoints: [],
-                hasVelocityData: false,
-                hasHeartRateData: false,
-                movingAveragePeriod: self::MOVING_AVERAGE_PERIOD,
-                metadata: $metadata,
-            );
-        }
-
         // Use the yield() method which handles moving averages internally
         foreach ($stream->yield($startDate, self::MOVING_AVERAGE_PERIOD) as $point) {
             $timestamp = $point['time_stamp']->format('H:i:s');
@@ -88,6 +70,7 @@ final class ActivityAnalysisBuilder
             hasHeartRateData: $hasHeartRateData,
             movingAveragePeriod: self::MOVING_AVERAGE_PERIOD,
             metadata: $metadata,
+            startDateLocalTime: $startDate
         );
     }
 }

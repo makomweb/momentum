@@ -22,6 +22,7 @@ final readonly class ActivityAnalysisData
         public bool $hasHeartRateData,
         public int $movingAveragePeriod,
         public AnalysisMetadata $metadata,
+        public \DateTimeImmutable $startDateLocalTime,
     ) {
     }
 
