@@ -14,14 +14,12 @@ final readonly class Speed implements \Stringable
 
     public static function fromStrava(float $metersPerSecond, string $type): self
     {
-        Assert::that(in_array($type, ['Ride', 'Walk', 'Run', 'WeightTraining']), sprintf('Type %s not yet supported!', $type));
-
         $speed = new Speed($metersPerSecond, SpeedUnit::METER_PER_SECOND);
 
         return match ($type) {
             'Ride' => $speed->as(SpeedUnit::KILOMETER_PER_HOUR),
-            'Walk', 'Run' => $speed->as(SpeedUnit::MINUTES_PER_KILOMETER),
-            default => $speed,
+            'Walk', 'Run', 'Hike' => $speed->as(SpeedUnit::MINUTES_PER_KILOMETER),
+            default => $speed, // Default to m/s for unknown types
         };
     }
 

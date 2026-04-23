@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Strava;
 
 use App\RunForge\ActivityAnalysisData;
+use App\RunForge\AnalysisMetadata;
 use App\Strava\API\Activity as StravaActivity;
 use App\Strava\API\ActivityStream as StravaActivityStream;
 
@@ -20,13 +21,18 @@ final class ActivityAnalysisBuilder
         $distance = $activity->data['distance'];
         $elapsedTime = $activity->data['elapsed_time'];
         $startDate = $activity->getStartDateLocalTime();
+        $activityType = $activity->data['type'];
 
         $velocityRawPoints = [];
         $velocityAveragePoints = [];
         $heartRatePoints = [];
 
-        // Check if we have all required data
-        if (!$stream->hasTimeData() || !$stream->hasVelocityData() || !$stream->hasHeartRateData()) {
+        $hasVelocityData = false;
+        $hasHeartRateData = false;
+
+        // Check if we have time data (required for both)
+        if (!$stream->hasTimeData()) {
+            $metadata = AnalysisMetadata::fromActivityType($activityType, $activity->getSpeed());
             return new ActivityAnalysisData(
                 activityName: $activityName,
                 distance: $distance,
@@ -37,6 +43,7 @@ final class ActivityAnalysisBuilder
                 hasVelocityData: false,
                 hasHeartRateData: false,
                 movingAveragePeriod: self::MOVING_AVERAGE_PERIOD,
+                metadata: $metadata,
             );
         }
 
@@ -44,24 +51,32 @@ final class ActivityAnalysisBuilder
         foreach ($stream->yield($startDate, self::MOVING_AVERAGE_PERIOD) as $point) {
             $timestamp = $point['time_stamp']->format('H:i:s');
 
-            // Collect all raw velocity points
-            $velocityRawPoints[] = [
-                'timestamp' => $timestamp,
-                'value' => round($point['velocity'], 2),
-            ];
+            // Collect all raw velocity points if available
+            if ($stream->hasVelocityData()) {
+                $velocityRawPoints[] = [
+                    'timestamp' => $timestamp,
+                    'value' => round($point['velocity'], 2),
+                ];
 
-            // Collect all average points (simple MA during warmup, exponential MA after)
-            $velocityAveragePoints[] = [
-                'timestamp' => $timestamp,
-                'value' => round($point['velocity_avg'], 2),
-            ];
+                // Collect all average points (simple MA during warmup, exponential MA after)
+                $velocityAveragePoints[] = [
+                    'timestamp' => $timestamp,
+                    'value' => round($point['velocity_avg'], 2),
+                ];
+                $hasVelocityData = true;
+            }
 
-            // Collect heart rate points
-            $heartRatePoints[] = [
-                'timestamp' => $timestamp,
-                'value' => round($point['heart_rate'], 1),
-            ];
+            // Collect heart rate points if available
+            if ($stream->hasHeartRateData()) {
+                $heartRatePoints[] = [
+                    'timestamp' => $timestamp,
+                    'value' => round($point['heart_rate'], 1),
+                ];
+                $hasHeartRateData = true;
+            }
         }
+
+        $metadata = AnalysisMetadata::fromActivityType($activityType, $activity->getSpeed());
 
         return new ActivityAnalysisData(
             activityName: $activityName,
@@ -70,9 +85,10 @@ final class ActivityAnalysisBuilder
             velocityRawPoints: $velocityRawPoints,
             velocityAveragePoints: $velocityAveragePoints,
             heartRatePoints: $heartRatePoints,
-            hasVelocityData: !empty($velocityRawPoints),
-            hasHeartRateData: !empty($heartRatePoints),
+            hasVelocityData: $hasVelocityData,
+            hasHeartRateData: $hasHeartRateData,
             movingAveragePeriod: self::MOVING_AVERAGE_PERIOD,
+            metadata: $metadata,
         );
     }
 }

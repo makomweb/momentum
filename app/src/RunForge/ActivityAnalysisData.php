@@ -21,6 +21,7 @@ final readonly class ActivityAnalysisData
         public bool $hasVelocityData,
         public bool $hasHeartRateData,
         public int $movingAveragePeriod,
+        public AnalysisMetadata $metadata,
     ) {
     }
 
