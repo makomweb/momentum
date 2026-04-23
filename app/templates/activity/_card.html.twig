@@ -34,17 +34,34 @@
                 <span class="stat-value">{{ (activity.data.moving_time / 60) | round(0) }} min</span>
             </div>
             <div class="stat">
-                <span class="stat-label">Pace</span>
-                <span class="stat-value">
-                    {%- if activity.data.distance > 0 -%}
-                        {%- set pace_ms = (activity.data.moving_time / (activity.data.distance / 1000)) | round(1) -%}
-                        {%- set minutes = pace_ms | round(0) -%}
-                        {%- set seconds = ((pace_ms - minutes) * 60) | round(0) -%}
-                        {{ minutes }}:{{ seconds | format("%02d") }} /km
-                    {%- else -%}
-                        N/A
-                    {%- endif -%}
-                </span>
+                {%- set type_lower = activity.data.type | lower -%}
+                {%- if type_lower in ['run', 'walk'] -%}
+                    {# Pace for running/walking activities (min/km) #}
+                    <span class="stat-label">Pace</span>
+                    <span class="stat-value">
+                        {%- if activity.data.distance > 0 -%}
+                            {%- set pace_min_km = (activity.data.moving_time / (activity.data.distance / 1000)) | round(1) -%}
+                            {%- set minutes = pace_min_km | round(0) -%}
+                            {%- set seconds = ((pace_min_km - minutes) * 60) | round(0) -%}
+                            {{ minutes }}:{{ seconds | format("%02d") }} /km
+                        {%- else -%}
+                            N/A
+                        {%- endif -%}
+                    </span>
+                {%- elseif type_lower == 'ride' -%}
+                    {# Speed for cycling activities (km/h) #}
+                    <span class="stat-label">Speed</span>
+                    <span class="stat-value">
+                        {%- set speed_kmh = (activity.data.average_speed * 3.6) | round(1) -%}
+                        {{ speed_kmh }} km/h
+                    </span>
+                {%- else -%}
+                    {# Default speed in m/s for other activity types #}
+                    <span class="stat-label">Speed</span>
+                    <span class="stat-value">
+                        {{ (activity.data.average_speed) | round(2) }} m/s
+                    </span>
+                {%- endif -%}
             </div>
         </div>
 
