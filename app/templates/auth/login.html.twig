@@ -128,10 +128,6 @@
             </div>
         {% endfor %}
 
-        <p style="text-align: center; color: #666; margin-bottom: 1.5rem;">
-            Sign in with your Strava account to get started.
-        </p>
-
         <form method="POST" action="{{ path('authorize_strava') }}">
             <div class="remember-me-section">
                 <div class="form-check">
@@ -143,7 +139,7 @@
             </div>
 
             <button type="submit" class="strava-button">
-                🔗 Connect with Strava
+                Login with Strava
             </button>
         </form>
 
