@@ -13,4 +13,4 @@ RUN docker-php-ext-install \
 
 COPY app /app
 
-CMD ["php", "bin/console", "messenger:consume", "async", "--time-limit=3600", "--memory-limit=512M"]
+CMD ["php", "bin/console", "messenger:consume", "async", "--time-limit=3600", "--memory-limit=512M", "-vv"]
