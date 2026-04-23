@@ -54,6 +54,26 @@ final readonly class Speed implements \Stringable
 
     public function __toString(): string
     {
-        return sprintf('%.2f %s', $this->value, $this->unit->value);
+        if (0.0 === $this->value) {
+            return 'N/A';
+        }
+
+        return match ($this->unit) {
+            SpeedUnit::MINUTES_PER_KILOMETER => $this->formatPace(),
+            default => sprintf('%.1f %s', $this->value, $this->unit->value),
+        };
+    }
+
+    private function formatPace(): string
+    {
+        $minutes = (int) $this->value;
+        $seconds = (int) (($this->value - $minutes) * 60);
+
+        return sprintf('%d:%02d %s', $minutes, $seconds, $this->unit->value);
+    }
+
+    public function display(): string
+    {
+        return $this->__toString();
     }
 }

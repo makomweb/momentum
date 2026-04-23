@@ -35,26 +35,8 @@
             </div>
             <div class="stat">
                 {%- set speed = activity.speed -%}
-                {%- set speed_unit_value = speed.unit.value -%}
-                {%- if speed_unit_value == 'min/km' -%}
-                    {# Pace for running/walking activities (min/km) #}
-                    <span class="stat-label">Pace</span>
-                    <span class="stat-value">
-                        {%- if speed.value > 0 -%}
-                            {%- set minutes = (speed.value | round(0)) -%}
-                            {%- set seconds = (((speed.value - minutes) * 60) | round(0)) -%}
-                            {{ minutes }}:{{ seconds | format("%02d") }} {{ speed_unit_value }}
-                        {%- else -%}
-                            N/A
-                        {%- endif -%}
-                    </span>
-                {%- else -%}
-                    {# Speed for cycling and other activities #}
-                    <span class="stat-label">Speed</span>
-                    <span class="stat-value">
-                        {{ (speed.value | round(1)) }} {{ speed_unit_value }}
-                    </span>
-                {%- endif -%}
+                <span class="stat-label">{{ speed.unit.value == 'min/km' ? 'Pace' : 'Speed' }}</span>
+                <span class="stat-value">{{ speed }}</span>
             </div>
         </div>
 
