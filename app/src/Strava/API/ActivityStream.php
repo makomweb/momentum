@@ -130,7 +130,7 @@ final readonly class ActivityStream
 
     /**
      * @return \Generator<array{
-     *  time_stamp: \DateTimeImmutable,
+     *  timestamp: \DateTimeImmutable,
      *  distance: float,
      *  heart_rate: int,
      *  heart_rate_avg: float,
@@ -172,13 +172,13 @@ final readonly class ActivityStream
             assert(is_numeric($velocity));
             assert(is_int($heartRate));
 
-            $timeStamp = $start->add($offset);
+            $timestamp = $start->add($offset);
 
-            $heartRateAvg = $heartRateAvg->with($heartRate, $timeStamp);
-            $velocityAvg = $velocityAvg->with($velocity, $timeStamp);
+            $heartRateAvg = $heartRateAvg->with($heartRate, $timestamp);
+            $velocityAvg = $velocityAvg->with($velocity, $timestamp);
 
             yield [
-                'time_stamp' => $timeStamp,
+                'timestamp' => $timestamp,
                 'distance' => $distance,
                 'heart_rate' => $heartRate,
                 'heart_rate_avg' => $heartRateAvg->getValue(),

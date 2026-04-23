@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\ActivityRepository;
-use App\Strava\ActivityAnalysisBuilder;
+use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +18,6 @@ final class ActivityAnalysisController extends AbstractController
     public function __construct(
         private ActivityRepository $activityRepository,
         private ActivityStreamCache $streamCache,
-        private ActivityAnalysisBuilder $analysisBuilder,
     ) {
     }
 
@@ -73,7 +72,9 @@ final class ActivityAnalysisController extends AbstractController
             ]);
         }
 
-        $analysis = $this->analysisBuilder->buildFromStream($activity, $stream);
+        $activityData = new ActivityData($activity, $stream);
+
+        // TODO turn activityData into analysis object!
 
         return $this->render('activity/analysis.html.twig', [
             'analysis' => $analysis,

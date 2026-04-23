@@ -86,7 +86,7 @@ class MovingAverageTest extends TestCase
         self::assertCount(7887, $series);
 
         foreach ($series as $data) {
-            $timestamp = $data['time_stamp'];
+            $timestamp = $data['timestamp'];
             self::assertEquals(
                 0,
                 date_diff($start, $timestamp)->days

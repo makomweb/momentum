@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Strava\API\Activity as StravaApiActivity;
-use App\Strava\API\Speed;
+use App\Strava\API\Velocity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -122,9 +122,9 @@ final class Activity
         return $this->data;
     }
 
-    public function getSpeed(): Speed
+    public function getVelocity(): Velocity
     {
-        return Speed::fromStrava((float) $this->data['average_speed'], $this->data['type']);
+        return Velocity::fromStrava((float) $this->data['average_speed'], $this->data['type']);
     }
 
     public function getStartDateLocalTime(): \DateTimeImmutable

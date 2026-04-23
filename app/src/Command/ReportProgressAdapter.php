@@ -18,7 +18,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
         public int $count = 0,
     ) {
         $this->table = new Table($output);
-        $this->table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Avg. Speed']);
+        $this->table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Avg. Velocity']);
     }
 
     public function reportStart(?Activity $resumeAfter): void
@@ -41,7 +41,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
             $activity->getStartDateLocalTime()->format(\DateTimeImmutable::RFC2822),
             $activity->getName(),
             $activity->getDistance(),
-            $activity->getAverageSpeed(),
+            $activity->getAverageVelocity(),
         ]);
 
         ++$this->count;
