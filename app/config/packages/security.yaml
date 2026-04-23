@@ -7,6 +7,8 @@ security:
     providers:
         app_user_provider:
             id: App\Security\UserProvider
+        remember_me_user_provider:
+            id: App\Security\RememberMeUserProvider
 
     firewalls:
         dev:
@@ -26,6 +28,7 @@ security:
                 secure: true
                 httponly: true
                 samesite: lax
+                user_provider: remember_me_user_provider
             logout:
                 path: logout
                 target: login
