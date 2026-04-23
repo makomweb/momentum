@@ -20,8 +20,12 @@ final class Version20260421100024 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE activities (id INT AUTO_INCREMENT NOT NULL, strava_user_id INT NOT NULL, strava_activity_id BIGINT NOT NULL, start_date DATETIME NOT NULL, data JSON NOT NULL, UNIQUE INDEX unique_strava_activity_id (strava_user_id, strava_activity_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('DROP TABLE activity');
+        if (!$schema->hasTable('activities')) {
+            $this->addSql('CREATE TABLE activities (id INT AUTO_INCREMENT NOT NULL, strava_user_id INT NOT NULL, strava_activity_id BIGINT NOT NULL, start_date DATETIME NOT NULL, data JSON NOT NULL, UNIQUE INDEX unique_strava_activity_id (strava_user_id, strava_activity_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        }
+        if ($schema->hasTable('activity')) {
+            $this->addSql('DROP TABLE activity');
+        }
     }
 
     public function down(Schema $schema): void
