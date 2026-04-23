@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Strava\API\Activity as StravaApiActivity;
+use App\Strava\API\Speed;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -119,5 +120,10 @@ final class Activity
     public function getData(): array
     {
         return $this->data;
+    }
+
+    public function getSpeed(): Speed
+    {
+        return Speed::fromStrava((float) $this->data['average_speed'], $this->data['type']);
     }
 }

@@ -34,32 +34,25 @@
                 <span class="stat-value">{{ (activity.data.moving_time / 60) | round(0) }} min</span>
             </div>
             <div class="stat">
-                {%- set type_lower = activity.data.type | lower -%}
-                {%- if type_lower in ['run', 'walk'] -%}
+                {%- set speed = activity.speed -%}
+                {%- set speed_unit_value = speed.unit.value -%}
+                {%- if speed_unit_value == 'min/km' -%}
                     {# Pace for running/walking activities (min/km) #}
                     <span class="stat-label">Pace</span>
                     <span class="stat-value">
-                        {%- if activity.data.distance > 0 -%}
-                            {%- set pace_min_km = (activity.data.moving_time / (activity.data.distance / 1000)) | round(1) -%}
-                            {%- set minutes = pace_min_km | round(0) -%}
-                            {%- set seconds = ((pace_min_km - minutes) * 60) | round(0) -%}
-                            {{ minutes }}:{{ seconds | format("%02d") }} /km
+                        {%- if speed.value > 0 -%}
+                            {%- set minutes = (speed.value | round(0)) -%}
+                            {%- set seconds = (((speed.value - minutes) * 60) | round(0)) -%}
+                            {{ minutes }}:{{ seconds | format("%02d") }} {{ speed_unit_value }}
                         {%- else -%}
                             N/A
                         {%- endif -%}
                     </span>
-                {%- elseif type_lower == 'ride' -%}
-                    {# Speed for cycling activities (km/h) #}
-                    <span class="stat-label">Speed</span>
-                    <span class="stat-value">
-                        {%- set speed_kmh = (activity.data.average_speed * 3.6) | round(1) -%}
-                        {{ speed_kmh }} km/h
-                    </span>
                 {%- else -%}
-                    {# Default speed in m/s for other activity types #}
+                    {# Speed for cycling and other activities #}
                     <span class="stat-label">Speed</span>
                     <span class="stat-value">
-                        {{ (activity.data.average_speed) | round(2) }} m/s
+                        {{ (speed.value | round(1)) }} {{ speed_unit_value }}
                     </span>
                 {%- endif -%}
             </div>
