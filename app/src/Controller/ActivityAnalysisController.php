@@ -73,10 +73,9 @@ final class ActivityAnalysisController extends AbstractController
         }
 
         $activityData = new ActivityData($activity, $stream);
-        $analysis = $activityData->toAnalysisData();
 
         return $this->render('activity/analysis.html.twig', [
-            'analysis' => $analysis,
+            'analysis' => $activityData->toAnalysisData(),
         ]);
     }
 }
