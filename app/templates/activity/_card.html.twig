@@ -33,14 +33,18 @@
             <span class="stat-label">Distance</span>
             {%- endif -%}
             <span class="stat-label">Duration</span>
+            {%- if activity.data.distance > 0 -%}
             <span class="stat-label">{{ speed.unit.value == 'min/km' ? 'Pace' : 'Speed' }}</span>
+            {%- endif -%}
             
             {# Row 2: Values #}
             {%- if activity.data.distance > 0 -%}
             <span class="stat-value">{{ (activity.data.distance / 1000) | round(1) }} km</span>
             {%- endif -%}
             <span class="stat-value">{{ (activity.data.moving_time / 60) | round(0) }} min</span>
+            {%- if activity.data.distance > 0 -%}
             <span class="stat-value">{{ speed }}</span>
+            {%- endif -%}
         </div>
 
         <div class="activity-card-hover-indicator">
