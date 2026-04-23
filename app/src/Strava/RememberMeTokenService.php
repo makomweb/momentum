@@ -10,10 +10,10 @@ use App\Repository\RememberMeTokenRepository;
 
 final readonly class RememberMeTokenService
 {
-    public const int LIFETIME_SECONDS = 30 * 24 * 60 * 60; // 30 days
-
-    public function __construct(private RememberMeTokenRepository $tokenRepository)
-    {
+    public function __construct(
+        private RememberMeTokenRepository $tokenRepository,
+        private int $lifetime,
+    ) {
     }
 
     /**
@@ -34,7 +34,7 @@ final readonly class RememberMeTokenService
         $hashedValidator = hash('sha256', $validator);
 
         // Store in database
-        $expiresAt = new \DateTimeImmutable(sprintf('+%d seconds', self::LIFETIME_SECONDS));
+        $expiresAt = new \DateTimeImmutable(sprintf('+%d seconds', $this->lifetime));
         $token = RememberMeToken::create($selector, $hashedValidator, $user, $expiresAt);
         $this->tokenRepository->save($token, true);
 

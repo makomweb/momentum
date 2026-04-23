@@ -21,6 +21,7 @@ final readonly class RememberMeTokenCreator implements EventSubscriberInterface
     public function __construct(
         private RememberMeTokenService $tokenService,
         private TokenStorageInterface $tokenStorage,
+        private int $lifetime,
     ) {
     }
 
@@ -60,7 +61,7 @@ final readonly class RememberMeTokenCreator implements EventSubscriberInterface
         // Set cookie
         $cookie = Cookie::create(RememberMeTokenService::getCookieName())
             ->withValue($cookieValue)
-            ->withExpires(time() + RememberMeTokenService::LIFETIME_SECONDS)
+            ->withExpires(time() + $this->lifetime)
             ->withPath('/')
             ->withHttpOnly(true)
             ->withSecure(true)

@@ -23,7 +23,7 @@ security:
                 - App\Security\StravaAuthenticator
             remember_me:
                 secret: '%env(APP_SECRET)%'
-                lifetime: 2592000  # 30 days
+                lifetime: '%remember_me_lifetime%'
                 path: /
                 secure: true
                 httponly: true
