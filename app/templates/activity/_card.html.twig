@@ -31,14 +31,14 @@
             </div>
             <div class="stat">
                 <span class="stat-label">Duration</span>
-                <span class="stat-value">{{ (activity.data.moving_time / 60) | round(0) | int }} min</span>
+                <span class="stat-value">{{ (activity.data.moving_time / 60) | round(0) }} min</span>
             </div>
             <div class="stat">
                 <span class="stat-label">Pace</span>
                 <span class="stat-value">
                     {%- set pace_ms = (activity.data.moving_time / (activity.data.distance / 1000)) | round(1) -%}
-                    {%- set minutes = (pace_ms | round(0) | int) -%}
-                    {%- set seconds = ((pace_ms - minutes) * 60) | round(0) | int -%}
+                    {%- set minutes = pace_ms | round(0) -%}
+                    {%- set seconds = ((pace_ms - minutes) * 60) | round(0) -%}
                     {{ minutes }}:{{ seconds | format("%02d") }} /km
                 </span>
             </div>
