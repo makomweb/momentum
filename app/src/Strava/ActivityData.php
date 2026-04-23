@@ -21,8 +21,6 @@ final class ActivityData
         $velocityRawPoints = [];
         $velocityAveragePoints = [];
         $heartRatePoints = [];
-        $hasVelocityData = false;
-        $hasHeartRateData = false;
 
         foreach ($this->yieldDataPoints() as $point) {
             // Collect velocity points (already converted to correct units)
@@ -35,7 +33,6 @@ final class ActivityData
                     'timestamp' => $point['timestamp'],
                     'value' => round($point['velocity_avg'], 2),
                 ];
-                $hasVelocityData = true;
             }
 
             // Collect heart rate points (prefer average)
@@ -44,7 +41,6 @@ final class ActivityData
                     'timestamp' => $point['timestamp'],
                     'value' => round($point['heart_rate_avg'] ?: $point['heart_rate'], 1),
                 ];
-                $hasHeartRateData = true;
             }
         }
 
@@ -65,8 +61,6 @@ final class ActivityData
             velocityRawPoints: $velocityRawPoints,
             velocityAveragePoints: $velocityAveragePoints,
             heartRatePoints: $heartRatePoints,
-            hasVelocityData: $hasVelocityData,
-            hasHeartRateData: $hasHeartRateData,
             movingAveragePeriod: self::PERIOD,
             metadata: $metadata,
             startDateLocalTime: $this->activity->getStartDateLocalTime(),

@@ -18,16 +18,24 @@ final readonly class AnalysisData
         public array $velocityRawPoints,
         public array $velocityAveragePoints,
         public array $heartRatePoints,
-        public bool $hasVelocityData,
-        public bool $hasHeartRateData,
         public int $movingAveragePeriod,
         public AnalysisMetadata $metadata,
         public \DateTimeImmutable $startDateLocalTime,
     ) {
     }
 
+    public function hasVelocityData(): bool
+    {
+        return !empty($this->velocityRawPoints) && !empty($this->velocityAveragePoints);
+    }
+
+    public function hasHeartRateData(): bool
+    {
+        return !empty($this->heartRatePoints);
+    }
+
     public function hasAnyData(): bool
     {
-        return $this->hasVelocityData || $this->hasHeartRateData;
+        return $this->hasVelocityData() || $this->hasHeartRateData();
     }
 }

@@ -260,7 +260,7 @@
                 <span>No data available for analysis. This activity may not have complete stream data.</span>
             </div>
         {% else %}
-            {% if analysis.hasVelocityData %}
+            {% if analysis.hasVelocityData() %}
                 <div class="chart-container">
                     <div class="chart-title">{{ analysis.metadata.chartTitle }}</div>
                     <div class="chart-wrapper">
@@ -274,7 +274,7 @@
                 </div>
             {% endif %}
 
-            {% if analysis.hasHeartRateData %}
+            {% if analysis.hasHeartRateData() %}
                 <div class="chart-container">
                     <div class="chart-title">❤️ Heart Rate Over Time</div>
                     <div class="chart-wrapper">
@@ -291,7 +291,7 @@
     </div>
 
     <script>
-        {% if analysis.hasVelocityData %}
+        {% if analysis.hasVelocityData() %}
         const velocityCtx = document.getElementById('velocityChart').getContext('2d');
         const velocityData = {
             labels: [
@@ -373,7 +373,7 @@
         });
         {% endif %}
 
-        {% if analysis.hasHeartRateData %}
+        {% if analysis.hasHeartRateData() %}
         const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
         const heartRateData = {
             labels: [
