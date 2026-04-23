@@ -18,8 +18,8 @@ final class LogoutHandler implements EventSubscriberInterface
 
     public function onLogout(LogoutEvent $event): void
     {
-        // Symfony's persistent remember-me handler automatically deletes tokens on logout
         // Clear session data
+        // Note: Remember-me cookie is handled automatically by Symfony's security system
         $request = $event->getRequest();
         $session = $request->getSession();
         $session->remove('strava_user_id');

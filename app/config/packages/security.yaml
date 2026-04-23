@@ -26,8 +26,6 @@ security:
                 secure: true
                 httponly: true
                 samesite: lax
-                token_provider:
-                    doctrine: true
             logout:
                 path: logout
                 target: login
