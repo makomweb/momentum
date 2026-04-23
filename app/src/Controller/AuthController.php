@@ -36,8 +36,9 @@ final class AuthController extends AbstractController
         $state = bin2hex(random_bytes(16));
         $request->getSession()->set('oauth_state', $state);
 
-        // Check if user wants to be remembered
-        $rememberMe = $request->request->getBoolean('remember_me', false);
+        // Check if user wants to be remembered (check both _remember_me and remember_me for compatibility)
+        $rememberMe = $request->request->getBoolean('_remember_me', false)
+                   || $request->request->getBoolean('remember_me', false);
         $request->getSession()->set('remember_me_choice', $rememberMe);
 
         // Redirect to Strava OAuth

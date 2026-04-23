@@ -75,9 +75,16 @@ final class StravaAuthenticator extends AbstractAuthenticator
             // Store strava user ID in session for later use
             $session->set('strava_user_id', $stravaUser->getId());
 
+            $badge = new RememberMeBadge();
+            // Enable remember-me if user checked the box during OAuth initiation
+            if ($session->get('remember_me_choice')) {
+                $badge->enable();
+                $session->remove('remember_me_choice');
+            }
+
             return new SelfValidatingPassport(
                 new UserBadge((string) $stravaUser->getId(), fn () => $user),
-                [new RememberMeBadge()],
+                [$badge],
             );
         } catch (\Throwable $ex) {
             throw new AuthenticationException(sprintf('Failed to authenticate: %s', $ex->getMessage()));
