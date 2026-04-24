@@ -230,14 +230,10 @@
             <div class="activity-header-content">
                 <div class="activity-title">
                     <span class="activity-emoji">{{ metaData.getEmoji() }}</span>
-                    <h1 class="activity-name">{{ metaData.getActivityName() }}</h1>
+                    <h1 class="activity-name">{{ metaData.getActivityName() }} · {{ metaData.getStartDateLocalTime() | date('D M d, y · H:i') }}</h1>
                 </div>
 
                 <div class="activity-stats">
-                    <div class="stat-box">
-                        <div class="stat-label">Date</div>
-                        <div class="stat-value">{{ metaData.getStartDateLocalTime() | date('M d, y · H:i') }}</div>
-                    </div>
                     <div class="stat-box">
                         <div class="stat-label">Distance</div>
                         <div class="stat-value">{{ (metaData.getData()['distance'].getMeters() / 1000) | number_format(1, '.') }} km</div>
@@ -351,10 +347,6 @@
                 },
                 scales: {
                     y: {
-                        {% if not metaData.useInverseScale() %}
-                        beginAtZero: true,
-                        {% endif %}
-                        reverse: {{ metaData.useInverseScale() ? 'true' : 'false' }},
                         ticks: { font: { size: 12 } },
                         title: {
                             display: true,

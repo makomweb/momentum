@@ -58,8 +58,10 @@ final class ActivityData
                 'distance' => $point['distance'],
                 'heart_rate' => $point['heart_rate'],
                 'heart_rate_avg' => $point['heart_rate_avg'],
-                'velocity' => Velocity::fromStrava($point['velocity'], $activityType)->value,
-                'velocity_avg' => Velocity::fromStrava($point['velocity_avg'], $activityType)->value,
+                'velocity' => $point['velocity'], // Velocity::fromStrava($point['velocity'], $activityType)->value,
+                'velocity_avg' => $point['velocity_avg'], // Velocity::fromStrava($point['velocity_avg'], $activityType)->value,
+                // 'velocity' => Velocity::fromStrava($point['velocity'], $activityType)->value,
+                // 'velocity_avg' => Velocity::fromStrava($point['velocity_avg'], $activityType)->value,
             ];
         }
     }

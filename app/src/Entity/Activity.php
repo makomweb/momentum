@@ -124,7 +124,7 @@ final class Activity
 
     public function getVelocity(): Velocity
     {
-        return Velocity::fromStrava((float) $this->data['average_speed'], $this->data['type']);
+        return new Velocity($this->data['average_speed']);
     }
 
     public function getStartDateLocalTime(): \DateTimeImmutable

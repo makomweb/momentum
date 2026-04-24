@@ -115,21 +115,12 @@ final readonly class Activity implements \Stringable
 
     public function getMaxVelocity(): Velocity
     {
-        return Velocity::fromStrava($this->data['max_speed'], $this->data['type' /* or: sport_type */]);
+        return new Velocity($this->data['max_speed']);
     }
 
     public function getAverageVelocity(): Velocity
     {
-        return Velocity::fromStrava($this->data['average_speed'], $this->data['type' /* or: sport_type */]);
-    }
-
-    public function getVelocityUnit(): VelocityUnit
-    {
-        return match ($this->data['type']) {
-            'Ride' => VelocityUnit::KILOMETER_PER_HOUR,
-            'Walk', 'Run', 'Hike' => VelocityUnit::MINUTES_PER_KILOMETER,
-            default => throw new \Exception(sprintf('Unsupported activity type "%s"!', $this->data['type'])),
-        };
+        return new Velocity($this->data['average_speed']);
     }
 
     public function __toString(): string

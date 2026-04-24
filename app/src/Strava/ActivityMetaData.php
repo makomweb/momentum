@@ -6,6 +6,8 @@ namespace App\Strava;
 
 use App\Strava\API\Activity;
 use App\Strava\API\Distance;
+use App\Strava\API\PaceUnit;
+use App\Strava\API\SpeedUnit;
 use App\Strava\API\Velocity;
 
 final readonly class ActivityMetaData
@@ -94,7 +96,12 @@ final readonly class ActivityMetaData
 
     public function getChartYAxisLabel(): string
     {
-        return $this->activity->getAverageVelocity()->unit->value;
+        $type = $this->getActivityType();
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike', 'Swim' => sprintf('Pace %s', PaceUnit::MINUTES_PER_KILOMETER->value),
+            default /* , Ride */ => sprintf('Speed %s', SpeedUnit::KILOMETER_PER_HOUR->value),
+        };
     }
 
     public function getMovingTimeAsString(): string
