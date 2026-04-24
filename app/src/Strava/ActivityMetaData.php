@@ -108,8 +108,8 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => sprintf('Pace %s', PaceUnit::MINUTES_PER_KILOMETER->value),
-            default /* , Ride */ => sprintf('Speed %s', SpeedUnit::KILOMETER_PER_HOUR->value),
+            'Run', 'Walk', 'Hike', 'Swim' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
+            default /* , Ride */ => sprintf('Speed (%s)', SpeedUnit::KILOMETER_PER_HOUR->value),
         };
     }
 

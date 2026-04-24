@@ -155,8 +155,8 @@ final readonly class ActivityStream
         assert($this->time->getCount() == $this->velocity->getCount());
         assert($this->time->getCount() == $this->heartrate->getCount());
 
-        $velocityAvg = MovingAverage::create('velocity', $start, $period);
-        $heartRateAvg = MovingAverage::create('heart_rate', $start, $period);
+        $velocityAvg = MovingAverage::create('velocity_avg', $start, $period);
+        $heartRateAvg = MovingAverage::create('heart_rate_avg', $start, $period);
 
         for ($i = 0; $i < $this->time->getCount(); ++$i) {
             $offset = $this->time->getDataPoint($i);

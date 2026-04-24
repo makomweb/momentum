@@ -6,6 +6,7 @@ namespace App\Strava;
 
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
+use App\Strava\API\SpeedUnit;
 use App\Strava\API\Velocity;
 
 final class ActivityData
@@ -28,8 +29,8 @@ final class ActivityData
      *   distance: float,
      *   heart_rate: int,
      *   heart_rate_avg: float,
-     *   velocity: float,
-     *   velocity_avg: float,
+     *   velocity: Velocity,
+     *   velocity_avg: Velocity,
      *  }
      * >
      */
@@ -44,24 +45,20 @@ final class ActivityData
      *  distance: float,
      *  heart_rate: int,
      *  heart_rate_avg: float,
-     *  velocity: float,
-     *  velocity_avg: float,
+     *  velocity: Velocity,
+     *  velocity_avg: Velocity,
      * }>
      */
     private function yieldDataPoints(): \Generator
     {
-        $activityType = $this->activity->data['type'];
-
         foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
             yield [
                 'timestamp' => $point['timestamp']->format('H:i:s'),
                 'distance' => $point['distance'],
                 'heart_rate' => $point['heart_rate'],
                 'heart_rate_avg' => $point['heart_rate_avg'],
-                'velocity' => $point['velocity'], // Velocity::fromStrava($point['velocity'], $activityType)->value,
-                'velocity_avg' => $point['velocity_avg'], // Velocity::fromStrava($point['velocity_avg'], $activityType)->value,
-                // 'velocity' => Velocity::fromStrava($point['velocity'], $activityType)->value,
-                // 'velocity_avg' => Velocity::fromStrava($point['velocity_avg'], $activityType)->value,
+                'velocity' => new Velocity($point['velocity']),
+                'velocity_avg' => new Velocity($point['velocity_avg']),
             ];
         }
     }
@@ -71,14 +68,19 @@ final class ActivityData
      */
     public function getVelocityRawPoints(): array
     {
+        $type = $this->activity->data['type'];
+
         $points = [];
         foreach ($this->getDataPoints() as $point) {
-            if ($point['velocity'] > 0) {
-                $points[] = [
-                    'timestamp' => $point['timestamp'],
-                    'value' => round($point['velocity'], 2),
-                ];
-            }
+            $velocity = $point['velocity'];
+            $points[] = [
+                'timestamp' => $point['timestamp'],
+                'value' => match ($type) {
+                    'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
+                    'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
+                    default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
+                },
+            ];
         }
 
         return $points;
@@ -89,14 +91,20 @@ final class ActivityData
      */
     public function getVelocityAveragePoints(): array
     {
+        $type = $this->activity->data['type'];
+
         $points = [];
         foreach ($this->getDataPoints() as $point) {
-            if ($point['velocity_avg'] > 0) {
-                $points[] = [
-                    'timestamp' => $point['timestamp'],
-                    'value' => round($point['velocity_avg'], 2),
-                ];
-            }
+            $velocity = $point['velocity_avg'];
+
+            $points[] = [
+                'timestamp' => $point['timestamp'],
+                'value' => match ($type) {
+                    'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
+                    'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
+                    default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
+                },
+            ];
         }
 
         return $points;

@@ -347,6 +347,11 @@
                 },
                 scales: {
                     y: {
+                        {% if metaData.useInverseScale() %}
+                        beginAtZero: false,
+                        {% else %}
+                        beginAtZero: true,
+                        {% endif %}
                         ticks: { font: { size: 12 } },
                         title: {
                             display: true,

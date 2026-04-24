@@ -17,6 +17,10 @@ final readonly class Velocity
 
     public function asPace(): Pace
     {
-        return new Pace((1000 / $this->metersPerSecond) / 60);
+        if (0.0 == $this->metersPerSecond) {
+            return new Pace(0.0);
+        }
+
+        return new Pace(16.667 / $this->metersPerSecond);
     }
 }

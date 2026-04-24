@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\RunForge;
 
-use App\Assert\Assert;
-
 final class MovingAverage implements \Stringable
 {
     /** @param float[] $values */
@@ -27,16 +25,6 @@ final class MovingAverage implements \Stringable
         return new self($name, $period, new InitialAverage($start));
     }
 
-    public function clone(): self
-    {
-        return new self(
-            $this->name,
-            $this->period,
-            $this->average->clone(),
-            $this->values
-        );
-    }
-
     public function with(int|float $value, \DateTimeImmutable $timestamp): self
     {
         // push a new value into the buffer
@@ -45,11 +33,11 @@ final class MovingAverage implements \Stringable
         // when there are less or equal values than the desired:
         if (count($values) <= $this->period) {
             // calculate simple average
-            $average = Average::simple($values, $timestamp);
+            $average = SimpleAverage::create($values, $timestamp);
         } else {
             // otherwise remove oldest value + calculate exponential average
             array_shift($values);
-            $average = Average::exponential($this->average, $values, $timestamp);
+            $average = ExponentialAverage::create($this->average, $values, $timestamp);
         }
 
         return new self($this->name, $this->period, $average, $values);
@@ -67,12 +55,9 @@ final class MovingAverage implements \Stringable
 
     public function getValue(): float
     {
-        Assert::that(
-            !$this->average instanceof InitialAverage,
-            new \InvalidArgumentException('Should not be initial. Collect some values first!')
-        );
-
-        return $this->average->value;
+        return $this->average instanceof ExponentialAverage
+            ? $this->average->value
+            : 0.0;
     }
 
     public function __toString(): string
