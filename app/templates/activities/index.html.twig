@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Run Forge</title>
+    <title>Activities - Run Forge</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('styles/navbar.css') }}">
     <style>
         :root {
             --primary-color: #667eea;
@@ -24,77 +25,6 @@
         body {
             background: var(--light-bg);
             color: #333;
-        }
-
-        .navbar {
-            background: white;
-            box-shadow: var(--card-shadow);
-            padding: 1rem 0;
-        }
-
-        .navbar-brand {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--primary-color) !important;
-        }
-
-        .navbar-user-section {
-            display: flex;
-            align-items: center;
-            gap: 1.2rem;
-        }
-
-        .profile-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary-color);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .profile-avatar:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: right;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .user-id {
-            font-size: 0.75rem;
-            color: #999;
-            margin: 0;
-        }
-
-        .logout-btn {
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .logout-btn:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
         }
 
         .dashboard-container {
@@ -168,16 +98,6 @@
             margin-bottom: 3rem;
         }
 
-        .activities-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
         .activities-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -225,10 +145,31 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
+        }
+
+        /* Activity type specific backgrounds */
+        .activity-card[data-activity-type="run"]::before {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(234, 88, 12, 0.1) 100%);
+        }
+
+        .activity-card[data-activity-type="ride"]::before {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+        }
+
+        .activity-card[data-activity-type="swim"]::before {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+        }
+
+        .activity-card[data-activity-type="walk"]::before {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+        }
+
+        .activity-card[data-activity-type="hike"]::before {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
         }
 
         .activity-link:hover .activity-card {
@@ -480,35 +421,12 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
-            <span class="navbar-brand">🏃 Run Forge</span>
-            
-            <div class="navbar-user-section">
-                {% if profile_picture %}
-                    <img src="{{ profile_picture }}" alt="{{ name }}" class="profile-avatar" title="{{ name }}">
-                {% else %}
-                    <div class="profile-avatar" style="background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>
-                {% endif %}
-                
-                <div class="user-info">
-                    <p class="user-name">{{ name }}</p>
-                    <p class="user-id">ID: {{ strava_user_id }}</p>
-                </div>
-                
-                <form method="post" action="{{ path('logout') }}" class="logout-form" style="display: inline;">
-                    <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
-                    <button type="submit" class="logout-btn">Logout</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+    {% include 'components/_header.html.twig' %}
 
     <div class="dashboard-container">
         <div class="header-section">
             <div class="header-title">
-                <h1>Your Activities</h1>
-                <span style="font-size: 2rem;">📊</span>
+                <h3>📊 Recent Activities <span id="activityCount">(20)</span></h3>
             </div>
             <button class="sync-button" id="syncButton" onclick="syncActivities()">
                 <span id="syncIcon">↻</span>
@@ -517,11 +435,6 @@
         </div>
 
         <div class="activities-section">
-            <div class="activities-title">
-                <span>Recent Activities</span>
-                <span id="activityCount" style="font-size: 0.9rem; color: #999;"></span>
-            </div>
-
             {% if activities is not empty %}
                 <div class="activities-grid" id="activitiesContainer">
                     {% for activity in activities %}
