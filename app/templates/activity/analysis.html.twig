@@ -229,40 +229,40 @@
         <div class="activity-header">
             <div class="activity-header-content">
                 <div class="activity-title">
-                    <span class="activity-emoji">{{ analysis.metadata.emoji }}</span>
-                    <h1 class="activity-name">{{ analysis.activityName }}</h1>
+                    <span class="activity-emoji">{{ activity_data.getMetaData().getEmoji() }}</span>
+                    <h1 class="activity-name">{{ activity_data.getMetaData().getActivityName() }}</h1>
                 </div>
 
                 <div class="activity-stats">
                     <div class="stat-box">
                         <div class="stat-label">Date</div>
-                        <div class="stat-value">{{ analysis.startDateLocalTime | date('M d, y') }}</div>
+                        <div class="stat-value">{{ activityData.getMetaData().getStartDateLocalTime() | date('M d, y') }}</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">Distance</div>
-                        <div class="stat-value">{{ (analysis.distance / 1000) | number_format(1, '.') }} km</div>
+                        <div class="stat-value">{{ (activityData.getMetaData().getData()['distance'].getMeters() / 1000) | number_format(1, '.') }} km</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">Duration</div>
-                        <div class="stat-value">{{ (analysis.elapsedTime / 60) | number_format(0) }} min</div>
+                        <div class="stat-value">{{ (activityData.getMetaData().getElapsedTimeInSeconds() / 60) | number_format(0) }} min</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-label">{{ analysis.metadata.metricLabel }}</div>
-                        <div class="stat-value">{{ analysis.metadata.averageVelocity }}</div>
+                        <div class="stat-label">{{ activityData.getMetaData().getLabel() }}</div>
+                        <div class="stat-value">{{ activityData.getMetaData().getData()['average_velocity'] }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {% if not analysis.hasAnyData() %}
+        {% if not activityData.hasAnyData() %}
             <div class="alert-message alert-info">
                 <span>⚠️</span>
                 <span>No data available for analysis. This activity may not have complete stream data.</span>
             </div>
         {% else %}
-            {% if analysis.hasVelocityData() %}
+            {% if activityData.hasVelocityData() %}
                 <div class="chart-container">
-                    <div class="chart-title">{{ analysis.metadata.chartTitle }}</div>
+                    <div class="chart-title">{{ activityData.getMetaData().getChartTitle() }}</div>
                     <div class="chart-wrapper">
                         <canvas id="velocityChart"></canvas>
                     </div>
@@ -274,7 +274,7 @@
                 </div>
             {% endif %}
 
-            {% if analysis.hasHeartRateData() %}
+            {% if activityData.hasHeartRateData() %}
                 <div class="chart-container">
                     <div class="chart-title">❤️ Heart Rate Over Time</div>
                     <div class="chart-wrapper">
@@ -291,11 +291,11 @@
     </div>
 
     <script>
-        {% if analysis.hasVelocityData() %}
+        {% if activityData.hasVelocityData() %}
         const velocityCtx = document.getElementById('velocityChart').getContext('2d');
         const velocityData = {
             labels: [
-                {% for point in analysis.velocityRawPoints %}
+                {% for point in activityData.getVelocityRawPoints() %}
                     '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
                 {% endfor %}
             ],
@@ -303,7 +303,7 @@
                 {
                     label: 'Velocity',
                     data: [
-                        {% for point in analysis.velocityRawPoints %}
+                        {% for point in activityData.getVelocityRawPoints() %}
                             {{ point.value }}{{ not loop.last ? ',' : '' }}
                         {% endfor %}
                     ],
@@ -316,9 +316,9 @@
                     pointHoverRadius: 6
                 },
                 {
-                    label: 'Moving Average ({{ analysis.movingAveragePeriod }}-period)',
+                    label: 'Moving Average ({{ activityData.getMovingAveragePeriod() }}-period)',
                     data: [
-                        {% for point in analysis.velocityAveragePoints %}
+                        {% for point in activityData.getVelocityAveragePoints() %}
                             {{ point.value }}{{ not loop.last ? ',' : '' }}
                         {% endfor %}
                     ],
@@ -352,11 +352,11 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        reverse: {{ analysis.metadata.usesInverseScale ? 'true' : 'false' }},
+                        reverse: {{ activityData.getMetaData().useInverseScale() ? 'true' : 'false' }},
                         ticks: { font: { size: 12 } },
                         title: {
                             display: true,
-                            text: '{{ analysis.metadata.chartYAxisLabel }}',
+                            text: '{{ activityData.getMetaData().getChartYAxisLabel() }}',
                             font: { size: 13, weight: 600 }
                         }
                     },
@@ -373,18 +373,18 @@
         });
         {% endif %}
 
-        {% if analysis.hasHeartRateData() %}
+        {% if activityData.hasHeartRateData() %}
         const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
         const heartRateData = {
             labels: [
-                {% for point in analysis.heartRatePoints %}
+                {% for point in activityData.getHeartRatePoints() %}
                     '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
                 {% endfor %}
             ],
             datasets: [{
                 label: 'Heart Rate (bpm)',
                 data: [
-                    {% for point in analysis.heartRatePoints %}
+                    {% for point in activityData.getHeartRatePoints() %}
                         {{ point.value }}{{ not loop.last ? ',' : '' }}
                     {% endfor %}
                 ],

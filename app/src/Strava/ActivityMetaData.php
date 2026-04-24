@@ -91,4 +91,27 @@ final readonly class ActivityMetaData
             default /* , Ride */ => false,
         };
     }
+
+    public function getChartYAxisLabel(): string
+    {
+        $type = $this->getActivityType();
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike', 'Swim' => 'min/km',
+            'Ride' => 'km/h',
+            default => 'Speed',
+        };
+    }
+
+    public function getElapsedTimeInSeconds(): int
+    {
+        $dateInterval = $this->activity->getElapsedTime();
+
+        return (int) (
+            $dateInterval->d * 86400 +
+            $dateInterval->h * 3600 +
+            $dateInterval->i * 60 +
+            $dateInterval->s
+        );
+    }
 }

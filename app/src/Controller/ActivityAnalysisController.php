@@ -8,7 +8,6 @@ use App\Entity\User;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
-use App\Strava\AnalysisPresenter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -74,13 +73,9 @@ final class ActivityAnalysisController extends AbstractController
         }
 
         $activityData = new ActivityData($activity, $stream);
-        $metaData = $activityData->getMetaData();
-
-        $presenter = new AnalysisPresenter();
-        $analysis = $presenter->buildAnalysis($activityData, $metaData);
 
         return $this->render('activity/analysis.html.twig', [
-            'analysis' => $analysis,
+            'activityData' => $activityData,
         ]);
     }
 }

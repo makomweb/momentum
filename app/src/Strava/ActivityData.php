@@ -63,4 +63,78 @@ final class ActivityData
             ];
         }
     }
+
+    /**
+     * @return array<array{timestamp: string, value: float}>
+     */
+    public function getVelocityRawPoints(): array
+    {
+        $points = [];
+        foreach ($this->getDataPoints() as $point) {
+            if ($point['velocity'] > 0) {
+                $points[] = [
+                    'timestamp' => $point['timestamp'],
+                    'value' => round($point['velocity'], 2),
+                ];
+            }
+        }
+
+        return $points;
+    }
+
+    /**
+     * @return array<array{timestamp: string, value: float}>
+     */
+    public function getVelocityAveragePoints(): array
+    {
+        $points = [];
+        foreach ($this->getDataPoints() as $point) {
+            if ($point['velocity_avg'] > 0) {
+                $points[] = [
+                    'timestamp' => $point['timestamp'],
+                    'value' => round($point['velocity_avg'], 2),
+                ];
+            }
+        }
+
+        return $points;
+    }
+
+    /**
+     * @return array<array{timestamp: string, value: int}>
+     */
+    public function getHeartRatePoints(): array
+    {
+        $points = [];
+        foreach ($this->getDataPoints() as $point) {
+            if ($point['heart_rate'] > 0 || $point['heart_rate_avg'] > 0) {
+                $points[] = [
+                    'timestamp' => $point['timestamp'],
+                    'value' => (int) ($point['heart_rate_avg'] ?: $point['heart_rate']),
+                ];
+            }
+        }
+
+        return $points;
+    }
+
+    public function hasVelocityData(): bool
+    {
+        return !empty($this->getVelocityRawPoints());
+    }
+
+    public function hasHeartRateData(): bool
+    {
+        return !empty($this->getHeartRatePoints());
+    }
+
+    public function hasAnyData(): bool
+    {
+        return $this->hasVelocityData() || $this->hasHeartRateData();
+    }
+
+    public function getMovingAveragePeriod(): int
+    {
+        return self::MOVING_AVERAGE_PERIOD;
+    }
 }
