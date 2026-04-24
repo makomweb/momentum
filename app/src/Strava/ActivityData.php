@@ -10,61 +10,32 @@ use App\Strava\API\Velocity;
 
 final class ActivityData
 {
-    private const PERIOD = 50;
+    private const MOVING_AVERAGE_PERIOD = 50;
 
     public function __construct(private Activity $activity, private ActivityStream $stream)
     {
     }
 
-    public function toAnalysisData(): AnalysisData
+    public function getMetaData(): ActivityMetaData
     {
-        $velocityRawPoints = [];
-        $velocityAveragePoints = [];
-        $heartRatePoints = [];
+        return new ActivityMetaData($this->activity);
+    }
 
-        foreach ($this->yieldDataPoints() as $point) {
-            // Collect velocity points (already converted to correct units)
-            if ($point['velocity'] > 0 || $point['velocity_avg'] > 0) {
-                $velocityRawPoints[] = [
-                    'timestamp' => $point['timestamp'],
-                    'value' => round($point['velocity'], 2),
-                ];
-                $velocityAveragePoints[] = [
-                    'timestamp' => $point['timestamp'],
-                    'value' => round($point['velocity_avg'], 2),
-                ];
-            }
-
-            // Collect heart rate points (prefer average)
-            if ($point['heart_rate'] > 0 || $point['heart_rate_avg'] > 0) {
-                $heartRatePoints[] = [
-                    'timestamp' => $point['timestamp'],
-                    'value' => round($point['heart_rate_avg'] ?: $point['heart_rate'], 1),
-                ];
-            }
-        }
-
-        // Create metadata from activity type
-        $averageVelocity = Velocity::fromStrava(
-            $this->activity->data['average_speed'],
-            $this->activity->data['type']
-        );
-        $metadata = AnalysisMetadata::fromActivityType(
-            $this->activity->data['type'],
-            $averageVelocity
-        );
-
-        return new AnalysisData(
-            activityName: $this->activity->getName(),
-            distance: $this->activity->data['distance'],
-            elapsedTime: $this->activity->data['elapsed_time'],
-            velocityRawPoints: $velocityRawPoints,
-            velocityAveragePoints: $velocityAveragePoints,
-            heartRatePoints: $heartRatePoints,
-            movingAveragePeriod: self::PERIOD,
-            metadata: $metadata,
-            startDateLocalTime: $this->activity->getStartDateLocalTime(),
-        );
+    /**
+     * @return array<
+     *  array{
+     *   timestamp: non-falsy-string,
+     *   distance: float,
+     *   heart_rate: int,
+     *   heart_rate_avg: float,
+     *   velocity: float,
+     *   velocity_avg: float,
+     *  }
+     * >
+     */
+    public function getDataPoints(): array
+    {
+        return iterator_to_array($this->yieldDataPoints());
     }
 
     /**
@@ -81,11 +52,9 @@ final class ActivityData
     {
         $activityType = $this->activity->data['type'];
 
-        foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::PERIOD) as $point) {
-            $timestamp = $point['timestamp'];
-
+        foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
             yield [
-                'timestamp' => $timestamp->format('H:i:s'),
+                'timestamp' => $point['timestamp']->format('H:i:s'),
                 'distance' => $point['distance'],
                 'heart_rate' => $point['heart_rate'],
                 'heart_rate_avg' => $point['heart_rate_avg'],
