@@ -55,6 +55,7 @@ final class MovingAverage implements \Stringable
 
     public function getValue(): float
     {
+        // ignore warmup phase:
         return $this->average instanceof ExponentialAverage
             ? $this->average->value
             : 0.0;

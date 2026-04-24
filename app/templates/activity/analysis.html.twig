@@ -348,9 +348,10 @@
                 scales: {
                     y: {
                         {% if metaData.useInverseScale() %}
-                        beginAtZero: false,
+                        reverse: true,
+                        max: 14,
                         {% else %}
-                        beginAtZero: true,
+                        min: 0,
                         {% endif %}
                         ticks: { font: { size: 12 } },
                         title: {
