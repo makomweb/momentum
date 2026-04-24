@@ -18,4 +18,9 @@ final readonly class Distance implements \Stringable
 
         return sprintf('%.2f km', $this->meters / 1000);
     }
+
+    public function getMeters(): float
+    {
+        return $this->meters;
+    }
 }
