@@ -470,7 +470,7 @@
             showToast('Sync started in background', 'success');
 
             try {
-                const response = await fetch('/api/activities/sync', {
+                const response = await fetch('/sync', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
