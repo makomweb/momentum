@@ -97,30 +97,8 @@ final readonly class ActivityMetaData
         return $this->activity->getAverageVelocity()->unit->value;
     }
 
-    public function getElapsedTimeFormatted(): string
+    public function getElapsedTimeAsString(): string
     {
-        $seconds = $this->getElapsedTimeInSeconds();
-
-        $hours = intdiv($seconds, 3600);
-        $minutes = intdiv($seconds % 3600, 60);
-        $secs = $seconds % 60;
-
-        if ($hours > 0) {
-            return sprintf('%d:%02d:%02d', $hours, $minutes, $secs);
-        }
-
-        return sprintf('%d:%02d', $minutes, $secs);
-    }
-
-    public function getElapsedTimeInSeconds(): int
-    {
-        $dateInterval = $this->activity->getElapsedTime();
-
-        return (int) (
-            $dateInterval->d * 86400 +
-            $dateInterval->h * 3600 +
-            $dateInterval->i * 60 +
-            $dateInterval->s
-        );
+        return $this->activity->getElapsedTime()->format('%H:%I:%S');
     }
 }
