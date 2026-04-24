@@ -73,9 +73,11 @@ final class ActivityAnalysisController extends AbstractController
         }
 
         $activityData = new ActivityData($activity, $stream);
+        $metaData = $activityData->getMetaData();
 
         return $this->render('activity/analysis.html.twig', [
             'activityData' => $activityData,
+            'metaData' => $metaData,
         ]);
     }
 }

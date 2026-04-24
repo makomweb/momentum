@@ -229,26 +229,26 @@
         <div class="activity-header">
             <div class="activity-header-content">
                 <div class="activity-title">
-                    <span class="activity-emoji">{{ activity_data.getMetaData().getEmoji() }}</span>
-                    <h1 class="activity-name">{{ activity_data.getMetaData().getActivityName() }}</h1>
+                    <span class="activity-emoji">{{ metaData.getEmoji() }}</span>
+                    <h1 class="activity-name">{{ metaData.getActivityName() }}</h1>
                 </div>
 
                 <div class="activity-stats">
                     <div class="stat-box">
                         <div class="stat-label">Date</div>
-                        <div class="stat-value">{{ activityData.getMetaData().getStartDateLocalTime() | date('M d, y') }}</div>
+                        <div class="stat-value">{{ metaData.getStartDateLocalTime() | date('M d, y') }}</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">Distance</div>
-                        <div class="stat-value">{{ (activityData.getMetaData().getData()['distance'].getMeters() / 1000) | number_format(1, '.') }} km</div>
+                        <div class="stat-value">{{ (metaData.getData()['distance'].getMeters() / 1000) | number_format(1, '.') }} km</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">Duration</div>
-                        <div class="stat-value">{{ (activityData.getMetaData().getElapsedTimeInSeconds() / 60) | number_format(0) }} min</div>
+                        <div class="stat-value">{{ metaData.getElapsedTimeFormatted() }}</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-label">{{ activityData.getMetaData().getLabel() }}</div>
-                        <div class="stat-value">{{ activityData.getMetaData().getData()['average_velocity'] }}</div>
+                        <div class="stat-label">{{ metaData.getLabel() }}</div>
+                        <div class="stat-value">{{ metaData.getData()['average_velocity'] }}</div>
                     </div>
                 </div>
             </div>
@@ -262,7 +262,7 @@
         {% else %}
             {% if activityData.hasVelocityData() %}
                 <div class="chart-container">
-                    <div class="chart-title">{{ activityData.getMetaData().getChartTitle() }}</div>
+                    <div class="chart-title">{{ metaData.getChartTitle() }}</div>
                     <div class="chart-wrapper">
                         <canvas id="velocityChart"></canvas>
                     </div>
@@ -352,11 +352,11 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        reverse: {{ activityData.getMetaData().useInverseScale() ? 'true' : 'false' }},
+                        reverse: {{ metaData.useInverseScale() ? 'true' : 'false' }},
                         ticks: { font: { size: 12 } },
                         title: {
                             display: true,
-                            text: '{{ activityData.getMetaData().getChartYAxisLabel() }}',
+                            text: '{{ metaData.getChartYAxisLabel() }}',
                             font: { size: 13, weight: 600 }
                         }
                     },

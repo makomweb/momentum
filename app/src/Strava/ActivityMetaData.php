@@ -94,13 +94,22 @@ final readonly class ActivityMetaData
 
     public function getChartYAxisLabel(): string
     {
-        $type = $this->getActivityType();
+        return $this->activity->getAverageVelocity()->unit->value;
+    }
 
-        return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => 'min/km',
-            'Ride' => 'km/h',
-            default => 'Speed',
-        };
+    public function getElapsedTimeFormatted(): string
+    {
+        $seconds = $this->getElapsedTimeInSeconds();
+
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+        $secs = $seconds % 60;
+
+        if ($hours > 0) {
+            return sprintf('%d:%02d:%02d', $hours, $minutes, $secs);
+        }
+
+        return sprintf('%d:%02d', $minutes, $secs);
     }
 
     public function getElapsedTimeInSeconds(): int
