@@ -100,6 +100,12 @@ cache-pool-clear:
 	@echo "Clearing cache pools..."
 	docker compose exec -it app bin/console cache:pool:clear --all
 
+reset: restart
+restart:
+	@echo "Restarting app, worker containers..."
+	docker compose restart app
+	docker compose restart worker
+
 open:
 	@if command -v xdg-open > /dev/null 2>&1; then \
 		xdg-open http://localhost:8080 2>/dev/null & \

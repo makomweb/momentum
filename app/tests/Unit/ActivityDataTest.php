@@ -5,15 +5,19 @@ namespace App\Tests\Unit;
 use App\Strava\ActivityData;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class ActivityDataTest extends TestCase
 {
-    public function test_me(): void
+    #[Test]
+    public function duration_is_properly_formatted(): void
     {
         $data = self::createActivityData();
 
         self::assertInstanceOf(ActivityData::class, $data);
+
+        self::assertEquals('00:12:00', $data->getMetaData()->getElapsedTimeAsString());
     }
 
     private static function createActivityData(): ActivityData
