@@ -6,9 +6,10 @@ namespace App\Strava;
 
 use App\Strava\API\Activity;
 use App\Strava\API\Distance;
+use App\Strava\API\Pace;
 use App\Strava\API\PaceUnit;
+use App\Strava\API\Speed;
 use App\Strava\API\SpeedUnit;
-use App\Strava\API\Velocity;
 
 final readonly class ActivityMetaData
 {
@@ -35,15 +36,23 @@ final readonly class ActivityMetaData
      * @return array{
      *  elapsed_time: \DateInterval,
      *  distance: Distance,
-     *  average_velocity: Velocity
+     *  average_velocity: Speed|Pace
      * }
      */
     public function getData(): array
     {
+        $type = $this->getActivityType();
+
+        $averageVelocity = match ($type) {
+            'Run', 'Walk', 'Hike', 'Swim' => $this->activity->getAverageVelocity()->asPace(),
+            'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR),
+            default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
+        };
+
         return [
             'elapsed_time' => $this->activity->getElapsedTime(),
             'distance' => $this->activity->getDistance(),
-            'average_velocity' => $this->activity->getAverageVelocity(),
+            'average_velocity' => $averageVelocity,
         ];
     }
 

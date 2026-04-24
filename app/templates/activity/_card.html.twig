@@ -26,7 +26,6 @@
 
         <div class="activity-stats">
             {%- set type_lower = activity.data.type | lower -%}
-            {%- set velocity = activity.velocity -%}
             
             {# Row 1: Labels #}
             {%- if activity.data.distance > 0 -%}
@@ -34,7 +33,7 @@
             {%- endif -%}
             <span class="stat-label">Duration</span>
             {%- if activity.data.distance > 0 -%}
-            <span class="stat-label">{{ velocity.unit.value == 'min/km' ? 'Pace' : 'Speed' }}</span>
+            <span class="stat-label">Velocity</span>
             {%- endif -%}
             
             {# Row 2: Values #}
@@ -43,7 +42,7 @@
             {%- endif -%}
             <span class="stat-value">{{ (activity.data.moving_time / 60) | round(0) }} min</span>
             {%- if activity.data.distance > 0 -%}
-            <span class="stat-value">{{ velocity }}</span>
+            <span class="stat-value">{{ activity.getAverageVelocityAsStringable() }}</span>
             {%- endif -%}
         </div>
 

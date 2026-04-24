@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Strava\API\Activity as StravaApiActivity;
+use App\Strava\API\SpeedUnit;
 use App\Strava\API\Velocity;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -122,7 +123,7 @@ final class Activity
         return $this->data;
     }
 
-    public function getVelocity(): Velocity
+    public function getAverageVelocity(): Velocity
     {
         return new Velocity($this->data['average_speed']);
     }
@@ -138,5 +139,16 @@ final class Activity
         $tz = new \DateTimeZone($matches[1]);
 
         return $this->startDate->setTimezone($tz);
+    }
+
+    public function getAverageVelocityAsStringable(): \Stringable
+    {
+        $type = $this->data['type'];
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike', 'Swim' => $this->getAverageVelocity()->asPace(),
+            'Ride' => $this->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR),
+            default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
+        };
     }
 }
