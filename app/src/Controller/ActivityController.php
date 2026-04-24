@@ -13,7 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-final class ActivityAnalysisController extends AbstractController
+#[Route('/activity', name: 'activity_')]
+final class ActivityController extends AbstractController
 {
     public function __construct(
         private ActivityRepository $activityRepository,
@@ -21,7 +22,7 @@ final class ActivityAnalysisController extends AbstractController
     ) {
     }
 
-    #[Route('/activity/latest/analysis', name: 'activity_analysis', methods: ['GET'])]
+    #[Route('/latest', name: 'analysis', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function analyzeLatestActivity(): Response
     {
@@ -37,7 +38,7 @@ final class ActivityAnalysisController extends AbstractController
         return $this->analyzeActivity($user, $activity->getId());
     }
 
-    #[Route('/activity/{id}/analysis', name: 'activity_analysis_by_id', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'analysis_by_id', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function analyzeActivityById(int $id): Response
     {
