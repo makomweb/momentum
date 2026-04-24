@@ -11,13 +11,13 @@ use PHPUnit\Framework\TestCase;
 class ActivityDataTest extends TestCase
 {
     #[Test]
-    public function duration_is_properly_formatted(): void
+    public function moving_time_is_properly_formatted(): void
     {
         $data = self::createActivityData();
 
         self::assertInstanceOf(ActivityData::class, $data);
 
-        self::assertEquals('00:12:00', $data->getMetaData()->getElapsedTimeAsString());
+        self::assertEquals('00h 12min 00s', $data->getMetaData()->getMovingTimeAsString());
     }
 
     private static function createActivityData(): ActivityData

@@ -97,22 +97,14 @@ final readonly class ActivityMetaData
         return $this->activity->getAverageVelocity()->unit->value;
     }
 
-    public function getElapsedTimeAsString(): string
+    public function getMovingTimeAsString(): string
     {
-        $interval = $this->activity->getElapsedTime();
-
-        // Convert to total seconds first
-        $totalSeconds = (int) (
-            $interval->d * 86400 +
-            $interval->h * 3600 +
-            $interval->i * 60 +
-            $interval->s
-        );
+        $totalSeconds = $this->activity->getMovingTime()->s;
 
         $hours = intdiv($totalSeconds, 3600);
         $minutes = intdiv($totalSeconds % 3600, 60);
         $seconds = $totalSeconds % 60;
 
-        return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+        return sprintf('%02dh %02dmin %02ds', $hours, $minutes, $seconds);
     }
 }
