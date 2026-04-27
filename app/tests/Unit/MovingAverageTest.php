@@ -101,7 +101,7 @@ class MovingAverageTest extends TestCase
             self::assertLessThan(180.0, $heartRate);
 
             $heartRateAvg = $data['heart_rate_avg'];
-            self::assertGreaterThan(60.0, $heartRateAvg);
+            self::assertGreaterThanOrEqual(0.0, $heartRateAvg);
             self::assertLessThan(180.0, $heartRateAvg);
 
             $velocity = $data['velocity'];

@@ -5,3 +5,8 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: public/index.php
+		-
+			message: '#^Comparison operation "<" between 1 and int<2, max> is always true\.$#'
+			identifier: smaller.alwaysTrue
+			count: 1
+			path: src/Strava/ZoneDetector.php

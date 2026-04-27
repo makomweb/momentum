@@ -41,6 +41,30 @@ final class ActivityData
 
     /**
      * @return \Generator<array{
+     *  timestamp: \DateTimeImmutable,
+     *  distance: float,
+     *  heart_rate: int,
+     *  heart_rate_avg: float,
+     *  velocity: float,
+     *  velocity_avg: float,
+     * }>
+     */
+    public function yieldRawDataPoints(): \Generator
+    {
+        foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
+            yield [
+                'timestamp' => $point['timestamp'],
+                'distance' => $point['distance'],
+                'heart_rate' => $point['heart_rate'],
+                'heart_rate_avg' => $point['heart_rate_avg'],
+                'velocity' => $point['velocity'],
+                'velocity_avg' => $point['velocity_avg'],
+            ];
+        }
+    }
+
+    /**
+     * @return \Generator<array{
      *  timestamp: non-falsy-string,
      *  distance: float,
      *  heart_rate: int,
