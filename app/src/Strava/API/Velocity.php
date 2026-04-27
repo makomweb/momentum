@@ -6,6 +6,8 @@ namespace App\Strava\API;
 
 final readonly class Velocity
 {
+    public const NO = new self(0.0);
+    
     public function __construct(public float $metersPerSecond)
     {
     }

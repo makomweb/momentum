@@ -147,4 +147,49 @@ final class ActivityData
     {
         return self::MOVING_AVERAGE_PERIOD;
     }
+
+    public function getHeartRateAverage(): int
+    {
+        $points = $this->getHeartRatePoints();
+        if (empty($points)) {
+            return 0;
+        }
+        $sum = array_sum(array_map(fn ($p) => $p['value'], $points));
+
+        return (int) round($sum / count($points));
+    }
+
+    public function getHeartRateMax(): int
+    {
+        $points = $this->getHeartRatePoints();
+        if (empty($points)) {
+            return 0;
+        }
+
+        return max(array_map(fn ($p) => $p['value'], $points));
+    }
+
+    public function getVelocityAverage(): Velocity
+    {
+        $points = $this->getDataPoints();
+        if (empty($points)) {
+            return Velocity::NO;
+        }
+        $sum = 0;
+        foreach ($points as $point) {
+            $sum += $point['velocity_avg']->metersPerSecond;
+        }
+        $average = $sum / count($points);
+        return new Velocity($average);
+    }
+
+    public function getVelocityMax(): Velocity
+    {
+        $points = $this->getDataPoints();
+        if (empty($points)) {
+            return Velocity::NO;
+        }
+        $max = max(array_map(fn ($p) => $p['velocity']->metersPerSecond, $points));
+        return new Velocity($max);
+    }
 }

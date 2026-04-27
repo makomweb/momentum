@@ -123,4 +123,15 @@ final readonly class ActivityMetaData
 
         return sprintf('%02dh %02dmin %02ds', $hours, $minutes, $seconds);
     }
+
+    public function getSpeedPaceEmoji(): string
+    {
+        $type = $this->getActivityType();
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike', 'Swim' => '⏱️',
+            'Ride' => '🚴‍♂️',
+            default => '📊',
+        };
+    }
 }
