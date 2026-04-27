@@ -12,6 +12,9 @@ final readonly class Pace implements \Stringable
 
     public function __toString(): string
     {
-        return sprintf('%.2f %s', $this->value, $this->unit->value);
+        $minutes = (int) $this->value;
+        $seconds = (int) (($this->value - $minutes) * 60);
+
+        return sprintf('%d:%02d %s', $minutes, $seconds, $this->unit->value);
     }
 }

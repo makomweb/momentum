@@ -18,7 +18,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
         public int $count = 0,
     ) {
         $this->table = new Table($output);
-        $this->table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Avg. Velocity']);
+        $this->table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
     }
 
     public function reportStart(?Activity $resumeAfter): void

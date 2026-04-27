@@ -43,4 +43,14 @@ class VelocityTest extends TestCase
         self::assertEquals(SpeedUnit::METER_PER_SECOND, $ms->unit);
         self::assertEqualsWithDelta(27.77, $ms->value, 0.01);
     }
+
+    #[Test]
+    public function format_pace(): void
+    {
+        $velocity = new Velocity(metersPerSecond: 4.0);
+
+        $pace = $velocity->asPace();
+
+        self::assertEquals('4:10 min/km', (string) $pace);
+    }
 }
