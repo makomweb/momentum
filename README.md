@@ -5,13 +5,24 @@
 </p>
 
 
-## Boot 🚀
+## Quick Start
 
 ```bash
-# build images, install dependencies, start the stack
+# 1. Copy and configure Strava credentials
+cp .env.local.example .env.local
+# Edit .env.local with your Strava Client ID and Secret from https://www.strava.com/settings/api
+
+# 2. Boot the application
 make boot
 ```
 
-## Strava Account
+## Strava Account Setup
 
-Momentum integrates with Strava via OAuth2 to fetch and analyze your running activities. You'll need a valid Strava account to use this application. Upon first login, you'll authorize Momentum to access your activity data, which is then cached locally for analysis.
+Momentum requires Strava API credentials to fetch and analyze your running activities.
+
+1. Get credentials from [Strava API Settings](https://www.strava.com/settings/api)
+2. Copy `.env.local.example` to `.env.local` 
+3. Fill in `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET`
+4. Set redirect URI to: `http://localhost:8080/exchange-token`
+
+⚠️ **Never commit `.env.local`** — it contains secrets and is gitignored.
