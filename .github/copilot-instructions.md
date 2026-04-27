@@ -1,4 +1,4 @@
-# Copilot Instructions for Run Forge
+# Copilot Instructions for Momentum
 
 This guide helps Copilot sessions work effectively in this Symfony 8 application that integrates with the Strava API to track and analyze running activities.
 
@@ -27,7 +27,7 @@ The app runs at http://localhost:8080 with MySQL database at http://localhost:80
 
 The application is organized into logical layers following a clean architecture pattern, enforced by Deptrac:
 
-### Core Layer (`App\RunForge`)
+### Core Layer (`App\Momentum`)
 - **Business logic** independent of frameworks and external dependencies
 - Contains domain models for running metrics:
   - `Average`: Calculates average values
@@ -78,7 +78,7 @@ make arch        # Architecture validation (Deptrac layer checks)
 
 To run a **single test**:
 ```bash
-docker compose run --rm composer bin/phpunit tests/Unit/RunForge/MovingAverageTest.php
+docker compose run --rm composer bin/phpunit tests/Unit/MovingAverageTest.php
 ```
 
 ### Development Commands
@@ -204,7 +204,7 @@ app/
     Entity/                   # Doctrine ORM entities
     Middleware/               # HTTP middleware
     Repository/               # Data access layer
-    RunForge/                 # Core business logic
+    Momentum/                 # Core business logic
     Security/                 # Auth providers, handlers
     Strava/                   # Strava API integration
   tests/

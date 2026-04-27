@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\RunForge;
+namespace App\Momentum;
 
 abstract class Average implements \Stringable
 {

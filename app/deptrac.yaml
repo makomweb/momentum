@@ -8,7 +8,7 @@ deptrac:
     - name: Core
       collectors:
         - type: classLike
-          value: .*App\\RunForge\\.*
+          value: .*App\\Momentum\\.*
         - type: classLike
           value: .*App\\Assert\\.*
     - name: Generic

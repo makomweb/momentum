@@ -15,7 +15,7 @@ services:
       DATABASE_URL: "mysql://root:secret@db:3306/app?serverVersion=8.4&charset=utf8mb4"
       MESSENGER_TRANSPORT_DSN: "doctrine://default?table_name=messenger_messages&queue_name=default"
     networks:
-      - run-forge
+      - momentum
 
   db:
     image: mysql:8.4
@@ -32,7 +32,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - run-forge
+      - momentum
 
   composer:
     build:
@@ -43,7 +43,7 @@ services:
     depends_on:
       - db
     networks:
-      - run-forge
+      - momentum
     
   db-admin:
     image: adminer:latest
@@ -56,7 +56,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - run-forge
+      - momentum
 
   worker:
     build:
@@ -72,12 +72,12 @@ services:
       DATABASE_URL: "mysql://root:secret@db:3306/app?serverVersion=8.4&charset=utf8mb4"
       MESSENGER_TRANSPORT_DSN: "doctrine://default?table_name=messenger_messages&queue_name=default"
     networks:
-      - run-forge
+      - momentum
     restart: unless-stopped
 
 volumes:
   db_data:
 
 networks:
-  run-forge:
+  momentum:
     driver: bridge

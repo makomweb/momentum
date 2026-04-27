@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit;
 
-use App\RunForge\MovingAverage;
+use App\Momentum\MovingAverage;
 use App\Strava\API\ActivityStream;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

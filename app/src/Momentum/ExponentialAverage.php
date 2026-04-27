@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\RunForge;
+namespace App\Momentum;
 
 class ExponentialAverage extends Average
 {
