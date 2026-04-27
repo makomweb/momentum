@@ -33,7 +33,13 @@
             {%- endif -%}
             <span class="stat-label">Duration</span>
             {%- if activity.data.distance > 0 -%}
-            <span class="stat-label">Velocity</span>
+            <span class="stat-label">
+                {%- if type_lower == 'ride' -%}
+                    Speed
+                {%- else -%}
+                    Pace
+                {%- endif -%}
+            </span>
             {%- endif -%}
             
             {# Row 2: Values #}
