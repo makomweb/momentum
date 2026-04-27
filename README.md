@@ -12,18 +12,6 @@
 make boot
 ```
 
-## Requirements
+## Strava Account
 
-### Authentication via Strava OAuth
-
-- dunno if it is OAuth 2.0 or OIDC - nevermind
-- auth + refresh flow is already implemented in the respective CLI commands
-  - persists token for a strava user in the cache
-  - shows if a token is expired
-  - fetching activities + activity streams works with this token
-- missing features:
-  - authentication via Symfony TWIG frontend
-  - login screen
-  - following Symfony best practices
-  - uses existing implementation which is already used by the 2 CLI commands
-  - UI with current Bootstrap styling
+Momentum integrates with Strava via OAuth2 to fetch and analyze your running activities. You'll need a valid Strava account to use this application. Upon first login, you'll authorize Momentum to access your activity data, which is then cached locally for analysis.
