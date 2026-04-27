@@ -64,12 +64,12 @@ final class Activity
     private function __construct(
         int $stravaUserId,
         int $stravaActivityId,
-        \DateTimeImmutable $startDateUtc,
+        \DateTimeImmutable $startDate,
         array $data,
     ) {
         $this->stravaUserId = $stravaUserId;
         $this->stravaActivityId = $stravaActivityId;
-        $this->startDate = $startDateUtc;
+        $this->startDate = $startDate;
         $this->data = $data;
     }
 
@@ -78,7 +78,7 @@ final class Activity
         return new self(
             $stravaUserId,
             $activity->getId(),
-            $activity->getStartDateUniversalTime(),
+            $activity->getStartDateLocalTime(),
             $activity->data
         );
     }
@@ -96,11 +96,6 @@ final class Activity
     public function getStravaActivityId(): int
     {
         return $this->stravaActivityId;
-    }
-
-    public function getStartDate(): \DateTimeImmutable
-    {
-        return $this->startDate;
     }
 
     /**
@@ -128,17 +123,14 @@ final class Activity
         return new Velocity($this->data['average_speed']);
     }
 
-    public function getStartDateLocalTime(): \DateTimeImmutable
+    public function getStartDate(): \DateTimeImmutable
     {
-        $result = preg_match('/\)\s(.+)$/', $this->data['timezone'], $matches);
-        if (1 !== $result) {
-            // Fallback to UTC if timezone not available
-            return $this->startDate;
-        }
+        return $this->startDate;
+    }
 
-        $tz = new \DateTimeZone($matches[1]);
-
-        return $this->startDate->setTimezone($tz);
+    public function getStartDateFormatted(): string
+    {
+        return $this->startDate->format('D M d, y · H:i');
     }
 
     public function getAverageVelocityAsStringable(): \Stringable

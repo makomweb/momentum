@@ -251,8 +251,7 @@
                         <div class="activity-title-content">
                             <h1 class="activity-name">{{ metaData.getActivityName() }}</h1>
                             <div class="activity-datetime">
-                                <span>📅</span>
-                                <span>{{ metaData.getStartDateLocalTime() | date('D M d, y · H:i') }}</span>
+                                <span>{{ metaData.getStartDateLocalTimeFormatted() }}</span>
                             </div>
                         </div>
                     </div>

@@ -76,7 +76,9 @@ final readonly class Activity implements \Stringable
 
     public function getStartDateUniversalTime(): \DateTimeImmutable
     {
-        return new \DateTimeImmutable($this->data['start_date']);
+        $dateTime = new \DateTimeImmutable($this->data['start_date']);
+
+        return $dateTime->setTimezone(new \DateTimeZone('UTC'));
     }
 
     public function getStartDateLocalTime(): \DateTimeImmutable
@@ -88,6 +90,11 @@ final readonly class Activity implements \Stringable
         $tz = new \DateTimeZone($matches[1]); // e.g. "Europe/Berlin"
 
         return $this->getStartDateUniversalTime()->setTimezone($tz);
+    }
+
+    public function getStartDateLocalTimeFormatted(): string
+    {
+        return $this->getStartDateLocalTime()->format('D M d, y · H:i');
     }
 
     public function getElapsedTime(): \DateInterval

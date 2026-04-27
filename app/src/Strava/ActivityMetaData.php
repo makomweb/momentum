@@ -27,9 +27,9 @@ final readonly class ActivityMetaData
         return $this->activity->getName();
     }
 
-    public function getStartDateLocalTime(): \DateTimeImmutable
+    public function getStartDateLocalTimeFormatted(): string
     {
-        return $this->activity->getStartDateLocalTime();
+        return $this->activity->getStartDateLocalTimeFormatted();
     }
 
     /**
