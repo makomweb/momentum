@@ -173,13 +173,14 @@ final class ActivityData
     {
         $points = $this->getDataPoints();
         if (empty($points)) {
-            return Velocity::NO;
+            return new Velocity(0.0);
         }
         $sum = 0;
         foreach ($points as $point) {
             $sum += $point['velocity_avg']->metersPerSecond;
         }
         $average = $sum / count($points);
+
         return new Velocity($average);
     }
 
@@ -187,9 +188,10 @@ final class ActivityData
     {
         $points = $this->getDataPoints();
         if (empty($points)) {
-            return Velocity::NO;
+            return new Velocity(0.0);
         }
         $max = max(array_map(fn ($p) => $p['velocity']->metersPerSecond, $points));
+
         return new Velocity($max);
     }
 }
