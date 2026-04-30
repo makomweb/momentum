@@ -17,7 +17,7 @@ enum Zone: string
      */
     public static function fromHeartFrequency(int $current, int $max): self
     {
-        $percentage = self::getPercentage($current, $max);
+        $percentage = (int) (($current / $max) * 100);
 
         return match (true) {
             $percentage >= 90 => self::ZONE_5,
@@ -29,23 +29,18 @@ enum Zone: string
     }
 
     /**
-     * Determine zone depending on functional treshold pace (FTP).
+     * Determine zone depending on FTP (functional treshold pace).
      */
     public static function fromTreshold(Pace $current, Pace $treshold): self
     {
-        /*
-        Zone 1	Recovery	Slower than 129% of FTP (Time) / <78% (Speed)
-        Zone 2	Aerobic Base	114% – 129% of FTP (Time) / 78–88% (Speed)
-        Zone 3	Tempo	106% – 113% of FTP (Time) / 88–94% (Speed)
-        Zone 4	Threshold	99% – 105% of FTP (Time) / 95–101% (Speed)
-        Zone 5	VO2 Max	Faster than 99% of FTP (Time) / >101% (Speed)
-        */
+        $percentage = (int) (($current->value / $treshold->value) * 100);
 
-        throw new \Exception('Not yet implemented!');
-    }
-
-    private static function getPercentage(int $current, int $max): int
-    {
-        return (int) (($current / $max) * 100);
+        return match (true) {
+            $percentage > 129 => self::ZONE_1, // more than 129% of the FTP -> Recovery
+            $percentage >= 114 => self::ZONE_2, // more than 114% of the FTP -> Aerobic/Basis
+            $percentage >= 106 => self::ZONE_3, // more than 106% of the FTP -> Tempo
+            $percentage >= 99 => self::ZONE_4, // more than 99% of the FTP -> Treshold
+            default => self::ZONE_5, // -> VO2 Max
+        };
     }
 }
