@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Momentum\Pace;
+
 final readonly class Velocity
 {
     public function __construct(public float $metersPerSecond)

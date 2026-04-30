@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Strava\API;
+namespace App\Momentum;
 
 enum PaceUnit: string
 {

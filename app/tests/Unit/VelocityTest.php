@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit;
 
-use App\Strava\API\PaceUnit;
+use App\Momentum\PaceUnit;
 use App\Strava\API\Speed;
 use App\Strava\API\SpeedUnit;
 use App\Strava\API\Velocity;

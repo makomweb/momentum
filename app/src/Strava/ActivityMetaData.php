@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\Pace;
+use App\Momentum\PaceUnit;
 use App\Strava\API\Activity;
 use App\Strava\API\Distance;
-use App\Strava\API\Pace;
-use App\Strava\API\PaceUnit;
 use App\Strava\API\Speed;
 use App\Strava\API\SpeedUnit;
 
