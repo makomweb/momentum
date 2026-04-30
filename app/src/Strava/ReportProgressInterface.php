@@ -8,11 +8,11 @@ use App\Strava\API\Activity;
 
 interface ReportProgressInterface
 {
-    public function reportStart(?Activity $resumeAfter): void;
+    public function onStart(?Activity $resumeAfter): void;
 
-    public function skip(Activity $current): void;
+    public function onSkip(Activity $current): void;
 
-    public function report(Activity $current): void;
+    public function onSuccess(Activity $current): void;
 
-    public function reportFinish(): void;
+    public function onFinish(): void;
 }

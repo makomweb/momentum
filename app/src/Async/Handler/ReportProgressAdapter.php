@@ -14,7 +14,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
     ) {
     }
 
-    public function reportStart(?Activity $resumeAfter): void
+    public function onStart(?Activity $resumeAfter): void
     {
         if ($resumeAfter) {
             $this->logger->info(sprintf('🚀 Resume after "%s"', $resumeAfter));
@@ -23,16 +23,16 @@ final class ReportProgressAdapter implements ReportProgressInterface
         }
     }
 
-    public function skip(Activity $activity): void
+    public function onSkip(Activity $activity): void
     {
     }
 
-    public function report(Activity $activity): void
+    public function onSuccess(Activity $activity): void
     {
         ++$this->count;
     }
 
-    public function reportFinish(): void
+    public function onFinish(): void
     {
         $this->logger->info(sprintf('Synchronized %d activitie(s) ✅', $this->count));
     }

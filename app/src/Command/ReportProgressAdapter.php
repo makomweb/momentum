@@ -21,7 +21,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
         $this->table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
     }
 
-    public function reportStart(?Activity $resumeAfter): void
+    public function onStart(?Activity $resumeAfter): void
     {
         if ($resumeAfter) {
             $this->io->info(sprintf('🚀 Resume after "%s"', $resumeAfter));
@@ -30,11 +30,11 @@ final class ReportProgressAdapter implements ReportProgressInterface
         }
     }
 
-    public function skip(Activity $activity): void
+    public function onSkip(Activity $activity): void
     {
     }
 
-    public function report(Activity $activity): void
+    public function onSuccess(Activity $activity): void
     {
         $this->table->addRow([
             $activity->getId(),
@@ -47,7 +47,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
         ++$this->count;
     }
 
-    public function reportFinish(): void
+    public function onFinish(): void
     {
         $this->table->render();
 

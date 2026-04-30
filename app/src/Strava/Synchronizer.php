@@ -25,7 +25,7 @@ final readonly class Synchronizer
         $last = $this->repository->findLastOrNull($stravaUserId);
 
         if ($last) {
-            $progress->reportStart($last);
+            $progress->onStart($last);
         }
 
         do {
@@ -42,16 +42,16 @@ final readonly class Synchronizer
             foreach ($activities as $activity) {
                 $existing = $this->repository->findOrNull($stravaUserId, $activity->getId());
                 if ($existing instanceof Activity) {
-                    $progress->skip($activity);
+                    $progress->onSkip($activity);
                     continue;
                 }
 
                 $this->repository->persist($stravaUserId, $activity);
 
-                $progress->report($activity);
+                $progress->onSuccess($activity);
             }
         } while (!empty($activities));
 
-        $progress->reportFinish();
+        $progress->onFinish();
     }
 }
