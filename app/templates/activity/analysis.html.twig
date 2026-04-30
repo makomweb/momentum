@@ -259,7 +259,13 @@
                     <div class="activity-stats">
                         <div class="stat-box">
                             <div class="stat-label">Distance</div>
-                            <div class="stat-value">{{ (metaData.getData()['distance'].getMeters() / 1000) | number_format(1, '.') }} km</div>
+                            <div class="stat-value">
+                                {% if metaData.getData()['distance'] is not null %}
+                                    {{ (metaData.getData()['distance'].getMeters() / 1000) | number_format(1, '.') }} km
+                                {% else %}
+                                    <span style="opacity: 0.5;">N/A</span>
+                                {% endif %}
+                            </div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Duration</div>
@@ -267,7 +273,13 @@
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Avg. {{ metaData.getLabel() }}</div>
-                            <div class="stat-value">{{ metaData.getData()['average_velocity'] }}</div>
+                            <div class="stat-value">
+                                {% if metaData.getData()['average_velocity'] is not null %}
+                                    {{ metaData.getData()['average_velocity'] }}
+                                {% else %}
+                                    <span style="opacity: 0.5;">N/A</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -398,8 +410,8 @@
                     y: {
                         {% if metaData.useInverseScale() %}
                         reverse: true,
-                        min: 3,
-                        max: 10,
+                        min: {{ metaData.getChartYAxisMinValue() }},
+                        max: {{ metaData.getChartYAxisMaxValue() }},
                         {% else %}
                         min: 0,
                         {% endif %}

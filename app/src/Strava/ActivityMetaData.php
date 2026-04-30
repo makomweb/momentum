@@ -35,23 +35,27 @@ final readonly class ActivityMetaData
     /**
      * @return array{
      *  elapsed_time: \DateInterval,
-     *  distance: Distance,
-     *  average_velocity: Speed|Pace
+     *  distance: Distance|null,
+     *  average_velocity: Speed|Pace|null
      * }
      */
     public function getData(): array
     {
+        $distance = $this->activity->data['distance'] > 0
+            ? $this->activity->getDistance()
+            : null;
+
         $type = $this->getActivityType();
 
         $averageVelocity = match ($type) {
             'Run', 'Walk', 'Hike', 'Swim' => $this->activity->getAverageVelocity()->asPace(),
             'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR),
-            default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
+            default => null,
         };
 
         return [
             'elapsed_time' => $this->activity->getElapsedTime(),
-            'distance' => $this->activity->getDistance(),
+            'distance' => $distance,
             'average_velocity' => $averageVelocity,
         ];
     }
@@ -63,7 +67,7 @@ final readonly class ActivityMetaData
         return match ($type) {
             'Run', 'Walk', 'Hike', 'Swim' => 'Pace',
             'Ride' => 'Speed',
-            default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
+            default => 'Metric',
         };
     }
 
@@ -75,7 +79,7 @@ final readonly class ActivityMetaData
             'Run', 'Walk', 'Hike' => '⏱️ Pace Over Time',
             'Swim' => '🏊‍♀️ Speed Over Time',
             'Ride' => '🚴‍♂️ Speed Over Time',
-            default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
+            default => '📊 Activity Data',
         };
     }
 
@@ -100,6 +104,29 @@ final readonly class ActivityMetaData
         return match ($type) {
             'Run', 'Walk', 'Hike', 'Swim' => true,
             default /* , Ride */ => false,
+        };
+    }
+
+    public function getChartYAxisMinValue(): int
+    {
+        $type = $this->getActivityType();
+
+        return match ($type) {
+            'Run', 'Swim' => 3,
+            'Walk', 'Hike' => 5,
+            default => 0,
+        };
+    }
+
+    public function getChartYAxisMaxValue(): int
+    {
+        $type = $this->getActivityType();
+
+        return match ($type) {
+            'Run', 'Swim' => 10,
+            'Walk' => 15,
+            'Hike' => 20,
+            default => 0,
         };
     }
 

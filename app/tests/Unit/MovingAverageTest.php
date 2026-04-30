@@ -35,6 +35,7 @@ class MovingAverageTest extends TestCase
         $last = array_last($items);
         $velocity = $last['velocity_avg'];
 
+        self::assertNotNull($velocity);
         self::assertGreaterThan(1, $velocity->metersPerSecond);
         self::assertLessThan(15, $velocity->metersPerSecond);
         self::assertEquals(
@@ -57,6 +58,7 @@ class MovingAverageTest extends TestCase
         $last = array_last($items);
         $heartRateAvg = $last['heart_rate_avg'];
 
+        self::assertNotNull($heartRateAvg);
         self::assertGreaterThan(60.0, $heartRateAvg->value);
         self::assertLessThan(180.0, $heartRateAvg->value);
         self::assertEquals(
@@ -87,23 +89,28 @@ class MovingAverageTest extends TestCase
             self::assertGreaterThanOrEqual($start, $timestamp);
 
             $distance = $data['distance'];
+            self::assertNotNull($distance);
             self::assertGreaterThanOrEqual(0.0, $distance);
 
             $heartRate = $data['heart_rate'];
+            self::assertNotNull($heartRate);
             self::assertGreaterThan(60.0, $heartRate->value);
             self::assertLessThan(180.0, $heartRate->value);
 
             $heartRateAvg = $data['heart_rate_avg'];
+            self::assertNotNull($heartRateAvg);
             self::assertGreaterThanOrEqual(0.0, $heartRateAvg->value);
             self::assertLessThan(180.0, $heartRateAvg->value);
 
             $velocity = $data['velocity'];
-            self::assertGreaterThanOrEqual(0.0, $velocity);
-            self::assertLessThan(50.0, $velocity);
+            self::assertNotNull($velocity);
+            self::assertGreaterThanOrEqual(0.0, $velocity->metersPerSecond);
+            self::assertLessThan(50.0, $velocity->metersPerSecond);
 
             $velocityAvg = $data['velocity_avg'];
-            self::assertGreaterThanOrEqual(0.0, $velocityAvg);
-            self::assertLessThan(50.0, $velocityAvg);
+            self::assertNotNull($velocityAvg);
+            self::assertGreaterThanOrEqual(0.0, $velocityAvg->metersPerSecond);
+            self::assertLessThan(50.0, $velocityAvg->metersPerSecond);
         }
     }
 }

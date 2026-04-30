@@ -27,11 +27,11 @@ final class ActivityData
      * @return array<
      *  array{
      *   timestamp: non-falsy-string,
-     *   distance: float,
-     *   heart_rate: HeartRate,
-     *   heart_rate_avg: HeartRate,
-     *   velocity: Velocity,
-     *   velocity_avg: Velocity,
+     *   distance: float|null,
+     *   heart_rate: HeartRate|null,
+     *   heart_rate_avg: HeartRate|null,
+     *   velocity: Velocity|null,
+     *   velocity_avg: Velocity|null,
      *  }
      * >
      */
@@ -43,11 +43,11 @@ final class ActivityData
     /**
      * @return \Generator<array{
      *  timestamp: non-falsy-string,
-     *  distance: float,
-     *  heart_rate: HeartRate,
-     *  heart_rate_avg: HeartRate,
-     *  velocity: Velocity,
-     *  velocity_avg: Velocity,
+     *  distance: float|null,
+     *  heart_rate: HeartRate|null,
+     *  heart_rate_avg: HeartRate|null,
+     *  velocity: Velocity|null,
+     *  velocity_avg: Velocity|null,
      * }>
      */
     private function yieldDataPoints(): \Generator
@@ -73,14 +73,24 @@ final class ActivityData
 
         $points = [];
         foreach ($this->getDataPoints() as $point) {
+            if (null === $point['velocity']) {
+                continue;
+            }
             $velocity = $point['velocity'];
+
+            $value = match ($type) {
+                'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
+                'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
+                default => null,
+            };
+
+            if (null === $value) {
+                continue;
+            }
+
             $points[] = [
                 'timestamp' => $point['timestamp'],
-                'value' => match ($type) {
-                    'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
-                    'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
-                    default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
-                },
+                'value' => $value,
             ];
         }
 
@@ -96,15 +106,24 @@ final class ActivityData
 
         $points = [];
         foreach ($this->getDataPoints() as $point) {
+            if (null === $point['velocity_avg']) {
+                continue;
+            }
             $velocity = $point['velocity_avg'];
+
+            $value = match ($type) {
+                'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
+                'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
+                default => null,
+            };
+
+            if (null === $value) {
+                continue;
+            }
 
             $points[] = [
                 'timestamp' => $point['timestamp'],
-                'value' => match ($type) {
-                    'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
-                    'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
-                    default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
-                },
+                'value' => $value,
             ];
         }
 
@@ -118,6 +137,9 @@ final class ActivityData
     {
         $points = [];
         foreach ($this->getDataPoints() as $point) {
+            if (null === $point['heart_rate']) {
+                continue;
+            }
             $heartRate = $point['heart_rate'];
 
             $points[] = [
@@ -177,10 +199,15 @@ final class ActivityData
             return new Velocity(0.0);
         }
         $sum = 0;
+        $count = 0;
         foreach ($points as $point) {
+            if (null === $point['velocity_avg']) {
+                continue;
+            }
             $sum += $point['velocity_avg']->metersPerSecond;
+            ++$count;
         }
-        $average = $sum / count($points);
+        $average = $count > 0 ? $sum / $count : 0;
 
         return new Velocity($average);
     }
@@ -191,7 +218,13 @@ final class ActivityData
         if (empty($points)) {
             return new Velocity(0.0);
         }
-        $max = max(array_map(fn ($p) => $p['velocity']->metersPerSecond, $points));
+        $velocities = [];
+        foreach ($points as $point) {
+            if (null !== $point['velocity']) {
+                $velocities[] = $point['velocity']->metersPerSecond;
+            }
+        }
+        $max = !empty($velocities) ? max($velocities) : 0;
 
         return new Velocity($max);
     }

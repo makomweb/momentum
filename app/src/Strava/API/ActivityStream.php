@@ -87,59 +87,66 @@ final readonly class ActivityStream
     /**
      * @return \Generator<array{
      *  timestamp: \DateTimeImmutable,
-     *  distance: float,
-     *  heart_rate: HeartRate,
-     *  heart_rate_avg: HeartRate,
-     *  velocity: Velocity,
-     *  velocity_avg: Velocity,
+     *  distance: float|null,
+     *  heart_rate: HeartRate|null,
+     *  heart_rate_avg: HeartRate|null,
+     *  velocity: Velocity|null,
+     *  velocity_avg: Velocity|null,
      * }>
      */
     public function yield(\DateTimeImmutable $start, int $period): \Generator
     {
         assert($this->hasTimeData());
-
         assert(!is_null($this->time));
-        assert(!is_null($this->distance));
-        assert(!is_null($this->velocity));
-        assert(!is_null($this->heartrate));
 
-        assert($this->hasDistanceData());
-        assert($this->hasVelocityData());
-        assert($this->hasHeartRateData());
+        $velocityAvg = $this->hasVelocityData() ? MovingAverage::create('velocity_avg', $start, $period) : null;
+        $heartRateAvg = $this->hasHeartRateData() ? MovingAverage::create('heart_rate_avg', $start, $period) : null;
 
-        assert($this->time->getCount() == $this->distance->getCount());
-        assert($this->time->getCount() == $this->velocity->getCount());
-        assert($this->time->getCount() == $this->heartrate->getCount());
+        $count = $this->time->getCount();
 
-        $velocityAvg = MovingAverage::create('velocity_avg', $start, $period);
-        $heartRateAvg = MovingAverage::create('heart_rate_avg', $start, $period);
-
-        for ($i = 0; $i < $this->time->getCount(); ++$i) {
+        for ($i = 0; $i < $count; ++$i) {
             $offset = $this->time->getDataPoint($i);
-            $distance = $this->distance->getDataPoint($i);
-            $velocity = $this->velocity->getDataPoint($i);
-            $heartRate = $this->heartrate->getDataPoint($i);
 
             assert(is_int($offset));
             $offset = \DateInterval::createFromDateString("$offset seconds");
             assert($offset instanceof \DateInterval);
 
-            assert(is_numeric($distance));
-            assert(is_numeric($velocity));
-            assert(is_int($heartRate));
-
             $timestamp = $start->add($offset);
 
-            $heartRateAvg = $heartRateAvg->with($heartRate, $timestamp);
-            $velocityAvg = $velocityAvg->with($velocity, $timestamp);
+            $distance = null;
+            if ($this->hasDistanceData() && null !== $this->distance) {
+                $distanceValue = $this->distance->getDataPoint($i);
+                assert(is_numeric($distanceValue));
+                $distance = $distanceValue;
+            }
+
+            $velocity = null;
+            $velocityAvgValue = null;
+            if ($this->hasVelocityData() && null !== $this->velocity && null !== $velocityAvg) {
+                $velocityValue = $this->velocity->getDataPoint($i);
+                assert(is_numeric($velocityValue));
+                $velocity = new Velocity($velocityValue);
+                $velocityAvg = $velocityAvg->with($velocityValue, $timestamp);
+                $velocityAvgValue = new Velocity($velocityAvg->getValue());
+            }
+
+            $heartRate = null;
+            $heartRateAvgValue = null;
+            if ($this->hasHeartRateData() && null !== $this->heartrate && null !== $heartRateAvg) {
+                $heartRateValue = $this->heartrate->getDataPoint($i);
+                assert(is_int($heartRateValue));
+                $heartRate = new HeartRate($heartRateValue);
+                $heartRateAvg = $heartRateAvg->with($heartRateValue, $timestamp);
+                $heartRateAvgValue = new HeartRate((int) $heartRateAvg->getValue());
+            }
 
             yield [
                 'timestamp' => $timestamp,
                 'distance' => $distance,
-                'heart_rate' => new HeartRate($heartRate),
-                'heart_rate_avg' => new HeartRate((int) $heartRateAvg->getValue()),
-                'velocity' => new Velocity($velocity),
-                'velocity_avg' => new Velocity($velocityAvg->getValue()),
+                'heart_rate' => $heartRate,
+                'heart_rate_avg' => $heartRateAvgValue,
+                'velocity' => $velocity,
+                'velocity_avg' => $velocityAvgValue,
             ];
         }
     }
