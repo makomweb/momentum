@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
-final readonly class HeartFrequency implements \Stringable
+final readonly class HeartRate implements \Stringable
 {
     public function __construct(public int $value)
     {

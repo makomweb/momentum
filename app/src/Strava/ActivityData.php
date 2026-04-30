@@ -6,7 +6,7 @@ namespace App\Strava;
 
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
-use App\Strava\API\HeartFrequency;
+use App\Strava\API\HeartRate;
 use App\Strava\API\SpeedUnit;
 use App\Strava\API\Velocity;
 
@@ -28,8 +28,8 @@ final class ActivityData
      *  array{
      *   timestamp: non-falsy-string,
      *   distance: float,
-     *   heart_rate: HeartFrequency,
-     *   heart_rate_avg: HeartFrequency,
+     *   heart_rate: HeartRate,
+     *   heart_rate_avg: HeartRate,
      *   velocity: Velocity,
      *   velocity_avg: Velocity,
      *  }
@@ -44,8 +44,8 @@ final class ActivityData
      * @return \Generator<array{
      *  timestamp: non-falsy-string,
      *  distance: float,
-     *  heart_rate: HeartFrequency,
-     *  heart_rate_avg: HeartFrequency,
+     *  heart_rate: HeartRate,
+     *  heart_rate_avg: HeartRate,
      *  velocity: Velocity,
      *  velocity_avg: Velocity,
      * }>

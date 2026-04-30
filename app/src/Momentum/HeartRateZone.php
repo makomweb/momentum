@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-enum HeartFrequencyZone: string
+enum HeartRateZone: string
 {
     case ZONE_1 = 'Warm-up/Light';
     case ZONE_2 = 'Easy/Recovery';

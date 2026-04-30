@@ -88,8 +88,8 @@ final readonly class ActivityStream
      * @return \Generator<array{
      *  timestamp: \DateTimeImmutable,
      *  distance: float,
-     *  heart_rate: HeartFrequency,
-     *  heart_rate_avg: HeartFrequency,
+     *  heart_rate: HeartRate,
+     *  heart_rate_avg: HeartRate,
      *  velocity: Velocity,
      *  velocity_avg: Velocity,
      * }>
@@ -136,8 +136,8 @@ final readonly class ActivityStream
             yield [
                 'timestamp' => $timestamp,
                 'distance' => $distance,
-                'heart_rate' => new HeartFrequency($heartRate),
-                'heart_rate_avg' => new HeartFrequency((int) $heartRateAvg->getValue()),
+                'heart_rate' => new HeartRate($heartRate),
+                'heart_rate_avg' => new HeartRate((int) $heartRateAvg->getValue()),
                 'velocity' => new Velocity($velocity),
                 'velocity_avg' => new Velocity($velocityAvg->getValue()),
             ];
