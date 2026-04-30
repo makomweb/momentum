@@ -2,7 +2,6 @@
 
 namespace App\Tests\Unit;
 
-use App\Momentum\MovingAverage;
 use App\Strava\API\ActivityStream;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -30,22 +29,19 @@ class MovingAverageTest extends TestCase
     {
         $start = new \DateTimeImmutable();
 
-        $ema = array_reduce(
-            iterator_to_array($this->stream->yieldSeries($start, 'velocity')),
-            /** @param array{value: float|int, time_stamp: \DateTimeImmutable} $data */
-            static fn (MovingAverage $carry, array $data) => $carry->with($data['value'], $data['time_stamp']),
-            MovingAverage::create('Speed', start: $start, period: 10)
-        );
+        $items = array_values(iterator_to_array($this->stream->yield($start, period: 10)));
+        assert(!empty($items));
 
-        self::assertEquals('Speed (EMA-10)', $ema->getName());
-        $value = $ema->getValue();
-        self::assertGreaterThan(1, $value);
-        self::assertLessThan(15, $value);
+        $last = array_last($items);
+        $velocity = $last['velocity_avg'];
+
+        self::assertGreaterThan(1, $velocity->metersPerSecond);
+        self::assertLessThan(15, $velocity->metersPerSecond);
         self::assertEquals(
             0,
             date_diff(
                 $start,
-                $ema->getTimestamp()
+                $last['timestamp']
             )->days
         );
     }
@@ -55,22 +51,19 @@ class MovingAverageTest extends TestCase
     {
         $start = new \DateTimeImmutable();
 
-        $ema = array_reduce(
-            iterator_to_array($this->stream->yieldSeries($start, 'heart_rate')),
-            /** @param array{value: float|int, time_stamp: \DateTimeImmutable} $data */
-            static fn (MovingAverage $carry, array $data) => $carry->with($data['value'], $data['time_stamp']),
-            MovingAverage::create('HF', start: $start, period: 10)
-        );
+        $items = array_values(iterator_to_array($this->stream->yield($start, period: 10)));
+        assert(!empty($items));
 
-        self::assertEquals('HF (EMA-10)', $ema->getName());
-        $value = $ema->getValue();
-        self::assertGreaterThan(60.0, $value);
-        self::assertLessThan(180.0, $value);
+        $last = array_last($items);
+        $heartRateAvg = $last['heart_rate_avg'];
+
+        self::assertGreaterThan(60.0, $heartRateAvg->value);
+        self::assertLessThan(180.0, $heartRateAvg->value);
         self::assertEquals(
             0,
             date_diff(
                 $start,
-                $ema->getTimestamp()
+                $last['timestamp']
             )->days
         );
     }
@@ -97,12 +90,12 @@ class MovingAverageTest extends TestCase
             self::assertGreaterThanOrEqual(0.0, $distance);
 
             $heartRate = $data['heart_rate'];
-            self::assertGreaterThan(60.0, $heartRate);
-            self::assertLessThan(180.0, $heartRate);
+            self::assertGreaterThan(60.0, $heartRate->value);
+            self::assertLessThan(180.0, $heartRate->value);
 
             $heartRateAvg = $data['heart_rate_avg'];
-            self::assertGreaterThanOrEqual(0.0, $heartRateAvg);
-            self::assertLessThan(180.0, $heartRateAvg);
+            self::assertGreaterThanOrEqual(0.0, $heartRateAvg->value);
+            self::assertLessThan(180.0, $heartRateAvg->value);
 
             $velocity = $data['velocity'];
             self::assertGreaterThanOrEqual(0.0, $velocity);

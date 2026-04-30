@@ -85,57 +85,13 @@ final readonly class ActivityStream
     }
 
     /**
-     * @return \Generator<array{value: float|int, time_stamp: \DateTimeImmutable}>
-     */
-    public function yieldSeries(\DateTimeImmutable $start, string $name): \Generator
-    {
-        assert(in_array($name, ['distance', 'velocity', 'heart_rate']));
-
-        assert($this->hasTimeData());
-
-        assert(match ($name) {
-            'distance' => $this->hasDistanceData(),
-            'velocity' => $this->hasVelocityData(),
-            'heart_rate' => $this->hasHeartRateData(),
-        });
-
-        assert(!is_null($this->time));
-        assert(!is_null($this->distance));
-        assert(!is_null($this->velocity));
-        assert(!is_null($this->heartrate));
-
-        assert(match ($name) {
-            'distance' => $this->time->getCount() == $this->distance->getCount(),
-            'velocity' => $this->time->getCount() == $this->velocity->getCount(),
-            'heart_rate' => $this->time->getCount() == $this->heartrate->getCount(),
-        });
-
-        for ($i = 0; $i < $this->time->getCount(); ++$i) {
-            $offset = $this->time->getDataPoint($i);
-            $value = match ($name) {
-                'distance' => $this->distance->getDataPoint($i),
-                'velocity' => $this->velocity->getDataPoint($i),
-                'heart_rate' => $this->heartrate->getDataPoint($i),
-            };
-
-            assert(!is_null($value));
-
-            assert(is_int($offset));
-            $offset = \DateInterval::createFromDateString("$offset seconds");
-            assert($offset instanceof \DateInterval);
-
-            yield ['value' => $value, 'time_stamp' => $start->add($offset)];
-        }
-    }
-
-    /**
      * @return \Generator<array{
      *  timestamp: \DateTimeImmutable,
      *  distance: float,
-     *  heart_rate: int,
-     *  heart_rate_avg: float,
-     *  velocity: float,
-     *  velocity_avg: float,
+     *  heart_rate: HeartFrequency,
+     *  heart_rate_avg: HeartFrequency,
+     *  velocity: Velocity,
+     *  velocity_avg: Velocity,
      * }>
      */
     public function yield(\DateTimeImmutable $start, int $period): \Generator
@@ -180,10 +136,10 @@ final readonly class ActivityStream
             yield [
                 'timestamp' => $timestamp,
                 'distance' => $distance,
-                'heart_rate' => $heartRate,
-                'heart_rate_avg' => $heartRateAvg->getValue(),
-                'velocity' => $velocity,
-                'velocity_avg' => $velocityAvg->getValue(),
+                'heart_rate' => new HeartFrequency($heartRate),
+                'heart_rate_avg' => new HeartFrequency((int) $heartRateAvg->getValue()),
+                'velocity' => new Velocity($velocity),
+                'velocity_avg' => new Velocity($velocityAvg->getValue()),
             ];
         }
     }
