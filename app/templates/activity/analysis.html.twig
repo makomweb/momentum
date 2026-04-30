@@ -361,7 +361,7 @@
                     pointHoverRadius: 6
                 },
                 {
-                    label: 'Moving Average ({{ activityData.getMovingAveragePeriod() }}-period)',
+                    label: 'EMA-{{ activityData.getMovingAveragePeriod() }}',
                     data: [
                         {% for point in activityData.getVelocityAveragePoints() %}
                             {{ point.value }}{{ not loop.last ? ',' : '' }}
@@ -369,7 +369,7 @@
                     ],
                     borderColor: '#e74c3c',
                     backgroundColor: 'rgba(231, 76, 60, 0)',
-                    borderWidth: 3,
+                    borderWidth: 2,
                     tension: 0.4,
                     fill: false,
                     pointRadius: 0,
@@ -440,7 +440,7 @@
                 ],
                 borderColor: '#e74c3c',
                 backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                borderWidth: 2.5,
+                borderWidth: 2,
                 tension: 0.4,
                 fill: true,
                 pointRadius: 0,
