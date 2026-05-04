@@ -81,15 +81,22 @@ final readonly class Activity implements \Stringable
         return $dateTime->setTimezone(new \DateTimeZone('UTC'));
     }
 
-    public function getStartDateLocalTime(): \DateTimeImmutable
+    public function getTimezone(): \DateTimeZone
     {
         $result = preg_match('/\)\s(.+)$/', $this->data['timezone'], $matches);
         Assert::that(1 === $result, 'There should be time zone information!');
         assert(1 === $result, 'There should be time zone information!');
 
-        $tz = new \DateTimeZone($matches[1]); // e.g. "Europe/Berlin"
+        return new \DateTimeZone($matches[1]); // e.g. "Europe/Berlin"
+    }
 
-        return $this->getStartDateUniversalTime()->setTimezone($tz);
+    public function getStartDateLocalTime(): \DateTimeImmutable
+    {
+        return $this
+            ->getStartDateUniversalTime()
+            ->setTimezone(
+                $this->getTimeZone()
+            );
     }
 
     public function getStartDateLocalTimeFormatted(): string

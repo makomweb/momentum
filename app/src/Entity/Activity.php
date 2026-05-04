@@ -28,6 +28,9 @@ final class Activity
     #[ORM\Column]
     private readonly \DateTimeImmutable $startDate;
 
+    #[ORM\Column]
+    private readonly \DateTimeZone $timezone;
+
     /**
      * @var array{
      *  id: int,
@@ -65,11 +68,13 @@ final class Activity
         int $stravaUserId,
         int $stravaActivityId,
         \DateTimeImmutable $startDate,
+        \DateTimeZone $timezone,
         array $data,
     ) {
         $this->stravaUserId = $stravaUserId;
         $this->stravaActivityId = $stravaActivityId;
         $this->startDate = $startDate;
+        $this->timezone = $timezone;
         $this->data = $data;
     }
 
@@ -78,7 +83,8 @@ final class Activity
         return new self(
             $stravaUserId,
             $activity->getId(),
-            $activity->getStartDateLocalTime(),
+            $activity->getStartDateUniversalTime(),
+            $activity->getTimezone(),
             $activity->data
         );
     }
@@ -128,9 +134,14 @@ final class Activity
         return $this->startDate;
     }
 
+    public function getStartDateLocalTime(): \DateTimeImmutable
+    {
+        return $this->startDate->setTimezone($this->timezone);
+    }
+
     public function getStartDateFormatted(): string
     {
-        return $this->startDate->format('D M d, y · H:i');
+        return $this->getStartDateLocalTime()->format('D M d, y · H:i');
     }
 
     public function getAverageVelocityAsStringable(): \Stringable
