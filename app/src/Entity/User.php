@@ -31,6 +31,12 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255)]
     private string $profilePictureMedium;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $ftpMinutesPerKilometer = null;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $maxHeartRate = null;
+
     private function __construct(
         int $stravaId,
         string $name,
@@ -108,5 +114,25 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __toString(): string
     {
         return sprintf('%s (Strava ID: %d)', $this->name, $this->stravaId);
+    }
+
+    public function getFtpMinutesPerKilometer(): ?float
+    {
+        return $this->ftpMinutesPerKilometer;
+    }
+
+    public function setFtpMinutesPerKilometer(?float $ftpMinutesPerKilometer): void
+    {
+        $this->ftpMinutesPerKilometer = $ftpMinutesPerKilometer;
+    }
+
+    public function getMaxHeartRate(): ?int
+    {
+        return $this->maxHeartRate;
+    }
+
+    public function setMaxHeartRate(?int $maxHeartRate): void
+    {
+        $this->maxHeartRate = $maxHeartRate;
     }
 }

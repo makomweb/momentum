@@ -27,4 +27,20 @@ enum HeartRateZone: string
             default => self::ZONE_1,
         };
     }
+
+    public function getName(): string
+    {
+        return $this->value;
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::ZONE_1 => '#1e88e5', // Blue - Warm-up/Light
+            self::ZONE_2 => '#43a047', // Green - Easy/Recovery
+            self::ZONE_3 => '#ffa726', // Orange - Aerobic/Moderate
+            self::ZONE_4 => '#e53935', // Red - Threshold/Hard
+            self::ZONE_5 => '#8e24aa', // Purple - Maximum/Sprinting
+        };
+    }
 }

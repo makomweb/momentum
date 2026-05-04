@@ -27,4 +27,20 @@ enum PaceZone: string
             default => self::ZONE_5, // -> VO2 Max
         };
     }
+
+    public function getName(): string
+    {
+        return $this->value;
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::ZONE_1 => '#1e88e5', // Blue - Recovery
+            self::ZONE_2 => '#43a047', // Green - Basis/Aerobic
+            self::ZONE_3 => '#ffa726', // Orange - Tempo
+            self::ZONE_4 => '#e53935', // Red - Threshold
+            self::ZONE_5 => '#8e24aa', // Purple - VO2max
+        };
+    }
 }

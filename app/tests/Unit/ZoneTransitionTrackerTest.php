@@ -1,0 +1,262 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit;
+
+use App\Momentum\HeartRateZone;
+use App\Momentum\Pace;
+use App\Momentum\PaceZone;
+use App\Momentum\ZoneTransitionTracker;
+use App\Strava\API\Velocity;
+use PHPUnit\Framework\TestCase;
+
+final class ZoneTransitionTrackerTest extends TestCase
+{
+    private ZoneTransitionTracker $tracker;
+    private Pace $ftp;
+    private int $maxHeartRate;
+
+    protected function setUp(): void
+    {
+        $this->tracker = new ZoneTransitionTracker();
+        // FTP of 6:00 min/km = 360 seconds per km
+        $this->ftp = new Pace(6.0);
+        $this->maxHeartRate = 200;
+    }
+
+    public function test_single_pace_zone_transition(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        // Start in Zone 2 (Basis: 114-129% of FTP)
+        // 6:00 FTP = 6.0 min/km
+        // 7:00 pace = 7.0 min/km = 116% of FTP → Zone 2
+        // velocity = 16.667 / 7.0 = 2.381 m/s
+        $baseVelocity = new Velocity(2.381);
+
+        for ($i = 0; $i < 60; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: $baseVelocity->asPace(),
+                ftp: $this->ftp,
+            );
+        }
+
+        // Transition to Zone 5 (VO2max: < 99%)
+        // 5:30 pace = 5.5 min/km = 92% of FTP → Zone 5
+        // velocity = 16.667 / 5.5 = 3.03 m/s
+        $fasterVelocity = new Velocity(3.03);
+
+        for ($i = 60; $i < 120; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: $fasterVelocity->asPace(),
+                ftp: $this->ftp,
+            );
+        }
+
+        $this->tracker->finalize($startTime->add(new \DateInterval('PT120S')));
+
+        $sessions = $this->tracker->getPaceZoneSessions();
+
+        $this->assertCount(2, $sessions, 'Should have 2 pace zone sessions');
+        $this->assertTrue($sessions[0]->isInZone(PaceZone::ZONE_2));
+        $this->assertEquals(60, $sessions[0]->durationSeconds);
+        $this->assertTrue($sessions[1]->isInZone(PaceZone::ZONE_5));
+        $this->assertEquals(60, $sessions[1]->durationSeconds);
+    }
+
+    public function test_heart_rate_zone_transition(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        // Dummy velocity (not used for HR zone test)
+        $velocity = new Velocity(2.5);
+
+        // Zone 2 (Easy/Recovery: 60-70% HR)
+        // 60% of 200 = 120 bpm, 70% of 200 = 140 bpm
+        // Use 130 bpm (in zone)
+        for ($i = 0; $i < 50; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: $velocity->asPace(),
+                ftp: $this->ftp,
+                heartRate: 130,
+                maxHeartRate: $this->maxHeartRate,
+            );
+        }
+
+        // Transition to Zone 4 (Threshold/Hard: 80-90%)
+        // 80% of 200 = 160 bpm, 90% of 200 = 180 bpm
+        // Use 170 bpm (in zone)
+        for ($i = 50; $i < 100; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: $velocity->asPace(),
+                ftp: $this->ftp,
+                heartRate: 170,
+                maxHeartRate: $this->maxHeartRate,
+            );
+        }
+
+        $this->tracker->finalize($startTime->add(new \DateInterval('PT100S')));
+
+        $sessions = $this->tracker->getHeartRateZoneSessions();
+
+        $this->assertCount(2, $sessions, 'Should have 2 heart rate zone sessions');
+        $this->assertTrue($sessions[0]->isInZone(HeartRateZone::ZONE_2));
+        $this->assertEquals(50, $sessions[0]->durationSeconds);
+        $this->assertTrue($sessions[1]->isInZone(HeartRateZone::ZONE_4));
+        $this->assertEquals(50, $sessions[1]->durationSeconds);
+    }
+
+    public function test_multiple_transitions(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        // Zone 2: 7:00 pace = 2.381 m/s (116% of 6:00 FTP)
+        // Zone 3: 6:18 pace = 2.62 m/s (106% of 6:00 FTP)  -- Need >= 106%
+        // Zone 5: 5:30 pace = 3.03 m/s (92% of 6:00 FTP)
+        $zones = [
+            ['velocity' => new Velocity(2.381), 'duration' => 30, 'expectedZone' => PaceZone::ZONE_2],
+            ['velocity' => new Velocity(2.62), 'duration' => 40, 'expectedZone' => PaceZone::ZONE_3],
+            ['velocity' => new Velocity(3.03), 'duration' => 20, 'expectedZone' => PaceZone::ZONE_5],
+            ['velocity' => new Velocity(2.381), 'duration' => 35, 'expectedZone' => PaceZone::ZONE_2],
+        ];
+
+        $timestamp = 0;
+        foreach ($zones as $zone) {
+            for ($i = 0; $i < $zone['duration']; ++$i) {
+                $this->tracker->processPoint(
+                    timestamp: $startTime->add(new \DateInterval("PT{$timestamp}S")),
+                    pace: $zone['velocity']->asPace(),
+                    ftp: $this->ftp,
+                );
+                ++$timestamp;
+            }
+        }
+
+        $this->tracker->finalize($startTime->add(new \DateInterval("PT{$timestamp}S")));
+
+        $sessions = $this->tracker->getPaceZoneSessions();
+
+        $this->assertCount(4, $sessions, 'Should have 4 pace zone sessions');
+        $this->assertTrue($sessions[0]->isInZone(PaceZone::ZONE_2));
+        $this->assertEquals(30, $sessions[0]->durationSeconds);
+        $this->assertTrue($sessions[1]->isInZone(PaceZone::ZONE_3));
+        $this->assertEquals(40, $sessions[1]->durationSeconds);
+        $this->assertTrue($sessions[2]->isInZone(PaceZone::ZONE_5));
+        $this->assertEquals(20, $sessions[2]->durationSeconds);
+        $this->assertTrue($sessions[3]->isInZone(PaceZone::ZONE_2));
+        $this->assertEquals(35, $sessions[3]->durationSeconds);
+    }
+
+    public function test_zone_session_duration_percentage(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+        $velocity = new Velocity(2.381); // Zone 2 pace
+
+        for ($i = 0; $i < 100; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: $velocity->asPace(),
+                ftp: $this->ftp,
+            );
+        }
+
+        $this->tracker->finalize($startTime->add(new \DateInterval('PT100S')));
+
+        $sessions = $this->tracker->getPaceZoneSessions();
+        $this->assertCount(1, $sessions);
+
+        $percentage = $sessions[0]->getDurationPercentage(100);
+        $this->assertEqualsWithDelta(100.0, $percentage, 0.01, 'Should be 100% of total time');
+    }
+
+    public function test_empty_activity(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+        $this->tracker->finalize($startTime);
+
+        $this->assertCount(0, $this->tracker->getPaceZoneSessions());
+        $this->assertCount(0, $this->tracker->getHeartRateZoneSessions());
+    }
+
+    public function test_mixed_pace_and_heart_rate_zones(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        // Slow pace (Zone 2) with high HR (Zone 4)
+        for ($i = 0; $i < 30; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: (new Velocity(2.381))->asPace(), // Zone 2 pace (7:00)
+                ftp: $this->ftp,
+                heartRate: 170,
+                maxHeartRate: $this->maxHeartRate,
+            );
+        }
+
+        $this->tracker->finalize($startTime->add(new \DateInterval('PT30S')));
+
+        $paceSessions = $this->tracker->getPaceZoneSessions();
+        $hrSessions = $this->tracker->getHeartRateZoneSessions();
+
+        $this->assertCount(1, $paceSessions);
+        $this->assertCount(1, $hrSessions);
+        $this->assertTrue($paceSessions[0]->isInZone(PaceZone::ZONE_2));
+        $this->assertTrue($hrSessions[0]->isInZone(HeartRateZone::ZONE_4));
+    }
+
+    public function test_no_heart_rate_data(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+        $velocity = new Velocity(2.381); // Zone 2 pace
+
+        for ($i = 0; $i < 50; ++$i) {
+            // Don't provide heart rate data
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: $velocity->asPace(),
+                ftp: $this->ftp,
+            );
+        }
+
+        $this->tracker->finalize($startTime->add(new \DateInterval('PT50S')));
+
+        $this->assertCount(1, $this->tracker->getPaceZoneSessions());
+        $this->assertCount(0, $this->tracker->getHeartRateZoneSessions());
+    }
+
+    public function test_zone_session_timestamps(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        for ($i = 0; $i < 50; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: (new Velocity(2.381))->asPace(), // Zone 2 pace
+                ftp: $this->ftp,
+            );
+        }
+
+        for ($i = 50; $i < 100; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: (new Velocity(3.03))->asPace(), // Zone 5 pace
+                ftp: $this->ftp,
+            );
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT100S'));
+        $this->tracker->finalize($endTime);
+
+        $sessions = $this->tracker->getPaceZoneSessions();
+
+        $this->assertEquals($startTime, $sessions[0]->startTime);
+        $this->assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[0]->endTime);
+        $this->assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[1]->startTime);
+        $this->assertEquals($endTime, $sessions[1]->endTime);
+    }
+}

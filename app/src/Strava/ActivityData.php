@@ -228,4 +228,83 @@ final class ActivityData
 
         return new Velocity($max);
     }
+
+    /**
+     * @return \App\Momentum\ZoneSession[]
+     */
+    public function getZoneSessions(
+        \App\Momentum\Pace $ftp,
+        ?int $maxHeartRate = null,
+    ): array {
+        $tracker = new \App\Momentum\ZoneTransitionTracker();
+
+        foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
+            $velocity = $point['velocity'];
+            $heartRate = $point['heart_rate'];
+
+            if (null === $velocity) {
+                continue;
+            }
+
+            // Use velocity_smooth from Strava (velocity_avg from ActivityStream)
+            $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
+
+            $tracker->processPoint(
+                timestamp: $point['timestamp'],
+                pace: $smoothedVelocity->asPace(),
+                ftp: $ftp,
+                heartRate: $heartRate?->value,
+                maxHeartRate: $maxHeartRate,
+            );
+        }
+
+        $tracker->finalize($this->activity->getStartDateLocalTime()->add(
+            new \DateInterval('PT'.$this->activity->data['elapsed_time'].'S')
+        ));
+
+        return $tracker->getPaceZoneSessions();
+    }
+
+    /**
+     * @return \App\Momentum\ZoneSession[]
+     */
+    public function getHeartRateZoneSessions(?int $maxHeartRate = null): array
+    {
+        if (null === $maxHeartRate) {
+            $maxHeartRate = $this->getHeartRateMax();
+        }
+
+        if ($maxHeartRate <= 0) {
+            return [];
+        }
+
+        $tracker = new \App\Momentum\ZoneTransitionTracker();
+        // Dummy FTP for HR zone tracking (not used in HR calculation)
+        $dummyFtp = new \App\Momentum\Pace(6.0);
+
+        foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
+            $heartRate = $point['heart_rate'];
+
+            if (null === $heartRate) {
+                continue;
+            }
+
+            // Use dummy pace (not used for HR zones)
+            $dummyPace = new \App\Momentum\Pace(6.0);
+
+            $tracker->processPoint(
+                timestamp: $point['timestamp'],
+                pace: $dummyPace,
+                ftp: $dummyFtp,
+                heartRate: $heartRate->value,
+                maxHeartRate: $maxHeartRate,
+            );
+        }
+
+        $tracker->finalize($this->activity->getStartDateLocalTime()->add(
+            new \DateInterval('PT'.$this->activity->data['elapsed_time'].'S')
+        ));
+
+        return $tracker->getHeartRateZoneSessions();
+    }
 }

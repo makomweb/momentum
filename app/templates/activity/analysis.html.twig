@@ -345,6 +345,142 @@
                 </div>
             {% endif %}
         {% endif %}
+
+        {% if zoneAnalysis %}
+            {% set paceStats = zoneAnalysis.getPaceZoneStatistics() %}
+            {% set hrStats = zoneAnalysis.getHeartRateZoneStatistics() %}
+            {% set polarized = zoneAnalysis.getPolarizedTrainingMetrics() %}
+            <div class="chart-container">
+                <div class="chart-title">🎯 Training Zones & Polarized Training</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <!-- Pace Zones -->
+                    <div>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #333;">Pace Zones</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for zoneKey, stat in paceStats.zoneStats %}
+                                {% set zone = stat.zone %}
+                                {% set percentage = stat.duration_percentage %}
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="font-size: 0.9rem; font-weight: 600; color: #666; min-width: 60px;">
+                                        {{ zone.getName() }}
+                                    </div>
+                                    <div style="flex: 1; background: #e0e0e0; border-radius: 4px; height: 24px; overflow: hidden; position: relative;">
+                                        <div style="
+                                            height: 100%;
+                                            width: {{ percentage }}%;
+                                            background: {{ zone.getColor() }};
+                                            border-radius: 4px;
+                                            transition: width 0.3s ease;
+                                        "></div>
+                                    </div>
+                                    <div style="font-size: 0.85rem; color: #999; min-width: 50px; text-align: right;">
+                                        {{ percentage | number_format(1, '.') }}%
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Heart Rate Zones -->
+                    {% if hrStats %}
+                    <div>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #333;">❤️ Heart Rate Zones</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for zoneKey, stat in hrStats.zoneStats %}
+                                {% set zone = stat.zone %}
+                                {% set percentage = stat.duration_percentage %}
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="font-size: 0.9rem; font-weight: 600; color: #666; min-width: 60px;">
+                                        {{ zone.getName() }}
+                                    </div>
+                                    <div style="flex: 1; background: #e0e0e0; border-radius: 4px; height: 24px; overflow: hidden; position: relative;">
+                                        <div style="
+                                            height: 100%;
+                                            width: {{ percentage }}%;
+                                            background: {{ zone.getColor() }};
+                                            border-radius: 4px;
+                                            transition: width 0.3s ease;
+                                        "></div>
+                                    </div>
+                                    <div style="font-size: 0.85rem; color: #999; min-width: 50px; text-align: right;">
+                                        {{ percentage | number_format(1, '.') }}%
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Polarized Training Feedback -->
+                <div style="
+                    background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+                    padding: 1.5rem;
+                    border-radius: 10px;
+                    border-left: 4px solid {% if polarized.isPolarized() %}#4caf50{% else %}#ff9800{% endif %};
+                    margin-bottom: 1rem;
+                ">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Easy (Zones 1-2)</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #2196f3;">
+                                {{ polarized.getEasyPercentage() | number_format(1, '.') }}%
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Tempo (Zone 3)</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #ff9800;">
+                                {{ polarized.getTempoPercentage() | number_format(1, '.') }}%
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Hard (Zones 4-5)</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #f44336;">
+                                {{ polarized.getHardPercentage() | number_format(1, '.') }}%
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; text-align: center;">
+                        {% if polarized.isPolarized() %}
+                            <div style="color: #4caf50; font-weight: 600;">✓ Following polarized training principles (80% easy + 15% hard)</div>
+                        {% else %}
+                            <div style="color: #ff9800; font-weight: 600;">⚠ Not following polarized training pattern yet</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Zone Transitions Timeline -->
+                {% if paceStats.getZoneSessions() | length > 0 %}
+                <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #333;">Pace Zone Transitions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto;">
+                        {% for session in paceStats.getZoneSessions() %}
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                gap: 0.75rem;
+                                padding: 0.75rem;
+                                background: {{ session.zone.getColor() }}22;
+                                border-left: 3px solid {{ session.zone.getColor() }};
+                                border-radius: 4px;
+                                font-size: 0.9rem;
+                            ">
+                                <div style="font-weight: 600; color: {{ session.zone.getColor() }};">{{ session.zone.getName() }}</div>
+                                <div style="color: #666;">{{ session.startTime | date('H:i:s') }}</div>
+                                <div style="color: #999;">→ {{ '%02d:%02d' | format((session.durationSeconds // 60), (session.durationSeconds % 60)) }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        {% elseif app.user.getFtpMinutesPerKilometer() is null %}
+            <div class="alert-message alert-info" style="background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%); color: #856404; border-left-color: #ffc107;">
+                <span>⚙️</span>
+                <span>To see zone analysis, please configure your FTP in your profile settings.</span>
+            </div>
+        {% endif %}
     </div>
 
     <script>

@@ -48,6 +48,117 @@ final class ActivityController extends AbstractController
         return $this->analyzeActivity($user, $id);
     }
 
+    #[Route('/{id}/zones', name: 'zones_api', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function getZonesApi(int $id): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $activity = $this->activityRepository->findOrNull($user->getStravaId(), $id);
+
+        if (null === $activity) {
+            return $this->json(['error' => 'Activity not found'], 404);
+        }
+
+        $ftp = $user->getFtpMinutesPerKilometer();
+        $maxHeartRate = $user->getMaxHeartRate();
+
+        if (null === $ftp) {
+            return $this->json(['error' => 'User FTP not configured'], 400);
+        }
+
+        try {
+            $stream = $this->streamCache->get(
+                $user->getStravaId(),
+                $activity->getId()
+            );
+        } catch (\Exception) {
+            return $this->json(['error' => 'Activity stream not available'], 404);
+        }
+
+        if (!$stream->hasData()) {
+            return $this->json(['error' => 'Activity stream has no data'], 404);
+        }
+
+        // Create zone sessions from the activity stream
+        $tracker = new \App\Momentum\ZoneTransitionTracker();
+
+        $startDate = $activity->getStartDateLocalTime();
+
+        foreach ($stream->yield($startDate, 50) as $point) {
+            $velocity = $point['velocity'];
+            $heartRate = $point['heart_rate'];
+
+            if (null === $velocity) {
+                continue;
+            }
+
+            // Use smoothed velocity from ActivityStream
+            $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
+
+            $tracker->processPoint(
+                timestamp: $point['timestamp'],
+                pace: $smoothedVelocity->asPace(),
+                ftp: new \App\Momentum\Pace($ftp),
+                heartRate: $heartRate?->value,
+                maxHeartRate: $maxHeartRate,
+            );
+        }
+
+        // Get end time from the activity's moving time
+        $movingTimeInterval = $activity->getMovingTime();
+        $endTime = $startDate->add($movingTimeInterval);
+
+        $tracker->finalize($endTime);
+
+        $paceZoneSessions = $tracker->getPaceZoneSessions();
+        $hrZoneSessions = $tracker->getHeartRateZoneSessions();
+
+        $analysis = new \App\Strava\ActivityZoneAnalysis(
+            paceZoneSessions: $paceZoneSessions,
+            heartRateZoneSessions: $hrZoneSessions,
+            totalActivitySeconds: (int) $movingTimeInterval->format('%s'),
+        );
+
+        $paceStats = $analysis->getPaceZoneStatistics();
+        $hrStats = $analysis->getHeartRateZoneStatistics();
+        $polarized = $analysis->getPolarizedTrainingMetrics();
+
+        return $this->json([
+            'activity' => [
+                'id' => $activity->getId(),
+                'name' => $activity->getName(),
+                'start_date' => $startDate->format('c'),
+            ],
+            'pace_zones' => array_map(
+                fn (array $zone) => [
+                    'zone' => $zone['zone']->value,
+                    'duration_seconds' => $zone['duration_seconds'],
+                    'duration_percentage' => round($zone['duration_percentage'], 2),
+                ],
+                $paceStats->zoneStats
+            ),
+            'heart_rate_zones' => array_map(
+                fn (array $zone) => [
+                    'zone' => $zone['zone']->value,
+                    'duration_seconds' => $zone['duration_seconds'],
+                    'duration_percentage' => round($zone['duration_percentage'], 2),
+                ],
+                $hrStats->zoneStats
+            ),
+            'polarized_training' => [
+                'easy_seconds' => $polarized->easySeconds,
+                'easy_percentage' => round($polarized->getEasyPercentage(), 2),
+                'tempo_seconds' => (int) ($polarized->totalSeconds - $polarized->easySeconds - $polarized->hardSeconds),
+                'tempo_percentage' => round($polarized->getTempoPercentage(), 2),
+                'hard_seconds' => $polarized->hardSeconds,
+                'hard_percentage' => round($polarized->getHardPercentage(), 2),
+                'is_polarized' => $polarized->isPolarized(),
+            ],
+        ]);
+    }
+
     private function analyzeActivity(User $user, int $stravaActivityId): Response
     {
         $activity = $this->activityRepository->findOrNull($user->getStravaId(), $stravaActivityId);
@@ -76,9 +187,51 @@ final class ActivityController extends AbstractController
         $activityData = new ActivityData($activity, $stream);
         $metaData = $activityData->getMetaData();
 
+        $zoneAnalysis = null;
+        $ftp = $user->getFtpMinutesPerKilometer();
+        $maxHeartRate = $user->getMaxHeartRate();
+
+        if (null !== $ftp) {
+            $tracker = new \App\Momentum\ZoneTransitionTracker();
+            $startDate = $activity->getStartDateLocalTime();
+
+            foreach ($stream->yield($startDate, 50) as $point) {
+                $velocity = $point['velocity'];
+                $heartRate = $point['heart_rate'];
+
+                if (null === $velocity) {
+                    continue;
+                }
+
+                $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
+
+                $tracker->processPoint(
+                    timestamp: $point['timestamp'],
+                    pace: $smoothedVelocity->asPace(),
+                    ftp: new \App\Momentum\Pace($ftp),
+                    heartRate: $heartRate?->value,
+                    maxHeartRate: $maxHeartRate,
+                );
+            }
+
+            $movingTimeInterval = $activity->getMovingTime();
+            $endTime = $startDate->add($movingTimeInterval);
+            $tracker->finalize($endTime);
+
+            $paceZoneSessions = $tracker->getPaceZoneSessions();
+            $hrZoneSessions = $tracker->getHeartRateZoneSessions();
+
+            $zoneAnalysis = new \App\Strava\ActivityZoneAnalysis(
+                paceZoneSessions: $paceZoneSessions,
+                heartRateZoneSessions: $hrZoneSessions,
+                totalActivitySeconds: (int) $movingTimeInterval->format('%s'),
+            );
+        }
+
         return $this->render('activity/analysis.html.twig', [
             'activityData' => $activityData,
             'metaData' => $metaData,
+            'zoneAnalysis' => $zoneAnalysis,
         ]);
     }
 }
