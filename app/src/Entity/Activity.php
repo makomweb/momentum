@@ -28,8 +28,8 @@ final class Activity
     #[ORM\Column]
     private readonly \DateTimeImmutable $startDate;
 
-    #[ORM\Column]
-    private readonly \DateTimeZone $timezone;
+    #[ORM\Column(type: 'string')]
+    private readonly string $timezone;
 
     /**
      * @var array{
@@ -68,7 +68,7 @@ final class Activity
         int $stravaUserId,
         int $stravaActivityId,
         \DateTimeImmutable $startDate,
-        \DateTimeZone $timezone,
+        string $timezone,
         array $data,
     ) {
         $this->stravaUserId = $stravaUserId;
@@ -80,11 +80,16 @@ final class Activity
 
     public static function fromActivity(int $stravaUserId, StravaApiActivity $activity): self
     {
+        // Extract timezone name from Strava data (format: "(UTC+XX:XX) TimezoneName")
+        $tzString = $activity->data['timezone'];
+        $result = preg_match('/\)\s(.+)$/', $tzString, $matches);
+        $tzName = (1 === $result) ? $matches[1] : 'UTC';
+
         return new self(
             $stravaUserId,
             $activity->getId(),
             $activity->getStartDateUniversalTime(),
-            $activity->getTimezone(),
+            $tzName,
             $activity->data
         );
     }
@@ -136,7 +141,7 @@ final class Activity
 
     public function getStartDateLocalTime(): \DateTimeImmutable
     {
-        return $this->startDate->setTimezone($this->timezone);
+        return $this->startDate->setTimezone(new \DateTimeZone($this->timezone));
     }
 
     public function getStartDateFormatted(): string
