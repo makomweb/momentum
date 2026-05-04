@@ -450,6 +450,20 @@
                     </div>
                 </div>
 
+                <!-- Cross-Validation Note -->
+                <div style="
+                    background: #e8f5e9;
+                    padding: 1rem;
+                    border-radius: 6px;
+                    border-left: 3px solid #4caf50;
+                    margin-bottom: 1rem;
+                    font-size: 0.9rem;
+                    color: #2e7d32;
+                ">
+                    <div style="font-weight: 600; margin-bottom: 0.25rem;">ℹ️ Zone Validation</div>
+                    <div>Hard zones (Threshold, VO2max) are validated by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones are used for polarized training calculations.</div>
+                </div>
+
                 <!-- Zone Transitions Timeline -->
                 {% if paceStats.getZoneSessions() | length > 0 %}
                 <div>
