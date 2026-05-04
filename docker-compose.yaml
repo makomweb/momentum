@@ -75,6 +75,28 @@ services:
       - momentum
     restart: unless-stopped
 
+  dashboard:
+    image: b4bz/homer:latest
+    volumes:
+      - ./dashboard/assets:/www/assets
+    ports:
+      - "8000:8080"
+    restart: unless-stopped
+    networks:
+      - momentum
+
+  mkdocs:
+    image: squidfunk/mkdocs-material:latest
+    ports:
+      - "8005:8000"
+    volumes:
+      - ./mkdocs:/docs
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    networks:
+      - momentum
+
 volumes:
   db_data:
 

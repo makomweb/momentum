@@ -1,0 +1,45 @@
+title: "Momentum"
+subtitle: "Your Running Analytics"
+
+header: true
+footer: '<p>Created with 🏃 by the Momentum team</p>'
+
+theme: default
+
+services:
+  - name: "Application"
+    icon: "fas fa-shoe-prints"
+    items:
+      - name: "Application"
+        subtitle: "Symfony + MySQL"
+        icon: "fas fa-desktop"
+        url: "http://localhost:8080"
+        target: "_blank"
+      - name: "Profiler"
+        subtitle: "Symfony Profiler"
+        icon: "fas fa-bug"
+        url: "http://localhost:8080/_profiler"
+        target: "_blank"
+
+  - name: "Infrastructure"
+    icon: "fas fa-server"
+    items:
+      - name: "Database administration"
+        subtitle: "Adminer"
+        icon: "fas fa-database"
+        url: "http://localhost:8085/?server=db&username=root&db=app"
+        target: "_blank"
+
+  - name: "Reference"
+    icon: "fas fa-bookmark"
+    items:
+      - name: "Documentation"
+        subtitle: "MKDocs"
+        icon: "fas fa-diagram-project"
+        url: "http://localhost:8005"
+        target: "_blank"
+      - name: "Source code"
+        subtitle: "Github"
+        icon: "fa-brands fa-github"
+        url: "https://github.com"
+        target: "_blank"
