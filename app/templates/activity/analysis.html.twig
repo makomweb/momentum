@@ -498,6 +498,66 @@
     </div>
 
     <script>
+        // Custom Chart.js plugin to draw zone backgrounds
+        const zoneBackgroundPlugin = {
+            id: 'zoneBackground',
+            afterDatasetsDraw(chart) {
+                if (!chart.data.zoneColors || chart.data.zoneColors.length === 0) {
+                    return;
+                }
+
+                const ctx = chart.ctx;
+                const xScale = chart.scales.x;
+                const yScale = chart.scales.y;
+                const chartArea = chart.chartArea;
+
+                // Get all labels (timestamps)
+                const labels = chart.data.labels;
+
+                chart.data.zoneColors.forEach(zone => {
+                    // Find start and end indices
+                    const startIdx = labels.findIndex(label => label >= zone.startTime);
+                    const endIdx = labels.findIndex(label => label > zone.endTime);
+                    
+                    if (startIdx === -1) return;
+                    
+                    // Calculate pixel positions
+                    const startPixel = startIdx < labels.length 
+                        ? xScale.getPixelForValue(startIdx)
+                        : chartArea.left;
+                    const endPixel = endIdx === -1 
+                        ? chartArea.right
+                        : xScale.getPixelForValue(endIdx);
+
+                    // Draw semi-transparent zone background
+                    ctx.save();
+                    ctx.fillStyle = zone.color + '44'; // Add alpha channel (44 hex = ~0.27 opacity)
+                    ctx.fillRect(
+                        Math.max(startPixel, chartArea.left),
+                        chartArea.top,
+                        Math.min(endPixel, chartArea.right) - Math.max(startPixel, chartArea.left),
+                        chartArea.bottom - chartArea.top
+                    );
+
+                    // Draw zone label
+                    if (endPixel - startPixel > 40) { // Only show label if space available
+                        ctx.fillStyle = zone.color;
+                        ctx.font = '11px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(
+                            zone.name,
+                            (Math.max(startPixel, chartArea.left) + Math.min(endPixel, chartArea.right)) / 2,
+                            chartArea.top + 15
+                        );
+                    }
+                    ctx.restore();
+                });
+            }
+        };
+        
+        // Register the zone background plugin
+        Chart.register(zoneBackgroundPlugin);
+        
         {% if activityData.hasVelocityData() %}
         const velocityCtx = document.getElementById('velocityChart').getContext('2d');
         const velocityData = {
@@ -539,6 +599,20 @@
                 }
             ]
         };
+        
+        {% if zoneAnalysis %}
+        velocityData.zoneColors = [
+            {% set confirmedPaceSessions = zoneAnalysis.getConfirmedPaceZoneSessions() %}
+            {% for session in confirmedPaceSessions %}
+                {
+                    name: '{{ session.zone.getName() }}',
+                    startTime: '{{ session.startTime.format('H:i:s') }}',
+                    endTime: '{{ session.endTime.format('H:i:s') }}',
+                    color: '{{ session.zone.getColor() }}'
+                }{{ not loop.last ? ',' : '' }}
+            {% endfor %}
+        ];
+        {% endif %}
 
         new Chart(velocityCtx, {
             type: 'line',
@@ -554,7 +628,8 @@
                             padding: 15,
                             font: { size: 13, weight: 600 }
                         }
-                    }
+                    },
+                    zoneBackground: {}
                 },
                 scales: {
                     y: {
@@ -609,6 +684,20 @@
                 pointHoverRadius: 6
             }]
         };
+        
+        {% if zoneAnalysis %}
+        heartRateData.zoneColors = [
+            {% set hrZoneSessions = zoneAnalysis.getHeartRateZoneStatistics().getZoneSessions() %}
+            {% for session in hrZoneSessions %}
+                {
+                    name: '{{ session.zone.getName() }}',
+                    startTime: '{{ session.startTime.format('H:i:s') }}',
+                    endTime: '{{ session.endTime.format('H:i:s') }}',
+                    color: '{{ session.zone.getColor() }}'
+                }{{ not loop.last ? ',' : '' }}
+            {% endfor %}
+        ];
+        {% endif %}
 
         new Chart(heartRateCtx, {
             type: 'line',
@@ -624,7 +713,8 @@
                             padding: 15,
                             font: { size: 13, weight: 600 }
                         }
-                    }
+                    },
+                    zoneBackground: {}
                 },
                 scales: {
                     y: {
