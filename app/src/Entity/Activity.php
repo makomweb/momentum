@@ -80,16 +80,11 @@ final class Activity
 
     public static function fromActivity(int $stravaUserId, StravaApiActivity $activity): self
     {
-        // Extract timezone name from Strava data (format: "(UTC+XX:XX) TimezoneName")
-        $tzString = $activity->data['timezone'];
-        $result = preg_match('/\)\s(.+)$/', $tzString, $matches);
-        $tzName = (1 === $result) ? $matches[1] : 'UTC';
-
         return new self(
             $stravaUserId,
             $activity->getId(),
             $activity->getStartDateUniversalTime(),
-            $tzName,
+            $activity->getTimezone()->getName(),
             $activity->data
         );
     }
