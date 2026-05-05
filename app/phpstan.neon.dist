@@ -9,3 +9,6 @@ parameters:
         - public/
         - src/
         - tests/
+    excludePaths:
+        analyse:
+            - config/reference.php
