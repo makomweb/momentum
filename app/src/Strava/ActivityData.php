@@ -242,20 +242,26 @@ final class ActivityData
             $velocity = $point['velocity'];
             $heartRate = $point['heart_rate'];
 
-            if (null === $velocity || 0.0 === $velocity->metersPerSecond) {
+            if (null === $velocity || $velocity->metersPerSecond < 0.1) {
                 continue;
             }
 
             // Use velocity_smooth from Strava (velocity_avg from ActivityStream)
             $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
 
-            if (0.0 === $smoothedVelocity->metersPerSecond) {
+            if ($smoothedVelocity->metersPerSecond < 0.1) {
+                continue;
+            }
+
+            // Convert to pace and reject unreasonably slow paces (> 60 min/km)
+            $pace = $smoothedVelocity->asPace();
+            if ($pace->value > 60.0) {
                 continue;
             }
             
             $tracker->processPoint(
                 timestamp: $point['timestamp'],
-                pace: $smoothedVelocity->asPace(),
+                pace: $pace,
                 ftp: $ftp,
                 heartRate: $heartRate?->value,
                 maxHeartRate: $maxHeartRate,

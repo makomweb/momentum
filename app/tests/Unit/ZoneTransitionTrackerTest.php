@@ -259,4 +259,76 @@ final class ZoneTransitionTrackerTest extends TestCase
         $this->assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[1]->startTime);
         $this->assertEquals($endTime, $sessions[1]->endTime);
     }
+
+    public function test_gap_in_data_prevents_zone_extension(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        // Zone 2 pace for first 8 seconds (0-7)
+        for ($i = 0; $i <= 7; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: (new Velocity(2.381))->asPace(), // Zone 2 pace
+                ftp: $this->ftp,
+            );
+        }
+
+        // Gap: no points from seconds 8-19 (> 10 second gap threshold)
+        // Resume with Zone 2 pace at second 20
+        for ($i = 20; $i <= 30; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: (new Velocity(2.381))->asPace(), // Zone 2 pace (same zone!)
+                ftp: $this->ftp,
+            );
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT31S'));
+        $this->tracker->finalize($endTime);
+
+        $sessions = $this->tracker->getPaceZoneSessions();
+
+        // Should have 2 sessions due to gap, not 1 extended session
+        $this->assertCount(2, $sessions);
+        $this->assertEquals(7, $sessions[0]->durationSeconds);
+        $this->assertEquals(11, $sessions[1]->durationSeconds);
+    }
+
+    public function test_finalize_does_not_create_negative_duration_when_end_time_precedes_last_point(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        for ($i = 0; $i < 10; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: (new Velocity(2.381))->asPace(),
+                ftp: $this->ftp,
+                heartRate: 150,
+                maxHeartRate: $this->maxHeartRate,
+            );
+        }
+
+        for ($i = 20; $i < 30; ++$i) {
+            $this->tracker->processPoint(
+                timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
+                pace: (new Velocity(2.381))->asPace(),
+                ftp: $this->ftp,
+                heartRate: 150,
+                maxHeartRate: $this->maxHeartRate,
+            );
+        }
+
+        $this->tracker->finalize($startTime->add(new \DateInterval('PT15S')));
+
+        $paceSessions = $this->tracker->getPaceZoneSessions();
+        $heartRateSessions = $this->tracker->getHeartRateZoneSessions();
+
+        $this->assertSame(2, count($paceSessions));
+        $this->assertSame(2, count($heartRateSessions));
+        $this->assertSame(9, $paceSessions[0]->durationSeconds);
+        $this->assertSame(9, $paceSessions[1]->durationSeconds);
+        $this->assertSame(9, $heartRateSessions[0]->durationSeconds);
+        $this->assertSame(9, $heartRateSessions[1]->durationSeconds);
+    }
+
 }

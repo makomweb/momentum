@@ -90,20 +90,26 @@ final class ActivityController extends AbstractController
             $velocity = $point['velocity'];
             $heartRate = $point['heart_rate'];
 
-            if (null === $velocity || 0.0 === $velocity->metersPerSecond) {
+            if (null === $velocity || $velocity->metersPerSecond < 0.1) {
                 continue;
             }
 
             // Use smoothed velocity from ActivityStream
             $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
 
-            if (0.0 === $smoothedVelocity->metersPerSecond) {
+            if ($smoothedVelocity->metersPerSecond < 0.1) {
+                continue;
+            }
+
+            // Convert to pace and reject unreasonably slow paces (> 60 min/km)
+            $pace = $smoothedVelocity->asPace();
+            if ($pace->value > 60.0) {
                 continue;
             }
 
             $tracker->processPoint(
                 timestamp: $point['timestamp'],
-                pace: $smoothedVelocity->asPace(),
+                pace: $pace,
                 ftp: new \App\Momentum\Pace($ftp),
                 heartRate: $heartRate?->value,
                 maxHeartRate: $maxHeartRate,
@@ -203,19 +209,25 @@ final class ActivityController extends AbstractController
                 $velocity = $point['velocity'];
                 $heartRate = $point['heart_rate'];
 
-                if (null === $velocity || 0.0 === $velocity->metersPerSecond) {
+                if (null === $velocity || $velocity->metersPerSecond < 0.1) {
                     continue;
                 }
 
                 $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
 
-                if (0.0 === $smoothedVelocity->metersPerSecond) {
+                if ($smoothedVelocity->metersPerSecond < 0.1) {
+                    continue;
+                }
+
+                // Convert to pace and reject unreasonably slow paces (> 60 min/km)
+                $pace = $smoothedVelocity->asPace();
+                if ($pace->value > 60.0) {
                     continue;
                 }
 
                 $tracker->processPoint(
                     timestamp: $point['timestamp'],
-                    pace: $smoothedVelocity->asPace(),
+                    pace: $pace,
                     ftp: new \App\Momentum\Pace($ftp),
                     heartRate: $heartRate?->value,
                     maxHeartRate: $maxHeartRate,
