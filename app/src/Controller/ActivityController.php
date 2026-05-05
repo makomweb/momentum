@@ -90,12 +90,16 @@ final class ActivityController extends AbstractController
             $velocity = $point['velocity'];
             $heartRate = $point['heart_rate'];
 
-            if (null === $velocity) {
+            if (null === $velocity || 0.0 === $velocity->metersPerSecond) {
                 continue;
             }
 
             // Use smoothed velocity from ActivityStream
             $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
+
+            if (0.0 === $smoothedVelocity->metersPerSecond) {
+                continue;
+            }
 
             $tracker->processPoint(
                 timestamp: $point['timestamp'],
@@ -199,11 +203,15 @@ final class ActivityController extends AbstractController
                 $velocity = $point['velocity'];
                 $heartRate = $point['heart_rate'];
 
-                if (null === $velocity) {
+                if (null === $velocity || 0.0 === $velocity->metersPerSecond) {
                     continue;
                 }
 
                 $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
+
+                if (0.0 === $smoothedVelocity->metersPerSecond) {
+                    continue;
+                }
 
                 $tracker->processPoint(
                     timestamp: $point['timestamp'],

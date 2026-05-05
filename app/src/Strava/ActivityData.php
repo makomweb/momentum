@@ -242,13 +242,17 @@ final class ActivityData
             $velocity = $point['velocity'];
             $heartRate = $point['heart_rate'];
 
-            if (null === $velocity) {
+            if (null === $velocity || 0.0 === $velocity->metersPerSecond) {
                 continue;
             }
 
             // Use velocity_smooth from Strava (velocity_avg from ActivityStream)
             $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
 
+            if (0.0 === $smoothedVelocity->metersPerSecond) {
+                continue;
+            }
+            
             $tracker->processPoint(
                 timestamp: $point['timestamp'],
                 pace: $smoothedVelocity->asPace(),
