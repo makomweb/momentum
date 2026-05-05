@@ -481,7 +481,7 @@
                                 font-size: 0.9rem;
                             ">
                                 <div style="font-weight: 600; color: {{ session.zone.getColor() }};">{{ session.zone.getName() }}</div>
-                                <div style="color: #666;">{{ session.startTime | date('H:i:s') }}</div>
+                                <div style="color: #666;">{{ session.startTime | local_date('H:i:s') }}</div>
                                 <div style="color: #999;">→ {{ '%02d:%02d' | format((session.durationSeconds // 60), (session.durationSeconds % 60)) }}</div>
                             </div>
                         {% endfor %}
