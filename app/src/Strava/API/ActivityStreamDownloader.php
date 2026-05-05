@@ -19,7 +19,7 @@ final readonly class ActivityStreamDownloader
     {
         $token = $this->tokenProvider->getToken($stravaUserId);
 
-        Assert::that(!$token->isExpired(), 'Token is expired!');
+        Assert::that(!$token->isExpired(), new TokenExpiredException($stravaUserId));
 
         $response = $this->httpClient->request('GET', sprintf(
             'https://www.strava.com/api/v3/activities/%d/streams',
