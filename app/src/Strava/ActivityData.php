@@ -258,7 +258,7 @@ final class ActivityData
             if ($pace->value > 60.0) {
                 continue;
             }
-            
+
             $tracker->processPoint(
                 timestamp: $point['timestamp'],
                 pace: $pace,

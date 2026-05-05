@@ -17,10 +17,10 @@ final class RealActivityZoneValidationTest extends TestCase
     {
         // Load real activity data
         $jsonFile = __DIR__.'/../../var/activity_stream_14417573_18355632062.json';
-        $this->assertFileExists($jsonFile, 'Activity stream file not found');
+        self::assertFileExists($jsonFile, 'Activity stream file not found');
 
         $fileContents = file_get_contents($jsonFile);
-        $this->assertNotFalse($fileContents, 'Failed to read activity stream file');
+        self::assertNotFalse($fileContents, 'Failed to read activity stream file');
 
         /** @var array<string, array<string, mixed>> $json */
         $json = json_decode($fileContents, true, flags: JSON_THROW_ON_ERROR);
@@ -32,9 +32,9 @@ final class RealActivityZoneValidationTest extends TestCase
         /** @var array<int, int|null> $hrData */
         $hrData = $json['heartrate']['data'] ?? [];
 
-        $this->assertNotEmpty($timeData, 'No time data found');
-        $this->assertNotEmpty($velocityData, 'No velocity data found');
-        $this->assertNotEmpty($hrData, 'No heart rate data found');
+        self::assertNotEmpty($timeData, 'No time data found');
+        self::assertNotEmpty($velocityData, 'No velocity data found');
+        self::assertNotEmpty($hrData, 'No heart rate data found');
 
         // User config
         $ftp = new Pace(6.0); // 6:00 min/km FTP
@@ -114,8 +114,8 @@ final class RealActivityZoneValidationTest extends TestCase
         // echo sprintf("Invalid VO2max (high pace, low HR): %.0f secs (%.1f%%)\n\n", $vo2maxTime - $vo2maxWithHighHR, $vo2maxPercentage - $vo2maxValidPercentage);
 
         // Currently, the issue: VO2max might be detected without confirming HR
-        $this->assertCount(count($vo2maxSessions), $vo2maxSessions, 'Should have detected VO2max sessions');
-        $this->assertLessThan(10, $vo2maxPercentage, 'VO2max should be less than 10% of activity');
+        self::assertCount(count($vo2maxSessions), $vo2maxSessions, 'Should have detected VO2max sessions');
+        self::assertLessThan(10, $vo2maxPercentage, 'VO2max should be less than 10% of activity');
     }
 
     public function test_zone_cross_validation_strategy(): void
@@ -156,12 +156,12 @@ final class RealActivityZoneValidationTest extends TestCase
 
         // CURRENT BEHAVIOR (wrong):
         // This will be classified as ZONE_5 (VO2max) because only pace is considered
-        $this->assertCount(1, $paceSessions);
-        $this->assertTrue(PaceZone::ZONE_5 === $paceSessions[0]->zone, 'Currently classified as VO2max based on pace alone');
+        self::assertCount(1, $paceSessions);
+        self::assertTrue(PaceZone::ZONE_5 === $paceSessions[0]->zone, 'Currently classified as VO2max based on pace alone');
 
         // HR zone is actually Zone 1 (recovery)
-        $this->assertCount(1, $hrSessions);
-        $this->assertTrue(HeartRateZone::ZONE_1 === $hrSessions[0]->zone, 'HR zone is recovery');
+        self::assertCount(1, $hrSessions);
+        self::assertTrue(HeartRateZone::ZONE_1 === $hrSessions[0]->zone, 'HR zone is recovery');
 
         // echo "\n=== Zone Mismatch Example ===\n";
         // echo 'Pace zone: '.$paceSessions[0]->zone->value."\n";

@@ -58,6 +58,7 @@ final class ZoneTransitionTracker
                 $this->currentPaceZone = $newZone;
                 $this->paceZoneEnteredAt = $timestamp;
                 $this->lastPacePointTimestamp = $timestamp;
+
                 return;
             }
         }
@@ -105,6 +106,7 @@ final class ZoneTransitionTracker
                 $this->currentHeartRateZone = $newZone;
                 $this->heartRateZoneEnteredAt = $timestamp;
                 $this->lastHeartRatePointTimestamp = $timestamp;
+
                 return;
             }
         }

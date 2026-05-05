@@ -232,7 +232,7 @@ class AsyncTaskTest extends KernelTestCase
         $bus->dispatch($message);
 
         // Verify message was queued
-        $this->assertCount(1, $transport->get());
+        self::assertCount(1, $transport->get());
     }
 }
 ```
