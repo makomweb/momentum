@@ -110,6 +110,7 @@ final class ZoneTransitionTracker
      */
     public function getPaceZoneSessions(): array
     {
+        dump(['pace-zone-sessions' => $this->paceZoneSessions]);
         return $this->paceZoneSessions;
     }
 
