@@ -107,19 +107,13 @@ final readonly class Activity implements \Stringable
     public function getElapsedTime(): \DateInterval
     {
         $seconds = $this->data['elapsed_time'];
-        $interval = \DateInterval::createFromDateString("$seconds seconds");
-        assert($interval instanceof \DateInterval);
-
-        return $interval;
+        return \DateInterval::createFromDateString("$seconds seconds");
     }
 
     public function getMovingTime(): \DateInterval
     {
         $seconds = $this->data['moving_time'];
-        $interval = \DateInterval::createFromDateString("$seconds seconds");
-        assert($interval instanceof \DateInterval);
-
-        return $interval;
+        return \DateInterval::createFromDateString("$seconds seconds");
     }
 
     public function getDistance(): Distance

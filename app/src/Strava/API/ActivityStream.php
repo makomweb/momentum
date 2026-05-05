@@ -106,12 +106,11 @@ final readonly class ActivityStream
 
         for ($i = 0; $i < $count; ++$i) {
             $offset = $this->time->getDataPoint($i);
-
             assert(is_int($offset));
-            $offset = \DateInterval::createFromDateString("$offset seconds");
-            assert($offset instanceof \DateInterval);
 
-            $timestamp = $start->add($offset);
+            $timestamp = $start->add(
+                \DateInterval::createFromDateString("$offset seconds")
+            );
 
             $distance = null;
             if ($this->hasDistanceData() && null !== $this->distance) {
