@@ -30,10 +30,10 @@
         .activity-header {
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.7) 0%, rgba(118, 75, 162, 0.7) 100%);
             color: white;
-            padding: 1.5rem 2rem;
+            padding: 1.25rem 1.5rem;
             border-radius: 12px;
             margin-top: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.25rem;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.12);
             position: relative;
             overflow: hidden;
@@ -44,15 +44,15 @@
             position: relative;
             z-index: 1;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.9fr);
+            gap: 1rem;
             align-items: stretch;
         }
 
         .activity-left-column {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
         .activity-right-column {
@@ -75,13 +75,13 @@
         }
 
         .activity-emoji {
-            font-size: 2rem;
+            font-size: 1.75rem;
             flex-shrink: 0;
             margin-top: 0.15rem;
         }
 
         .activity-name {
-            font-size: 1.8rem;
+            font-size: 1.55rem;
             font-weight: 700;
             margin: 0;
             line-height: 1.2;
@@ -98,27 +98,29 @@
         .activity-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
         .stats-panel {
             background: rgba(255, 255, 255, 0.06);
-            padding: 0.75rem;
+            padding: 0.55rem 0.75rem;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             flex: 1;
+            gap: 0.1rem;
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.4rem 0;
+            padding: 0.35rem 0;
             flex: 1;
             align-self: stretch;
+            gap: 1rem;
         }
 
         .stat-row-separator {
@@ -127,7 +129,7 @@
 
         .stat-box {
             background: rgba(255, 255, 255, 0.08);
-            padding: 0.9rem;
+            padding: 0.7rem 0.8rem;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(8px);
@@ -143,14 +145,14 @@
         .stat-label {
             font-size: 0.7rem;
             opacity: 0.7;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.2rem;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
 
         .stat-value {
-            font-size: 1.3rem;
+            font-size: 1.15rem;
             font-weight: 600;
             line-height: 1;
         }
@@ -168,10 +170,208 @@
         .chart-container {
             background: white;
             border-radius: 16px;
-            padding: 2.5rem;
-            margin-bottom: 3rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
+        }
+
+        .zone-analysis-panel {
+            padding: 1.5rem 1.5rem 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(102, 126, 234, 0.12);
+            box-shadow: 0 10px 28px rgba(102, 126, 234, 0.12);
+        }
+
+        .zone-analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .zone-analysis-kicker {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #667eea;
+            margin-bottom: 0.35rem;
+        }
+
+        .zone-analysis-subtitle {
+            margin: 0;
+            color: #667085;
+            font-size: 0.92rem;
+            line-height: 1.4;
+        }
+
+        .zone-analysis-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr);
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        .zone-analysis-main {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .zone-summary-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+            padding: 1rem 1.1rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .zone-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .zone-summary-metric {
+            text-align: center;
+        }
+
+        .zone-summary-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .zone-summary-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .zone-columns {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .zone-card {
+            background: #f8fafc;
+            border: 1px solid #e6ebf2;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .zone-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #333;
+        }
+
+        .zone-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .zone-row {
+            display: grid;
+            grid-template-columns: minmax(70px, auto) minmax(0, 1fr) 52px;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .zone-name {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .zone-bar {
+            background: #e0e0e0;
+            border-radius: 999px;
+            height: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .zone-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+
+        .zone-percentage {
+            font-size: 0.8rem;
+            color: #8a8f98;
+            text-align: right;
+        }
+
+        .zone-analysis-side {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .zone-note {
+            background: #e8f5e9;
+            padding: 0.9rem 1rem;
+            border-radius: 10px;
+            border-left: 3px solid #4caf50;
+            font-size: 0.88rem;
+            color: #2e7d32;
+        }
+
+        .zone-note-title {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .timeline-card {
+            background: #fbfcfe;
+            border: 1px solid #e6ebf2;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .timeline-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #333;
+        }
+
+        .timeline-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.55rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .timeline-zone {
+            font-weight: 600;
+        }
+
+        .timeline-meta {
+            display: flex;
+            gap: 0.6rem;
+            color: #666;
+            white-space: nowrap;
+            margin-left: auto;
         }
 
         .chart-container:hover {
@@ -227,6 +427,16 @@
 
             .activity-stats {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .zone-analysis-layout,
+            .zone-columns,
+            .zone-summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .zone-analysis-header {
+                flex-direction: column;
             }
 
             .chart-wrapper {
@@ -311,6 +521,115 @@
             </div>
         </div>
 
+        {% if zoneAnalysis %}
+            {% set paceStats = zoneAnalysis.getPaceZoneStatistics() %}
+            {% set hrStats = zoneAnalysis.getHeartRateZoneStatistics() %}
+            {% set polarized = zoneAnalysis.getPolarizedTrainingMetrics() %}
+            <div class="chart-container zone-analysis-panel">
+                <div class="zone-analysis-header">
+                    <div>
+                        <div class="zone-analysis-kicker">Priority insight</div>
+                        <div class="chart-title" style="margin-bottom: 0.35rem;">🎯 Training Zones</div>
+                        <p class="zone-analysis-subtitle">Zone distribution and transitions are surfaced first so the training load is visible before the detailed charts.</p>
+                    </div>
+                </div>
+
+                <div class="zone-analysis-layout">
+                    <div class="zone-analysis-main">
+                        <div class="zone-summary-card" style="border-left-color: {% if polarized.isPolarized() %}#4caf50{% else %}#ff9800{% endif %};">
+                            <div class="zone-summary-grid">
+                                <div class="zone-summary-metric">
+                                    <div class="zone-summary-label">Easy (Zones 1-2)</div>
+                                    <div class="zone-summary-value" style="color: #2196f3;">
+                                        {{ polarized.getEasyPercentage() | number_format(1, '.') }}%
+                                    </div>
+                                </div>
+                                <div class="zone-summary-metric">
+                                    <div class="zone-summary-label">Tempo (Zone 3)</div>
+                                    <div class="zone-summary-value" style="color: #ff9800;">
+                                        {{ polarized.getTempoPercentage() | number_format(1, '.') }}%
+                                    </div>
+                                </div>
+                                <div class="zone-summary-metric">
+                                    <div class="zone-summary-label">Hard (Zones 4-5)</div>
+                                    <div class="zone-summary-value" style="color: #f44336;">
+                                        {{ polarized.getHardPercentage() | number_format(1, '.') }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="zone-columns">
+                            <div class="zone-card">
+                                <h3 class="zone-card-title">⏱️ Pace Zones</h3>
+                                <div class="zone-list">
+                                    {% for zoneKey, stat in paceStats.zoneStats %}
+                                        {% set zone = stat.zone %}
+                                        {% set percentage = stat.duration_percentage %}
+                                        <div class="zone-row">
+                                            <div class="zone-name">{{ zone.getName() }}</div>
+                                            <div class="zone-bar">
+                                                <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
+                                            </div>
+                                            <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            {% if hrStats %}
+                                <div class="zone-card">
+                                    <h3 class="zone-card-title">❤️ Heart Rate Zones</h3>
+                                    <div class="zone-list">
+                                        {% for zoneKey, stat in hrStats.zoneStats %}
+                                            {% set zone = stat.zone %}
+                                            {% set percentage = stat.duration_percentage %}
+                                            <div class="zone-row">
+                                                <div class="zone-name">{{ zone.getName() }}</div>
+                                                <div class="zone-bar">
+                                                    <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
+                                                </div>
+                                                <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="zone-analysis-side">
+                        <div class="zone-note">
+                            <div class="zone-note-title">ℹ️ Zone Validation</div>
+                            <div>Hard zones (Threshold, VO2max) are validated by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones are used for training calculations.</div>
+                        </div>
+
+                        {% if paceStats.getZoneSessions() | length > 0 %}
+                            <div class="timeline-card">
+                                <h3 class="timeline-title">Pace Zone Transitions</h3>
+                                <div class="timeline-list">
+                                    {% for session in paceStats.getZoneSessions() %}
+                                        <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
+                                            <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.getName() }}</div>
+                                            <div class="timeline-meta">
+                                                <span>{{ session.startTime | local_date('H:i:s') }}</span>
+                                                <span>→ {{ '%02d:%02d' | format((session.durationSeconds // 60), (session.durationSeconds % 60)) }}</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% elseif app.user.getFtpMinutesPerKilometer() is null %}
+            <div class="alert-message alert-info" style="background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%); color: #856404; border-left-color: #ffc107;">
+                <span>⚙️</span>
+                <span>To see zone analysis, please configure your FTP in your profile settings.</span>
+            </div>
+        {% endif %}
+
         {% if not activityData.hasAnyData() %}
             <div class="alert-message alert-info">
                 <span>⚠️</span>
@@ -319,7 +638,7 @@
         {% else %}
             {% if activityData.hasVelocityData() %}
                 <div class="chart-container">
-                    <div class="chart-title">{{ metaData.getChartTitle() }}</div>
+                    <div class="chart-title">{{ metaData.getVelocityChartTitle() }}</div>
                     <div class="chart-wrapper">
                         <canvas id="velocityChart"></canvas>
                     </div>
@@ -346,155 +665,6 @@
             {% endif %}
         {% endif %}
 
-        {% if zoneAnalysis %}
-            {% set paceStats = zoneAnalysis.getPaceZoneStatistics() %}
-            {% set hrStats = zoneAnalysis.getHeartRateZoneStatistics() %}
-            {% set polarized = zoneAnalysis.getPolarizedTrainingMetrics() %}
-            <div class="chart-container">
-                <div class="chart-title">🎯 Training Zones & Polarized Training</div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-                    <!-- Pace Zones -->
-                    <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #333;">Pace Zones</h3>
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            {% for zoneKey, stat in paceStats.zoneStats %}
-                                {% set zone = stat.zone %}
-                                {% set percentage = stat.duration_percentage %}
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="font-size: 0.9rem; font-weight: 600; color: #666; min-width: 60px;">
-                                        {{ zone.getName() }}
-                                    </div>
-                                    <div style="flex: 1; background: #e0e0e0; border-radius: 4px; height: 24px; overflow: hidden; position: relative;">
-                                        <div style="
-                                            height: 100%;
-                                            width: {{ percentage }}%;
-                                            background: {{ zone.getColor() }};
-                                            border-radius: 4px;
-                                            transition: width 0.3s ease;
-                                        "></div>
-                                    </div>
-                                    <div style="font-size: 0.85rem; color: #999; min-width: 50px; text-align: right;">
-                                        {{ percentage | number_format(1, '.') }}%
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Heart Rate Zones -->
-                    {% if hrStats %}
-                    <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #333;">❤️ Heart Rate Zones</h3>
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            {% for zoneKey, stat in hrStats.zoneStats %}
-                                {% set zone = stat.zone %}
-                                {% set percentage = stat.duration_percentage %}
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="font-size: 0.9rem; font-weight: 600; color: #666; min-width: 60px;">
-                                        {{ zone.getName() }}
-                                    </div>
-                                    <div style="flex: 1; background: #e0e0e0; border-radius: 4px; height: 24px; overflow: hidden; position: relative;">
-                                        <div style="
-                                            height: 100%;
-                                            width: {{ percentage }}%;
-                                            background: {{ zone.getColor() }};
-                                            border-radius: 4px;
-                                            transition: width 0.3s ease;
-                                        "></div>
-                                    </div>
-                                    <div style="font-size: 0.85rem; color: #999; min-width: 50px; text-align: right;">
-                                        {{ percentage | number_format(1, '.') }}%
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Polarized Training Feedback -->
-                <div style="
-                    background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
-                    padding: 1.5rem;
-                    border-radius: 10px;
-                    border-left: 4px solid {% if polarized.isPolarized() %}#4caf50{% else %}#ff9800{% endif %};
-                    margin-bottom: 1rem;
-                ">
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Easy (Zones 1-2)</div>
-                            <div style="font-size: 1.8rem; font-weight: 700; color: #2196f3;">
-                                {{ polarized.getEasyPercentage() | number_format(1, '.') }}%
-                            </div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Tempo (Zone 3)</div>
-                            <div style="font-size: 1.8rem; font-weight: 700; color: #ff9800;">
-                                {{ polarized.getTempoPercentage() | number_format(1, '.') }}%
-                            </div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Hard (Zones 4-5)</div>
-                            <div style="font-size: 1.8rem; font-weight: 700; color: #f44336;">
-                                {{ polarized.getHardPercentage() | number_format(1, '.') }}%
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; text-align: center;">
-                        {% if polarized.isPolarized() %}
-                            <div style="color: #4caf50; font-weight: 600;">✓ Following polarized training principles (80% easy + 15% hard)</div>
-                        {% else %}
-                            <div style="color: #ff9800; font-weight: 600;">⚠ Not following polarized training pattern yet</div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Cross-Validation Note -->
-                <div style="
-                    background: #e8f5e9;
-                    padding: 1rem;
-                    border-radius: 6px;
-                    border-left: 3px solid #4caf50;
-                    margin-bottom: 1rem;
-                    font-size: 0.9rem;
-                    color: #2e7d32;
-                ">
-                    <div style="font-weight: 600; margin-bottom: 0.25rem;">ℹ️ Zone Validation</div>
-                    <div>Hard zones (Threshold, VO2max) are validated by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones are used for polarized training calculations.</div>
-                </div>
-
-                <!-- Zone Transitions Timeline -->
-                {% if paceStats.getZoneSessions() | length > 0 %}
-                <div>
-                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #333;">Pace Zone Transitions</h3>
-                    <div style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto;">
-                        {% for session in paceStats.getZoneSessions() %}
-                            <div style="
-                                display: flex;
-                                align-items: center;
-                                gap: 0.75rem;
-                                padding: 0.75rem;
-                                background: {{ session.zone.getColor() }}22;
-                                border-left: 3px solid {{ session.zone.getColor() }};
-                                border-radius: 4px;
-                                font-size: 0.9rem;
-                            ">
-                                <div style="font-weight: 600; color: {{ session.zone.getColor() }};">{{ session.zone.getName() }}</div>
-                                <div style="color: #666;">{{ session.startTime | local_date('H:i:s') }}</div>
-                                <div style="color: #999;">→ {{ '%02d:%02d' | format((session.durationSeconds // 60), (session.durationSeconds % 60)) }}</div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        {% elseif app.user.getFtpMinutesPerKilometer() is null %}
-            <div class="alert-message alert-info" style="background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%); color: #856404; border-left-color: #ffc107;">
-                <span>⚙️</span>
-                <span>To see zone analysis, please configure your FTP in your profile settings.</span>
-            </div>
-        {% endif %}
     </div>
 
     <script>

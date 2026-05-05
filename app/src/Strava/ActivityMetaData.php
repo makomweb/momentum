@@ -71,7 +71,7 @@ final readonly class ActivityMetaData
         };
     }
 
-    public function getChartTitle(): string
+    public function getVelocityChartTitle(): string
     {
         $type = $this->getActivityType();
 
