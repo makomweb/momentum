@@ -90,12 +90,12 @@ final class RealActivityZoneValidationTest extends TestCase
                     $maxHRInSession = max($sessionHRs);
                     $avgHRInSession = array_sum($sessionHRs) / count($sessionHRs);
 
-                    echo sprintf(
-                        "\nVO2max session %d secs: HR avg %.0f, max %d\n",
-                        $session->durationSeconds,
-                        $avgHRInSession,
-                        $maxHRInSession
-                    );
+                    // echo sprintf(
+                    //     "\nVO2max session %d secs: HR avg %.0f, max %d\n",
+                    //     $session->durationSeconds,
+                    //     $avgHRInSession,
+                    //     $maxHRInSession
+                    // );
 
                     // VO2max should have HR > 80% of max (>152 for 190 max)
                     if ($maxHRInSession >= 0.80 * $maxHeartRate) {
@@ -108,10 +108,10 @@ final class RealActivityZoneValidationTest extends TestCase
         $vo2maxPercentage = $totalSeconds > 0 ? ($vo2maxTime / $totalSeconds) * 100 : 0;
         $vo2maxValidPercentage = $totalSeconds > 0 ? ($vo2maxWithHighHR / $totalSeconds) * 100 : 0;
 
-        echo sprintf("\n=== Zone Validation Results ===\n");
-        echo sprintf("Total VO2max time: %.0f secs (%.1f%%)\n", $vo2maxTime, $vo2maxPercentage);
-        echo sprintf("VO2max with confirming HR (>80%% max): %.0f secs (%.1f%%)\n", $vo2maxWithHighHR, $vo2maxValidPercentage);
-        echo sprintf("Invalid VO2max (high pace, low HR): %.0f secs (%.1f%%)\n\n", $vo2maxTime - $vo2maxWithHighHR, $vo2maxPercentage - $vo2maxValidPercentage);
+        // echo sprintf("\n=== Zone Validation Results ===\n");
+        // echo sprintf("Total VO2max time: %.0f secs (%.1f%%)\n", $vo2maxTime, $vo2maxPercentage);
+        // echo sprintf("VO2max with confirming HR (>80%% max): %.0f secs (%.1f%%)\n", $vo2maxWithHighHR, $vo2maxValidPercentage);
+        // echo sprintf("Invalid VO2max (high pace, low HR): %.0f secs (%.1f%%)\n\n", $vo2maxTime - $vo2maxWithHighHR, $vo2maxPercentage - $vo2maxValidPercentage);
 
         // Currently, the issue: VO2max might be detected without confirming HR
         $this->assertCount(count($vo2maxSessions), $vo2maxSessions, 'Should have detected VO2max sessions');
@@ -163,9 +163,9 @@ final class RealActivityZoneValidationTest extends TestCase
         $this->assertCount(1, $hrSessions);
         $this->assertTrue(HeartRateZone::ZONE_1 === $hrSessions[0]->zone, 'HR zone is recovery');
 
-        echo "\n=== Zone Mismatch Example ===\n";
-        echo 'Pace zone: '.$paceSessions[0]->zone->value."\n";
-        echo 'HR zone: '.$hrSessions[0]->zone->value."\n";
-        echo "^ This is the problem - pace and HR zones don't match!\n";
+        // echo "\n=== Zone Mismatch Example ===\n";
+        // echo 'Pace zone: '.$paceSessions[0]->zone->value."\n";
+        // echo 'HR zone: '.$hrSessions[0]->zone->value."\n";
+        // echo "^ This is the problem - pace and HR zones don't match!\n";
     }
 }
