@@ -61,12 +61,8 @@ final class ActivityController extends AbstractController
             return $this->json(['error' => 'Activity not found'], 404);
         }
 
-        $ftp = $user->getFtpMinutesPerKilometer();
+        $ftp = $user->getFtp();
         $maxHeartRate = $user->getMaxHeartRate();
-
-        if (null === $ftp) {
-            return $this->json(['error' => 'User FTP not configured'], 400);
-        }
 
         try {
             $stream = $this->streamCache->get(
@@ -110,7 +106,7 @@ final class ActivityController extends AbstractController
             $tracker->processPoint(
                 timestamp: $point['timestamp'],
                 pace: $pace,
-                ftp: new \App\Momentum\Pace($ftp),
+                ftp: $ftp,
                 heartRate: $heartRate?->value,
                 maxHeartRate: $maxHeartRate,
             );
@@ -198,10 +194,10 @@ final class ActivityController extends AbstractController
         $metaData = $activityData->getMetaData();
 
         $zoneAnalysis = null;
-        $ftp = $user->getFtpMinutesPerKilometer();
+        $ftp = $user->getFtp();
         $maxHeartRate = $user->getMaxHeartRate();
 
-        if (null !== $ftp) {
+        if (!$ftp->isZero()) {
             $tracker = new \App\Momentum\ZoneTransitionTracker();
             $startDate = $activity->getStartDateLocalTime();
 
@@ -228,7 +224,7 @@ final class ActivityController extends AbstractController
                 $tracker->processPoint(
                     timestamp: $point['timestamp'],
                     pace: $pace,
-                    ftp: new \App\Momentum\Pace($ftp),
+                    ftp: $ftp,
                     heartRate: $heartRate?->value,
                     maxHeartRate: $maxHeartRate,
                 );

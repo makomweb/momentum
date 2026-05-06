@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Momentum\Pace;
 use App\Strava\API\Athlete;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -15,7 +16,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     /** @phpstan-ignore property.onlyRead */
     private int $id;
 
@@ -31,11 +32,11 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255)]
     private string $profilePictureMedium;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $ftpMinutesPerKilometer = null;
+    #[ORM\Column]
+    private float $ftp;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $maxHeartRate = null;
+    #[ORM\Column]
+    private int $maxHeartRate;
 
     private function __construct(
         int $stravaId,
@@ -47,6 +48,8 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->name = $name;
         $this->profilePicture = $profilePicture;
         $this->profilePictureMedium = $profilePictureMedium;
+        $this->ftp = 0.0;
+        $this->maxHeartRate = 0;
     }
 
     public static function fromStravaUser(Athlete $athlete): self
@@ -116,22 +119,22 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return sprintf('%s (Strava ID: %d)', $this->name, $this->stravaId);
     }
 
-    public function getFtpMinutesPerKilometer(): ?float
+    public function getFtp(): Pace
     {
-        return $this->ftpMinutesPerKilometer;
+        return new Pace($this->ftp);
     }
 
-    public function setFtpMinutesPerKilometer(?float $ftpMinutesPerKilometer): void
+    public function setFtp(Pace $ftp): void
     {
-        $this->ftpMinutesPerKilometer = $ftpMinutesPerKilometer;
+        $this->ftp = $ftp->value;
     }
 
-    public function getMaxHeartRate(): ?int
+    public function getMaxHeartRate(): int
     {
         return $this->maxHeartRate;
     }
 
-    public function setMaxHeartRate(?int $maxHeartRate): void
+    public function setMaxHeartRate(int $maxHeartRate): void
     {
         $this->maxHeartRate = $maxHeartRate;
     }

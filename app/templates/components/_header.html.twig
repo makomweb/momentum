@@ -24,6 +24,8 @@
                         <p class="user-name">{{ user.name }}</p>
                         <p class="user-id">ID: {{ user.stravaId }}</p>
                     </div>
+
+                    <a href="{{ path('profile_settings') }}" class="logout-btn" style="text-decoration: none; display: inline-flex; align-items: center;">Settings</a>
                     
                     <form method="post" action="{{ path('logout') }}" class="logout-form">
                         <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">

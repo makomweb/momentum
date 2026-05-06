@@ -10,6 +10,11 @@ final readonly class Pace implements \Stringable
     {
     }
 
+    public function isZero(): bool
+    {
+        return $this->value < 0.1;
+    }
+
     public function __toString(): string
     {
         $minutes = (int) $this->value;
