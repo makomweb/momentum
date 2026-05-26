@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Assert;
+namespace App\Momentum\Assert;
 
 final readonly class Assert
 {

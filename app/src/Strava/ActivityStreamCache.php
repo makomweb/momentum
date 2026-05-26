@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use App\Assert\Assert;
+use App\Momentum\Assert\Assert;
 use App\Strava\API\ActivityStream;
 use App\Strava\API\ActivityStreamDownloader;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;

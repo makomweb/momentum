@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
-use App\Assert\Assert;
+use App\Momentum\Assert\Assert;
 
 final readonly class Activity implements \Stringable
 {
