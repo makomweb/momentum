@@ -72,10 +72,17 @@ final class ActivityData
      */
     public function getVelocityRawPoints(): array
     {
+        return iterator_to_array($this->yieldVelocityRawPoints());
+    }
+
+    /**
+     * @return \Generator<array{timestamp: string, value: float}>
+     */
+    private function yieldVelocityRawPoints(): \Generator
+    {
         $type = $this->activity->data['type'];
 
-        $points = [];
-        foreach ($this->getDataPoints() as $point) {
+        foreach ($this->yieldDataPoints() as $point) {
             if (null === $point['velocity']) {
                 continue;
             }
@@ -91,13 +98,11 @@ final class ActivityData
                 continue;
             }
 
-            $points[] = [
+            yield [
                 'timestamp' => $point['timestamp'],
                 'value' => $value,
             ];
         }
-
-        return $points;
     }
 
     /**
@@ -105,10 +110,17 @@ final class ActivityData
      */
     public function getVelocityAveragePoints(): array
     {
+        return iterator_to_array($this->yieldVelocityAveragePoints());
+    }
+
+    /**
+     * @return \Generator<array{timestamp: string, value: float}>
+     */
+    private function yieldVelocityAveragePoints(): \Generator
+    {
         $type = $this->activity->data['type'];
 
-        $points = [];
-        foreach ($this->getDataPoints() as $point) {
+        foreach ($this->yieldDataPoints() as $point) {
             if (null === $point['velocity_avg']) {
                 continue;
             }
@@ -124,13 +136,11 @@ final class ActivityData
                 continue;
             }
 
-            $points[] = [
+            yield [
                 'timestamp' => $point['timestamp'],
                 'value' => $value,
             ];
         }
-
-        return $points;
     }
 
     /**
@@ -138,20 +148,26 @@ final class ActivityData
      */
     public function getHeartRatePoints(): array
     {
-        $points = [];
-        foreach ($this->getDataPoints() as $point) {
+        return iterator_to_array($this->yieldHeartRatePoints());
+    }
+
+    /**
+     * @return \Generator<array{timestamp: string, value: int}>
+     */
+    private function yieldHeartRatePoints(): \Generator
+    {
+        foreach ($this->yieldDataPoints() as $point) {
             if (null === $point['heart_rate']) {
                 continue;
             }
+
             $heartRate = $point['heart_rate'];
 
-            $points[] = [
+            yield [
                 'timestamp' => $point['timestamp'],
                 'value' => $heartRate->value,
             ];
         }
-
-        return $points;
     }
 
     public function hasVelocityData(): bool
@@ -227,9 +243,8 @@ final class ActivityData
                 $velocities[] = $point['velocity']->metersPerSecond;
             }
         }
-        $max = !empty($velocities) ? max($velocities) : 0;
 
-        return new Velocity($max);
+        return Velocity::max($velocities);
     }
 
     /**

@@ -12,6 +12,14 @@ final readonly class Velocity
     {
     }
 
+    /** @param float[] $velocities */
+    public static function max(array $velocities): self
+    {
+        $max = !empty($velocities) ? max($velocities) : 0;
+
+        return new self($max);
+    }
+
     public function asSpeed(): Speed
     {
         return new Speed($this->metersPerSecond, SpeedUnit::METER_PER_SECOND);
