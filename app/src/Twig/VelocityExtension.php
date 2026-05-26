@@ -17,11 +17,11 @@ final class VelocityExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('format_velocity', $this->formatVelocity(...)),
+            new TwigFilter('format_velocity', self::formatVelocity(...)),
         ];
     }
 
-    public function formatVelocity(Velocity $velocity, string $activityType): string
+    public static function formatVelocity(Velocity $velocity, string $activityType): string
     {
         return match ($activityType) {
             'Run', 'Walk', 'Hike', 'Swim' => (string) $velocity->asPace(),
