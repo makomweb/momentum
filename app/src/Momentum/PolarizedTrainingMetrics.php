@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Momentum;
 
 final readonly class PolarizedTrainingMetrics
 {

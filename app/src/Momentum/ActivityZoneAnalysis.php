@@ -2,12 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
-
-use App\Momentum\HeartRateZone;
-use App\Momentum\PaceZone;
-use App\Momentum\ZoneSession;
-use App\Momentum\ZoneValidator;
+namespace App\Momentum;
 
 final readonly class ActivityZoneAnalysis
 {

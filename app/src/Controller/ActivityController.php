@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Momentum\ActivityZoneAnalysis;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
@@ -121,7 +122,7 @@ final class ActivityController extends AbstractController
         $paceZoneSessions = $tracker->getPaceZoneSessions();
         $hrZoneSessions = $tracker->getHeartRateZoneSessions();
 
-        $analysis = new \App\Strava\ActivityZoneAnalysis(
+        $analysis = new ActivityZoneAnalysis(
             paceZoneSessions: $paceZoneSessions,
             heartRateZoneSessions: $hrZoneSessions,
             totalActivitySeconds: (int) $movingTimeInterval->format('%s'),
@@ -237,7 +238,7 @@ final class ActivityController extends AbstractController
             $paceZoneSessions = $tracker->getPaceZoneSessions();
             $hrZoneSessions = $tracker->getHeartRateZoneSessions();
 
-            $zoneAnalysis = new \App\Strava\ActivityZoneAnalysis(
+            $zoneAnalysis = new ActivityZoneAnalysis(
                 paceZoneSessions: $paceZoneSessions,
                 heartRateZoneSessions: $hrZoneSessions,
                 totalActivitySeconds: (int) $movingTimeInterval->format('%s'),

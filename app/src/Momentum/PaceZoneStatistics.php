@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
-
-use App\Momentum\PaceZone;
-use App\Momentum\ZoneSession;
+namespace App\Momentum;
 
 final readonly class PaceZoneStatistics
 {
