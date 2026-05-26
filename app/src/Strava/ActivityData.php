@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\Pace;
+use App\Momentum\ZoneSession;
+use App\Momentum\ZoneTransitionTracker;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
 use App\Strava\API\HeartRate;
@@ -177,7 +180,7 @@ final class ActivityData
         if (empty($points)) {
             return 0;
         }
-        $sum = array_sum(array_map(fn ($p) => $p['value'], $points));
+        $sum = array_sum(array_map(fn ($point) => $point['value'], $points));
 
         return (int) round($sum / count($points));
     }
@@ -189,7 +192,7 @@ final class ActivityData
             return 0;
         }
 
-        return max(array_map(fn ($p) => $p['value'], $points));
+        return max(array_map(fn ($point) => $point['value'], $points));
     }
 
     public function getVelocityAverage(): Velocity
@@ -230,13 +233,13 @@ final class ActivityData
     }
 
     /**
-     * @return \App\Momentum\ZoneSession[]
+     * @return ZoneSession[]
      */
     public function getZoneSessions(
-        \App\Momentum\Pace $ftp,
+        Pace $ftp,
         ?int $maxHeartRate = null,
     ): array {
-        $tracker = new \App\Momentum\ZoneTransitionTracker();
+        $tracker = new ZoneTransitionTracker();
 
         foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
             $velocity = $point['velocity'];
@@ -276,7 +279,7 @@ final class ActivityData
     }
 
     /**
-     * @return \App\Momentum\ZoneSession[]
+     * @return ZoneSession[]
      */
     public function getHeartRateZoneSessions(?int $maxHeartRate = null): array
     {
@@ -288,9 +291,9 @@ final class ActivityData
             return [];
         }
 
-        $tracker = new \App\Momentum\ZoneTransitionTracker();
+        $tracker = new ZoneTransitionTracker();
         // Dummy FTP for HR zone tracking (not used in HR calculation)
-        $dummyFtp = new \App\Momentum\Pace(6.0);
+        $dummyFtp = new Pace(6.0);
 
         foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
             $heartRate = $point['heart_rate'];
@@ -300,7 +303,7 @@ final class ActivityData
             }
 
             // Use dummy pace (not used for HR zones)
-            $dummyPace = new \App\Momentum\Pace(6.0);
+            $dummyPace = new Pace(6.0);
 
             $tracker->processPoint(
                 timestamp: $point['timestamp'],
