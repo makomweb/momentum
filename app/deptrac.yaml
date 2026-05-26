@@ -9,8 +9,6 @@ deptrac:
       collectors:
         - type: classLike
           value: .*App\\Momentum\\.*
-        - type: classLike
-          value: .*App\\Assert\\.*
     - name: Generic
       collectors:
         - type: classLike

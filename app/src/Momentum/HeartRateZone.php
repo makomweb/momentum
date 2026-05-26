@@ -28,11 +28,6 @@ enum HeartRateZone: string
         };
     }
 
-    public function getName(): string
-    {
-        return $this->value;
-    }
-
     public function getColor(): string
     {
         return match ($this) {
