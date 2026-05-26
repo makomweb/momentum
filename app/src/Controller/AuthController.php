@@ -21,7 +21,7 @@ final class AuthController extends AbstractController
     public function login(): Response
     {
         if ($this->getUser()) {
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('activities');
         }
 
         return $this->render('auth/login.html.twig', [

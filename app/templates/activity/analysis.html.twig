@@ -567,7 +567,7 @@
                                         {% set zone = stat.zone %}
                                         {% set percentage = stat.duration_percentage %}
                                         <div class="zone-row">
-                                            <div class="zone-name">{{ zone.getName() }}</div>
+                                            <div class="zone-name">{{ zone.value }}</div>
                                             <div class="zone-bar">
                                                 <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
                                             </div>
@@ -585,7 +585,7 @@
                                             {% set zone = stat.zone %}
                                             {% set percentage = stat.duration_percentage %}
                                             <div class="zone-row">
-                                                <div class="zone-name">{{ zone.getName() }}</div>
+                                                <div class="zone-name">{{ zone.value }}</div>
                                                 <div class="zone-bar">
                                                     <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
                                                 </div>
@@ -610,7 +610,7 @@
                                 <div class="timeline-list">
                                     {% for session in paceStats.getZoneSessions() %}
                                         <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
-                                            <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.getName() }}</div>
+                                            <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
                                             <div class="timeline-meta">
                                                 <span>{{ session.startTime | local_date('H:i:s') }}</span>
                                                 <span>→ {{ '%02d:%02d' | format((session.durationSeconds // 60), (session.durationSeconds % 60)) }}</span>
@@ -775,7 +775,7 @@
             {% set confirmedPaceSessions = zoneAnalysis.getConfirmedPaceZoneSessions() %}
             {% for session in confirmedPaceSessions %}
                 {
-                    name: '{{ session.zone.getName() }}',
+                    name: '{{ session.zone.value }}',
                     startTime: '{{ session.startTime.format('H:i:s') }}',
                     endTime: '{{ session.endTime.format('H:i:s') }}',
                     color: '{{ session.zone.getColor() }}'
@@ -860,7 +860,7 @@
             {% set hrZoneSessions = zoneAnalysis.getHeartRateZoneStatistics().getZoneSessions() %}
             {% for session in hrZoneSessions %}
                 {
-                    name: '{{ session.zone.getName() }}',
+                    name: '{{ session.zone.value }}',
                     startTime: '{{ session.startTime.format('H:i:s') }}',
                     endTime: '{{ session.endTime.format('H:i:s') }}',
                     color: '{{ session.zone.getColor() }}'
