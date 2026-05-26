@@ -6,8 +6,10 @@ namespace App\Momentum;
 
 final readonly class Pace implements \Stringable
 {
-    public function __construct(public float $value, public PaceUnit $unit = PaceUnit::MINUTES_PER_KILOMETER)
-    {
+    public function __construct(
+        public float $value,
+        public PaceUnit $unit = PaceUnit::MINUTES_PER_KILOMETER,
+    ) {
     }
 
     public function isZero(): bool
