@@ -11,13 +11,13 @@ final readonly class ActivityStreamDownloader
 {
     public function __construct(
         private HttpClientInterface $httpClient,
-        private TokenProviderInterface $tokenProvider,
+        private TokenCacheInterface $tokenCache,
     ) {
     }
 
     public function download(int $stravaUserId, int $activityId): ActivityStream
     {
-        $token = $this->tokenProvider->getToken($stravaUserId);
+        $token = $this->tokenCache->getToken($stravaUserId);
 
         Assert::that(!$token->isExpired(), new TokenExpiredException($stravaUserId));
 

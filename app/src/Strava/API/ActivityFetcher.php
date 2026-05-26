@@ -11,7 +11,7 @@ final readonly class ActivityFetcher
 {
     public function __construct(
         private HttpClientInterface $httpClient,
-        private TokenProviderInterface $tokenProvider,
+        private TokenCacheInterface $tokenCache,
     ) {
     }
 
@@ -27,7 +27,7 @@ final readonly class ActivityFetcher
         ?int $after = null,
         ?int $before = null,
     ): array {
-        $token = $this->tokenProvider->getToken($stravaUserId);
+        $token = $this->tokenCache->getToken($stravaUserId);
 
         Assert::that(!$token->isExpired(), new TokenExpiredException($stravaUserId));
 

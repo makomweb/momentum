@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Async\Handler;
 
 use App\Async\Message\SyncActivitiesMessage;
+use App\Strava\API\Client;
 use App\Strava\API\TokenExpiredException;
-use App\Strava\Client;
 use App\Strava\Synchronizer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;

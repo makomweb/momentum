@@ -7,10 +7,10 @@ namespace App\Strava;
 use App\Momentum\Assert\Assert;
 use App\Strava\API\MissingTokenException;
 use App\Strava\API\Token;
-use App\Strava\API\TokenProviderInterface;
+use App\Strava\API\TokenCacheInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-final readonly class TokenCache implements TokenProviderInterface
+final readonly class TokenCache implements TokenCacheInterface
 {
     public function __construct(private CacheItemPoolInterface $pool)
     {
