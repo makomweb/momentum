@@ -17,63 +17,6 @@ final readonly class ActivityZoneAnalysis
     ) {
     }
 
-    /**
-     * Get pace zone sessions that are confirmed by matching HR zones.
-     * Filters out false positives (e.g., high pace spikes with low HR).
-     *
-     * @return ZoneSession[]
-     */
-    public function getConfirmedPaceZoneSessions(): array
-    {
-        $confirmed = [];
-
-        foreach ($this->paceZoneSessions as $paceSession) {
-            // Find all HR sessions that overlap with this pace session
-            $overlappingHrZones = $this->getOverlappingHrZones(
-                $paceSession->startTime,
-                $paceSession->endTime,
-            );
-
-            // Check if the pace zone is confirmed by any overlapping HR zone
-            $isConfirmed = false;
-            foreach ($overlappingHrZones as $hrZone) {
-                if ($paceSession->zone instanceof PaceZone && ZoneValidator::isPaceZoneConfirmed($paceSession->zone, $hrZone)) {
-                    $isConfirmed = true;
-                    break;
-                }
-            }
-
-            if ($isConfirmed) {
-                $confirmed[] = $paceSession;
-            }
-        }
-
-        return $confirmed;
-    }
-
-    /**
-     * Get which HR zones were active during a time period.
-     *
-     * @return HeartRateZone[]
-     */
-    private function getOverlappingHrZones(
-        \DateTimeImmutable $startTime,
-        \DateTimeImmutable $endTime,
-    ): array {
-        $zones = [];
-
-        foreach ($this->heartRateZoneSessions as $session) {
-            // Check if session overlaps with the time window
-            if ($session->endTime > $startTime && $session->startTime < $endTime) {
-                if ($session->zone instanceof HeartRateZone) {
-                    $zones[$session->zone->value] = $session->zone;
-                }
-            }
-        }
-
-        return array_values($zones);
-    }
-
     public function getPaceZoneStatistics(): PaceZoneStatistics
     {
         return PaceZoneStatistics::fromSessions($this->paceZoneSessions, $this->totalActivitySeconds);
@@ -107,5 +50,39 @@ final readonly class ActivityZoneAnalysis
             hardSeconds: $hardTime,
             totalSeconds: $this->totalActivitySeconds,
         );
+    }
+
+    /**
+     * Get pace zone sessions that are confirmed by matching HR zones.
+     * Filters out false positives (e.g., high pace spikes with low HR).
+     *
+     * @return ZoneSession[]
+     */
+    public function getConfirmedPaceZoneSessions(): array
+    {
+        $confirmed = [];
+
+        foreach ($this->paceZoneSessions as $paceSession) {
+            // Find all HR sessions that overlap with this pace session
+            $overlappingHrZones = ActiveHeartRateZones::getZones($this->heartRateZoneSessions,
+                $paceSession->startTime,
+                $paceSession->endTime,
+            );
+
+            // Check if the pace zone is confirmed by any overlapping HR zone
+            $isConfirmed = false;
+            foreach ($overlappingHrZones as $hrZone) {
+                if ($paceSession->zone instanceof PaceZone && ZoneValidator::isPaceZoneConfirmed($paceSession->zone, $hrZone)) {
+                    $isConfirmed = true;
+                    break;
+                }
+            }
+
+            if ($isConfirmed) {
+                $confirmed[] = $paceSession;
+            }
+        }
+
+        return $confirmed;
     }
 }
