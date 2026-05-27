@@ -340,17 +340,28 @@
         }
 
         .zone-card {
-            background: #f8fafc;
+            background: white;
             border: 1px solid #e6ebf2;
-            border-radius: 12px;
-            padding: 1rem;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .zone-card-header {
+            padding: 0.8rem 1.1rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #f0f2f5;
         }
 
         .zone-card-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
-            margin-bottom: 0.8rem;
             color: #333;
+            margin: 0;
+        }
+
+        .zone-card-body {
+            padding: 1rem 1.1rem;
         }
 
         .zone-list {
@@ -398,32 +409,42 @@
             gap: 0.9rem;
         }
 
-        .zone-note {
-            background: #e8f5e9;
-            padding: 0.9rem 1rem;
-            border-radius: 10px;
-            border-left: 3px solid #4caf50;
+        .zone-analysis-note {
             font-size: 0.88rem;
-            color: #2e7d32;
+            color: #667085;
+            line-height: 1.5;
+            margin-top: 0.3rem;
         }
 
-        .zone-note-title {
+        .zone-analysis-note-label {
             font-weight: 600;
-            margin-bottom: 0.2rem;
+            color: #4a5568;
+            margin-right: 0.35rem;
         }
 
         .timeline-card {
-            background: #fbfcfe;
+            background: white;
             border: 1px solid #e6ebf2;
-            border-radius: 12px;
-            padding: 1rem;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .timeline-card-header {
+            padding: 0.8rem 1.1rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #f0f2f5;
         }
 
         .timeline-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
-            margin-bottom: 0.8rem;
             color: #333;
+            margin: 0;
+        }
+
+        .timeline-card-body {
+            padding: 0.5rem;
         }
 
         .timeline-list {
@@ -612,7 +633,7 @@
                     <div>
                         <div class="zone-analysis-kicker">Priority insight</div>
                         <div class="chart-title" style="margin-bottom: 0.35rem;">🎯 Training Zones</div>
-                        <p class="zone-analysis-subtitle">Zone distribution and transitions are surfaced first so the training load is visible before the detailed charts.</p>
+                        <p class="zone-analysis-note"><span class="zone-analysis-note-label">Zone Validation</span>Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.</p>
                     </div>
                 </div>
 
@@ -660,27 +681,12 @@
 
                         <div class="zone-columns">
                             <div class="zone-card">
-                                <h3 class="zone-card-title">⏱️ Pace Zones</h3>
-                                <div class="zone-list">
-                                    {% for zoneKey, stat in paceStats.all() %}
-                                        {% set zone = stat.zone %}
-                                        {% set percentage = stat.duration_percentage %}
-                                        <div class="zone-row">
-                                            <div class="zone-name">{{ zone.value }}</div>
-                                            <div class="zone-bar">
-                                                <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
-                                            </div>
-                                            <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
-                                        </div>
-                                    {% endfor %}
+                                <div class="zone-card-header">
+                                    <h3 class="zone-card-title">⏱️ Pace Zones</h3>
                                 </div>
-                            </div>
-
-                            {% if hrStats %}
-                                <div class="zone-card">
-                                    <h3 class="zone-card-title">❤️ Heart Rate Zones</h3>
+                                <div class="zone-card-body">
                                     <div class="zone-list">
-                                        {% for zoneKey, stat in hrStats.all() %}
+                                        {% for zoneKey, stat in paceStats.all() %}
                                             {% set zone = stat.zone %}
                                             {% set percentage = stat.duration_percentage %}
                                             <div class="zone-row">
@@ -693,29 +699,51 @@
                                         {% endfor %}
                                     </div>
                                 </div>
+                            </div>
+
+                            {% if hrStats %}
+                                <div class="zone-card">
+                                    <div class="zone-card-header">
+                                        <h3 class="zone-card-title">❤️ Heart Rate Zones</h3>
+                                    </div>
+                                    <div class="zone-card-body">
+                                        <div class="zone-list">
+                                            {% for zoneKey, stat in hrStats.all() %}
+                                                {% set zone = stat.zone %}
+                                                {% set percentage = stat.duration_percentage %}
+                                                <div class="zone-row">
+                                                    <div class="zone-name">{{ zone.value }}</div>
+                                                    <div class="zone-bar">
+                                                        <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
+                                                    </div>
+                                                    <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
 
                     <div class="zone-analysis-side">
-                        <div class="zone-note">
-                            <div class="zone-note-title">ℹ️ Zone Validation</div>
-                            <div>Hard zones (Threshold, VO2max) are validated by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones are used for training calculations.</div>
-                        </div>
-
                         {% if paceStats.getZoneSessions() | length > 0 %}
                             <div class="timeline-card">
-                                <h3 class="timeline-title">Pace Zone Transitions</h3>
-                                <div class="timeline-list">
-                                    {% for session in paceStats.getZoneSessions() %}
-                                        <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
-                                            <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
-                                            <div class="timeline-meta">
-                                                <span>{{ session.startTime | local_date('H:i:s') }}</span>
-                                                <span>→ {{ '%02d:%02d' | format((session.durationSeconds // 60), (session.durationSeconds % 60)) }}</span>
+                                <div class="timeline-card-header">
+                                    <h3 class="timeline-title">⏱ Pace Zone Transitions</h3>
+                                </div>
+                                <div class="timeline-card-body">
+                                    <div class="timeline-list">
+                                        {% for session in paceStats.getZoneSessions() %}
+                                            <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
+                                                <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
+                                                <div class="timeline-meta">
+                                                    <span>{{ session.startTime | local_date('H:i:s') }}</span>
+                                                    <span>→ {{ '%02d:%02d' | format((session.durationSeconds // 60), (session.durationSeconds % 60)) }}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    {% endfor %}
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
                         {% endif %}
