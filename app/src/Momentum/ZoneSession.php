@@ -21,10 +21,6 @@ final readonly class ZoneSession
 
     public function isInZone(PaceZone|HeartRateZone $zone): bool
     {
-        return match (true) {
-            $this->zone instanceof PaceZone && $zone instanceof PaceZone => $this->zone === $zone,
-            $this->zone instanceof HeartRateZone && $zone instanceof HeartRateZone => $this->zone === $zone,
-            default => false,
-        };
+        return $this->zone === $zone;
     }
 }

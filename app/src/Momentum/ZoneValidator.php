@@ -30,23 +30,7 @@ final class ZoneValidator
                 HeartRateZone::ZONE_3 === $hrZone || HeartRateZone::ZONE_4 === $hrZone
             ),
             // Easy/Recovery pace zones are always valid
-            // (recovery pace with easy HR is expected during recovery runs)
             default => true,
-        };
-    }
-
-    /**
-     * Get the recommended HR zone for a pace zone.
-     * Used when we only have pace data.
-     */
-    public static function getExpectedHrZoneForPaceZone(PaceZone $paceZone): string
-    {
-        return match ($paceZone) {
-            PaceZone::ZONE_1 => 'Zone 1-2 (Recovery/Easy)',
-            PaceZone::ZONE_2 => 'Zone 2-3 (Easy/Aerobic)',
-            PaceZone::ZONE_3 => 'Zone 3-4 (Aerobic/Threshold)',
-            PaceZone::ZONE_4 => 'Zone 4-5 (Threshold/VO2max)',
-            PaceZone::ZONE_5 => 'Zone 4-5 (Threshold/VO2max)',
         };
     }
 }

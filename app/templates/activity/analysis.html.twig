@@ -563,7 +563,7 @@
                             <div class="zone-card">
                                 <h3 class="zone-card-title">⏱️ Pace Zones</h3>
                                 <div class="zone-list">
-                                    {% for zoneKey, stat in paceStats.zoneStats %}
+                                    {% for zoneKey, stat in paceStats.all() %}
                                         {% set zone = stat.zone %}
                                         {% set percentage = stat.duration_percentage %}
                                         <div class="zone-row">
@@ -581,7 +581,7 @@
                                 <div class="zone-card">
                                     <h3 class="zone-card-title">❤️ Heart Rate Zones</h3>
                                     <div class="zone-list">
-                                        {% for zoneKey, stat in hrStats.zoneStats %}
+                                        {% for zoneKey, stat in hrStats.all() %}
                                             {% set zone = stat.zone %}
                                             {% set percentage = stat.duration_percentage %}
                                             <div class="zone-row">

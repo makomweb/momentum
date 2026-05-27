@@ -76,48 +76,12 @@ final readonly class ActivityZoneAnalysis
 
     public function getPaceZoneStatistics(): PaceZoneStatistics
     {
-        $stats = [];
-
-        foreach (PaceZone::cases() as $zone) {
-            $timeInZone = 0;
-            foreach ($this->paceZoneSessions as $session) {
-                if ($session->isInZone($zone)) {
-                    $timeInZone += $session->durationSeconds;
-                }
-            }
-            $stats[$zone->value] = [
-                'zone' => $zone,
-                'duration_seconds' => $timeInZone,
-                'duration_percentage' => $this->totalActivitySeconds > 0
-                    ? ($timeInZone / $this->totalActivitySeconds) * 100
-                    : 0.0,
-            ];
-        }
-
-        return new PaceZoneStatistics($stats, $this->totalActivitySeconds, $this->paceZoneSessions);
+        return PaceZoneStatistics::fromSessions($this->paceZoneSessions, $this->totalActivitySeconds);
     }
 
     public function getHeartRateZoneStatistics(): HeartRateZoneStatistics
     {
-        $stats = [];
-
-        foreach (HeartRateZone::cases() as $zone) {
-            $timeInZone = 0;
-            foreach ($this->heartRateZoneSessions as $session) {
-                if ($session->isInZone($zone)) {
-                    $timeInZone += $session->durationSeconds;
-                }
-            }
-            $stats[$zone->value] = [
-                'zone' => $zone,
-                'duration_seconds' => $timeInZone,
-                'duration_percentage' => $this->totalActivitySeconds > 0
-                    ? ($timeInZone / $this->totalActivitySeconds) * 100
-                    : 0.0,
-            ];
-        }
-
-        return new HeartRateZoneStatistics($stats, $this->totalActivitySeconds, $this->heartRateZoneSessions);
+        return HeartRateZoneStatistics::fromSessions($this->heartRateZoneSessions, $this->totalActivitySeconds);
     }
 
     /**

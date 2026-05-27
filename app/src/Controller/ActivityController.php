@@ -144,7 +144,7 @@ final class ActivityController extends AbstractController
                     'duration_seconds' => $zone['duration_seconds'],
                     'duration_percentage' => round($zone['duration_percentage'], 2),
                 ],
-                $paceStats->zoneStats
+                $paceStats->all()
             ),
             'heart_rate_zones' => array_map(
                 fn (array $zone) => [
@@ -152,7 +152,7 @@ final class ActivityController extends AbstractController
                     'duration_seconds' => $zone['duration_seconds'],
                     'duration_percentage' => round($zone['duration_percentage'], 2),
                 ],
-                $hrStats->zoneStats
+                $hrStats->all()
             ),
             'polarized_training' => [
                 'easy_seconds' => $polarized->easySeconds,
