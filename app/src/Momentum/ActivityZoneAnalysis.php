@@ -11,9 +11,9 @@ final readonly class ActivityZoneAnalysis
      * @param ZoneSession[] $heartRateZoneSessions
      */
     public function __construct(
-        public array $paceZoneSessions,
-        public array $heartRateZoneSessions,
-        public int $totalActivitySeconds,
+        private array $paceZoneSessions,
+        private array $heartRateZoneSessions,
+        private int $totalActivitySeconds,
     ) {
     }
 
@@ -60,29 +60,8 @@ final readonly class ActivityZoneAnalysis
      */
     public function getConfirmedPaceZoneSessions(): array
     {
-        $confirmed = [];
+        $yielder = new YieldConfirmedPaceZoneSessions($this->paceZoneSessions, $this->heartRateZoneSessions);
 
-        foreach ($this->paceZoneSessions as $paceSession) {
-            // Find all HR sessions that overlap with this pace session
-            $overlappingHrZones = ActiveHeartRateZones::getZones($this->heartRateZoneSessions,
-                $paceSession->startTime,
-                $paceSession->endTime,
-            );
-
-            // Check if the pace zone is confirmed by any overlapping HR zone
-            $isConfirmed = false;
-            foreach ($overlappingHrZones as $hrZone) {
-                if ($paceSession->zone instanceof PaceZone && ZoneValidator::isPaceZoneConfirmed($paceSession->zone, $hrZone)) {
-                    $isConfirmed = true;
-                    break;
-                }
-            }
-
-            if ($isConfirmed) {
-                $confirmed[] = $paceSession;
-            }
-        }
-
-        return $confirmed;
+        return iterator_to_array($yielder->yieldSessions());
     }
 }

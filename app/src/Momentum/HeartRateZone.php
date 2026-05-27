@@ -38,4 +38,18 @@ enum HeartRateZone: string
             self::ZONE_5 => '#8e24aa', // Purple - Maximum/Sprinting
         };
     }
+
+    public function confirms(PaceZone $paceZone): bool
+    {
+        return match (true) {
+            // Hard pace zones (Threshold, VO2max) need hard HR zones (Threshold, Maximum)
+            in_array($paceZone, [PaceZone::ZONE_4, PaceZone::ZONE_5]) => in_array($this, [self::ZONE_4, self::ZONE_5]),
+
+            // Tempo pace zone accepts HR zones 3-4 (Aerobic/Moderate to Threshold/Hard)
+            PaceZone::ZONE_3 === $paceZone => in_array($this, [self::ZONE_3, self::ZONE_4]),
+
+            // Easy/Recovery pace zones are always valid
+            default => true,
+        };
+    }
 }
