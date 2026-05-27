@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Momentum\ActivityZoneAnalysis;
+use App\Momentum\ZoneAnalysis;
+use App\Momentum\ZoneTransitionTracker;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
@@ -79,7 +80,7 @@ final class ActivityController extends AbstractController
         }
 
         // Create zone sessions from the activity stream
-        $tracker = new \App\Momentum\ZoneTransitionTracker();
+        $tracker = new ZoneTransitionTracker();
 
         $startDate = $activity->getStartDateLocalTime();
 
@@ -122,7 +123,7 @@ final class ActivityController extends AbstractController
         $paceZoneSessions = $tracker->getPaceZoneSessions();
         $hrZoneSessions = $tracker->getHeartRateZoneSessions();
 
-        $analysis = new ActivityZoneAnalysis(
+        $analysis = new ZoneAnalysis(
             paceZoneSessions: $paceZoneSessions,
             heartRateZoneSessions: $hrZoneSessions,
             totalActivitySeconds: (int) $movingTimeInterval->format('%s'),
@@ -194,12 +195,12 @@ final class ActivityController extends AbstractController
         $activityData = new ActivityData($activity, $stream);
         $metaData = $activityData->getMetaData();
 
-        $zoneAnalysis = null;
+        $analysis = null;
         $ftp = $user->getFtp();
         $maxHeartRate = $user->getMaxHeartRate();
 
         if (!$ftp->isZero()) {
-            $tracker = new \App\Momentum\ZoneTransitionTracker();
+            $tracker = new ZoneTransitionTracker();
             $startDate = $activity->getStartDateLocalTime();
 
             foreach ($stream->yield($startDate, 50) as $point) {
@@ -238,7 +239,7 @@ final class ActivityController extends AbstractController
             $paceZoneSessions = $tracker->getPaceZoneSessions();
             $hrZoneSessions = $tracker->getHeartRateZoneSessions();
 
-            $zoneAnalysis = new ActivityZoneAnalysis(
+            $analysis = new ZoneAnalysis(
                 paceZoneSessions: $paceZoneSessions,
                 heartRateZoneSessions: $hrZoneSessions,
                 totalActivitySeconds: (int) $movingTimeInterval->format('%s'),
@@ -248,7 +249,7 @@ final class ActivityController extends AbstractController
         return $this->render('activity/analysis.html.twig', [
             'activityData' => $activityData,
             'metaData' => $metaData,
-            'zoneAnalysis' => $zoneAnalysis,
+            'zoneAnalysis' => $analysis,
         ]);
     }
 }

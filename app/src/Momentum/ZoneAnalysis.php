@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class ActivityZoneAnalysis
+final readonly class ZoneAnalysis
 {
     /**
      * @param ZoneSession[] $paceZoneSessions
@@ -25,6 +25,19 @@ final readonly class ActivityZoneAnalysis
     public function getHeartRateZoneStatistics(): HeartRateZoneStatistics
     {
         return HeartRateZoneStatistics::fromSessions($this->heartRateZoneSessions, $this->totalActivitySeconds);
+    }
+
+    /**
+     * Get pace zone sessions that are confirmed by matching HR zones.
+     * Filters out false positives (e.g., high pace spikes with low HR).
+     *
+     * @return ZoneSession[]
+     */
+    public function getConfirmedPaceZoneSessions(): array
+    {
+        $yielder = new YieldConfirmedPaceZoneSessions($this->paceZoneSessions, $this->heartRateZoneSessions);
+
+        return iterator_to_array($yielder->yieldSessions());
     }
 
     /**
@@ -50,18 +63,5 @@ final readonly class ActivityZoneAnalysis
             hardSeconds: $hardTime,
             totalSeconds: $this->totalActivitySeconds,
         );
-    }
-
-    /**
-     * Get pace zone sessions that are confirmed by matching HR zones.
-     * Filters out false positives (e.g., high pace spikes with low HR).
-     *
-     * @return ZoneSession[]
-     */
-    public function getConfirmedPaceZoneSessions(): array
-    {
-        $yielder = new YieldConfirmedPaceZoneSessions($this->paceZoneSessions, $this->heartRateZoneSessions);
-
-        return iterator_to_array($yielder->yieldSessions());
     }
 }

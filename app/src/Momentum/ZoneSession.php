@@ -28,7 +28,7 @@ final readonly class ZoneSession
 
         // Find all HR zones that overlap with this pace session
         $hrZones = new ExtractHeartRateZones($sessions)->for($this);
-        
+
         foreach ($hrZones as $hrZone) {
             if ($hrZone->confirms($this->zone)) {
                 return true;
