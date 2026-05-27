@@ -221,34 +221,116 @@
         }
 
         .zone-summary-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
-            padding: 1rem 1.1rem;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
+            background: white;
+            border-radius: 14px;
+            border: 1px solid #e6ebf2;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .zone-summary-card--balanced {
+            border-color: rgba(76, 175, 80, 0.3);
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.14);
+        }
+
+        .zone-summary-card--unbalanced {
+            border-color: rgba(255, 152, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(255, 152, 0, 0.14);
+        }
+
+        .zone-summary-header {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.8rem 1.1rem;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .zone-summary-card--balanced .zone-summary-header {
+            background: linear-gradient(135deg, #f1f8f1 0%, #e8f5e9 100%);
+        }
+
+        .zone-summary-card--unbalanced .zone-summary-header {
+            background: linear-gradient(135deg, #fffbf2 0%, #fff3e0 100%);
+        }
+
+        .zone-summary-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .zone-summary-card--balanced .zone-summary-badge {
+            background: rgba(76, 175, 80, 0.12);
+            color: #2e7d32;
+            border: 1px solid rgba(76, 175, 80, 0.35);
+        }
+
+        .zone-summary-card--unbalanced .zone-summary-badge {
+            background: rgba(255, 152, 0, 0.12);
+            color: #b45309;
+            border: 1px solid rgba(255, 152, 0, 0.35);
+        }
+
+        .zone-summary-hint {
+            font-size: 0.8rem;
+            color: #667085;
+            line-height: 1.35;
+        }
+
+        .zone-summary-body {
+            padding: 1rem 1rem;
         }
 
         .zone-summary-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.75rem;
+            gap: 0.65rem;
         }
 
-        .zone-summary-metric {
+        .zone-summary-metric-inner {
+            background: #f8fafc;
+            border: 1px solid #e6ebf2;
+            border-radius: 10px;
+            padding: 0.75rem 0.5rem 0.65rem;
             text-align: center;
         }
 
         .zone-summary-label {
-            font-size: 0.75rem;
-            color: #666;
-            margin-bottom: 0.35rem;
+            font-size: 0.66rem;
+            color: #8892a4;
+            margin-bottom: 0.45rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
+            font-weight: 600;
         }
 
         .zone-summary-value {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.6rem;
+            font-weight: 800;
             line-height: 1;
+            margin-bottom: 0.55rem;
+        }
+
+        .zone-summary-bar {
+            height: 5px;
+            background: #eaecf0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 0.1rem;
+        }
+
+        .zone-summary-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            opacity: 0.85;
         }
 
         .zone-columns {
@@ -536,24 +618,41 @@
 
                 <div class="zone-analysis-layout">
                     <div class="zone-analysis-main">
-                        <div class="zone-summary-card" style="border-left-color: {% if metrics.isBalanced() %}#4caf50{% else %}#ff9800{% endif %};">
-                            <div class="zone-summary-grid">
-                                <div class="zone-summary-metric">
-                                    <div class="zone-summary-label">Easy (Zones 1-2)</div>
-                                    <div class="zone-summary-value" style="color: #2196f3;">
-                                        {{ metrics.getEasyPercentage() | number_format(1, '.') }}%
+                        <div class="zone-summary-card {% if metrics.isBalanced() %}zone-summary-card--balanced{% else %}zone-summary-card--unbalanced{% endif %}">
+                            <div class="zone-summary-header">
+                                <span class="zone-summary-badge">
+                                    {% if metrics.isBalanced() %}✅ Balanced{% else %}⚠️ Unbalanced{% endif %}
+                                </span>
+                                <span class="zone-summary-hint">
+                                    {% if metrics.isBalanced() %}
+                                        Good balance of easy aerobic base and hard quality work.
+                                    {% else %}
+                                        Shift more volume into easy (Z1–2) or hard (Z4–5) zones.
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="zone-summary-body">
+                                <div class="zone-summary-grid">
+                                    <div class="zone-summary-metric-inner">
+                                        <div class="zone-summary-label">Easy · Z1–2</div>
+                                        <div class="zone-summary-value" style="color: #2196f3;">{{ metrics.getEasyPercentage() | number_format(1, '.') }}%</div>
+                                        <div class="zone-summary-bar">
+                                            <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getEasyPercentage(), 100) | number_format(1, '.') }}%; background: #2196f3;"></div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="zone-summary-metric">
-                                    <div class="zone-summary-label">Tempo (Zone 3)</div>
-                                    <div class="zone-summary-value" style="color: #ff9800;">
-                                        {{ metrics.getTempoPercentage() | number_format(1, '.') }}%
+                                    <div class="zone-summary-metric-inner">
+                                        <div class="zone-summary-label">Tempo · Z3</div>
+                                        <div class="zone-summary-value" style="color: #ff9800;">{{ metrics.getTempoPercentage() | number_format(1, '.') }}%</div>
+                                        <div class="zone-summary-bar">
+                                            <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getTempoPercentage(), 100) | number_format(1, '.') }}%; background: #ff9800;"></div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="zone-summary-metric">
-                                    <div class="zone-summary-label">Hard (Zones 4-5)</div>
-                                    <div class="zone-summary-value" style="color: #f44336;">
-                                        {{ metrics.getHardPercentage() | number_format(1, '.') }}%
+                                    <div class="zone-summary-metric-inner">
+                                        <div class="zone-summary-label">Hard · Z4–5</div>
+                                        <div class="zone-summary-value" style="color: #f44336;">{{ metrics.getHardPercentage() | number_format(1, '.') }}%</div>
+                                        <div class="zone-summary-bar">
+                                            <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getHardPercentage(), 100) | number_format(1, '.') }}%; background: #f44336;"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
