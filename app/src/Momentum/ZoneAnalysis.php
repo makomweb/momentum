@@ -41,27 +41,13 @@ final readonly class ZoneAnalysis
     }
 
     /**
-     * Get polarized training metrics: % easy (zones 1-2) vs hard (zones 4-5).
+     * Get training metrics: % easy (zones 1-2) vs tempo vs hard (zones 4-5).
      * Uses only confirmed pace zones to avoid false positives.
      */
-    public function getPolarizedTrainingMetrics(): PolarizedTrainingMetrics
+    public function getTrainingMetrics(): TrainingMetrics
     {
-        $confirmedSessions = $this->getConfirmedPaceZoneSessions();
-        $easyTime = 0;
-        $hardTime = 0;
+        $sessions = $this->getConfirmedPaceZoneSessions();
 
-        foreach ($confirmedSessions as $session) {
-            if ($session->isInZone(PaceZone::ZONE_1) || $session->isInZone(PaceZone::ZONE_2)) {
-                $easyTime += $session->durationSeconds;
-            } elseif ($session->isInZone(PaceZone::ZONE_4) || $session->isInZone(PaceZone::ZONE_5)) {
-                $hardTime += $session->durationSeconds;
-            }
-        }
-
-        return new PolarizedTrainingMetrics(
-            easySeconds: $easyTime,
-            hardSeconds: $hardTime,
-            totalSeconds: $this->totalActivitySeconds,
-        );
+        return TrainingMetrics::fromSessions($sessions, $this->totalActivitySeconds);
     }
 }

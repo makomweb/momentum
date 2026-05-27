@@ -524,7 +524,7 @@
         {% if zoneAnalysis %}
             {% set paceStats = zoneAnalysis.getPaceZoneStatistics() %}
             {% set hrStats = zoneAnalysis.getHeartRateZoneStatistics() %}
-            {% set polarized = zoneAnalysis.getPolarizedTrainingMetrics() %}
+            {% set metrics = zoneAnalysis.getTrainingMetrics() %}
             <div class="chart-container zone-analysis-panel">
                 <div class="zone-analysis-header">
                     <div>
@@ -536,24 +536,24 @@
 
                 <div class="zone-analysis-layout">
                     <div class="zone-analysis-main">
-                        <div class="zone-summary-card" style="border-left-color: {% if polarized.isPolarized() %}#4caf50{% else %}#ff9800{% endif %};">
+                        <div class="zone-summary-card" style="border-left-color: {% if metrics.isBalanced() %}#4caf50{% else %}#ff9800{% endif %};">
                             <div class="zone-summary-grid">
                                 <div class="zone-summary-metric">
                                     <div class="zone-summary-label">Easy (Zones 1-2)</div>
                                     <div class="zone-summary-value" style="color: #2196f3;">
-                                        {{ polarized.getEasyPercentage() | number_format(1, '.') }}%
+                                        {{ metrics.getEasyPercentage() | number_format(1, '.') }}%
                                     </div>
                                 </div>
                                 <div class="zone-summary-metric">
                                     <div class="zone-summary-label">Tempo (Zone 3)</div>
                                     <div class="zone-summary-value" style="color: #ff9800;">
-                                        {{ polarized.getTempoPercentage() | number_format(1, '.') }}%
+                                        {{ metrics.getTempoPercentage() | number_format(1, '.') }}%
                                     </div>
                                 </div>
                                 <div class="zone-summary-metric">
                                     <div class="zone-summary-label">Hard (Zones 4-5)</div>
                                     <div class="zone-summary-value" style="color: #f44336;">
-                                        {{ polarized.getHardPercentage() | number_format(1, '.') }}%
+                                        {{ metrics.getHardPercentage() | number_format(1, '.') }}%
                                     </div>
                                 </div>
                             </div>

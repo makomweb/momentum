@@ -131,7 +131,7 @@ final class ActivityController extends AbstractController
 
         $paceStats = $analysis->getPaceZoneStatistics();
         $hrStats = $analysis->getHeartRateZoneStatistics();
-        $polarized = $analysis->getPolarizedTrainingMetrics();
+        $metrics = $analysis->getTrainingMetrics();
 
         return $this->json([
             'activity' => [
@@ -156,13 +156,12 @@ final class ActivityController extends AbstractController
                 $hrStats->all()
             ),
             'polarized_training' => [
-                'easy_seconds' => $polarized->easySeconds,
-                'easy_percentage' => round($polarized->getEasyPercentage(), 2),
-                'tempo_seconds' => (int) ($polarized->totalSeconds - $polarized->easySeconds - $polarized->hardSeconds),
-                'tempo_percentage' => round($polarized->getTempoPercentage(), 2),
-                'hard_seconds' => $polarized->hardSeconds,
-                'hard_percentage' => round($polarized->getHardPercentage(), 2),
-                'is_polarized' => $polarized->isPolarized(),
+                'easy_seconds' => $metrics->easySeconds,
+                'easy_percentage' => round($metrics->getEasyPercentage(), 2),
+                'tempo_seconds' => $metrics->getTempoSeconds(),
+                'tempo_percentage' => round($metrics->getTempoPercentage(), 2),
+                'hard_seconds' => $metrics->hardSeconds,
+                'hard_percentage' => round($metrics->getHardPercentage(), 2),
             ],
         ]);
     }
