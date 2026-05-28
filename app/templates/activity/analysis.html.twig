@@ -708,9 +708,9 @@
                                     </div>
                                     <div class="zone-card-body">
                                         <div class="zone-list">
-                                            {% for zoneKey, stat in hrStats.all() %}
+                                            {% for zoneKey, stat in hrStats.statistics %}
                                                 {% set zone = stat.zone %}
-                                                {% set percentage = stat.duration_percentage %}
+                                                {% set percentage = stat.getDurationPercentage() %}
                                                 <div class="zone-row">
                                                     <div class="zone-name">{{ zone.value }}</div>
                                                     <div class="zone-bar">
@@ -984,7 +984,7 @@
         
         {% if zoneAnalysis %}
         heartRateData.zoneColors = [
-            {% set hrZoneSessions = zoneAnalysis.getHeartRateZoneStatistics().getZoneSessions() %}
+            {% set hrZoneSessions = zoneAnalysis.heartRateZoneSessions %}
             {% for session in hrZoneSessions %}
                 {
                     name: '{{ session.zone.value }}',

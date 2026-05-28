@@ -61,9 +61,9 @@ final class ZoneTransitionTrackerTest extends TestCase
         $sessions = $this->tracker->getPaceZoneSessions();
 
         self::assertCount(2, $sessions, 'Should have 2 pace zone sessions');
-        self::assertTrue($sessions[0]->isInZone(PaceZone::ZONE_2));
+        self::assertTrue($sessions[0]->isEqual(PaceZone::ZONE_2));
         self::assertEquals(60, $sessions[0]->durationSeconds);
-        self::assertTrue($sessions[1]->isInZone(PaceZone::ZONE_5));
+        self::assertTrue($sessions[1]->isEqual(PaceZone::ZONE_5));
         self::assertEquals(60, $sessions[1]->durationSeconds);
     }
 
@@ -105,9 +105,9 @@ final class ZoneTransitionTrackerTest extends TestCase
         $sessions = $this->tracker->getHeartRateZoneSessions();
 
         self::assertCount(2, $sessions, 'Should have 2 heart rate zone sessions');
-        self::assertTrue($sessions[0]->isInZone(HeartRateZone::ZONE_2));
+        self::assertTrue($sessions[0]->isEqual(HeartRateZone::ZONE_2));
         self::assertEquals(50, $sessions[0]->durationSeconds);
-        self::assertTrue($sessions[1]->isInZone(HeartRateZone::ZONE_4));
+        self::assertTrue($sessions[1]->isEqual(HeartRateZone::ZONE_4));
         self::assertEquals(50, $sessions[1]->durationSeconds);
     }
 
@@ -142,13 +142,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         $sessions = $this->tracker->getPaceZoneSessions();
 
         self::assertCount(4, $sessions, 'Should have 4 pace zone sessions');
-        self::assertTrue($sessions[0]->isInZone(PaceZone::ZONE_2));
+        self::assertTrue($sessions[0]->isEqual(PaceZone::ZONE_2));
         self::assertEquals(30, $sessions[0]->durationSeconds);
-        self::assertTrue($sessions[1]->isInZone(PaceZone::ZONE_3));
+        self::assertTrue($sessions[1]->isEqual(PaceZone::ZONE_3));
         self::assertEquals(40, $sessions[1]->durationSeconds);
-        self::assertTrue($sessions[2]->isInZone(PaceZone::ZONE_5));
+        self::assertTrue($sessions[2]->isEqual(PaceZone::ZONE_5));
         self::assertEquals(20, $sessions[2]->durationSeconds);
-        self::assertTrue($sessions[3]->isInZone(PaceZone::ZONE_2));
+        self::assertTrue($sessions[3]->isEqual(PaceZone::ZONE_2));
         self::assertEquals(35, $sessions[3]->durationSeconds);
     }
 
@@ -205,8 +205,8 @@ final class ZoneTransitionTrackerTest extends TestCase
 
         self::assertCount(1, $paceSessions);
         self::assertCount(1, $hrSessions);
-        self::assertTrue($paceSessions[0]->isInZone(PaceZone::ZONE_2));
-        self::assertTrue($hrSessions[0]->isInZone(HeartRateZone::ZONE_4));
+        self::assertTrue($paceSessions[0]->isEqual(PaceZone::ZONE_2));
+        self::assertTrue($hrSessions[0]->isEqual(HeartRateZone::ZONE_4));
     }
 
     public function test_no_heart_rate_data(): void

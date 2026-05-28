@@ -29,7 +29,7 @@ final readonly class PaceZoneStatistics
         foreach (PaceZone::cases() as $zone) {
             $timeInZone = 0;
             foreach ($sessions as $session) {
-                if ($session->isInZone($zone)) {
+                if ($session->isEqual($zone)) {
                     $timeInZone += $session->durationSeconds;
                 }
             }

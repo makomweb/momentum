@@ -52,8 +52,7 @@ final readonly class ZoneSession
         return in_array($this->zone, [PaceZone::ZONE_4, PaceZone::ZONE_5]);
     }
 
-    // TODO: Get rid of this method!
-    public function isInZone(PaceZone|HeartRateZone $zone): bool
+    public function isEqual(PaceZone|HeartRateZone $zone): bool
     {
         return $this->zone === $zone;
     }

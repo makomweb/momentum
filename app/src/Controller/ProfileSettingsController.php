@@ -31,13 +31,14 @@ final class ProfileSettingsController extends AbstractController
         $user = $this->getUser();
         assert($user instanceof User);
 
-        dump('Current user is:', ['Name' => $user->getName(), 'Strava ID' => $user->getId()]);
-
         $errors = [];
         $ftp = $user->getFtp();
         $maxHeartRate = $user->getMaxHeartRate();
 
-        dump('Configuration is:', ['FTP' => $ftp, 'max HR' => $maxHeartRate]);
+        dump('Logged in user:', [
+            'Name' => $user->getName(), 'Strava ID' => $user->getStravaId(),
+            'FTP' => $ftp, 'max HR' => $maxHeartRate]
+        );
 
         if ('POST' === $request->getMethod()) {
             $submittedToken = (string) $request->request->get('_token', '');

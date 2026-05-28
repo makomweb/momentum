@@ -11,9 +11,9 @@ final readonly class ZoneAnalysis
      * @param ZoneSession[] $heartRateZoneSessions
      */
     public function __construct(
-        private array $paceZoneSessions,
-        private array $heartRateZoneSessions,
-        private int $totalActivitySeconds,
+        public array $paceZoneSessions,
+        public array $heartRateZoneSessions,
+        public int $totalActivitySeconds,
     ) {
     }
 
