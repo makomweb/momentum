@@ -59,8 +59,8 @@ class MovingAverageTest extends TestCase
         $heartRateAvg = $last['heart_rate_avg'];
 
         self::assertNotNull($heartRateAvg);
-        self::assertGreaterThan(60.0, $heartRateAvg->value);
-        self::assertLessThan(180.0, $heartRateAvg->value);
+        self::assertGreaterThan(60.0, $heartRateAvg->bpm);
+        self::assertLessThan(180.0, $heartRateAvg->bpm);
         self::assertEquals(
             0,
             date_diff(
@@ -94,13 +94,13 @@ class MovingAverageTest extends TestCase
 
             $heartRate = $data['heart_rate'];
             self::assertNotNull($heartRate);
-            self::assertGreaterThan(60.0, $heartRate->value);
-            self::assertLessThan(180.0, $heartRate->value);
+            self::assertGreaterThan(60.0, $heartRate->bpm);
+            self::assertLessThan(180.0, $heartRate->bpm);
 
             $heartRateAvg = $data['heart_rate_avg'];
             self::assertNotNull($heartRateAvg);
-            self::assertGreaterThanOrEqual(0.0, $heartRateAvg->value);
-            self::assertLessThan(180.0, $heartRateAvg->value);
+            self::assertGreaterThanOrEqual(0.0, $heartRateAvg->bpm);
+            self::assertLessThan(180.0, $heartRateAvg->bpm);
 
             $velocity = $data['velocity'];
             self::assertNotNull($velocity);

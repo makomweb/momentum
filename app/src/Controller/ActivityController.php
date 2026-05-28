@@ -110,7 +110,7 @@ final class ActivityController extends AbstractController
                 timestamp: $point['timestamp'],
                 pace: $pace,
                 ftp: $ftp,
-                heartRate: $heartRate?->value,
+                heartRate: $heartRate?->bpm,
                 maxHeartRate: $maxHeartRate,
             );
         }
@@ -219,7 +219,7 @@ final class ActivityController extends AbstractController
                     timestamp: $point['timestamp'],
                     pace: $pace,
                     ftp: $ftp,
-                    heartRate: $heartRate?->value,
+                    heartRate: $heartRate?->bpm,
                     maxHeartRate: $maxHeartRate,
                 );
             }

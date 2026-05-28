@@ -165,7 +165,7 @@ final class ActivityData
 
             yield [
                 'timestamp' => $point['timestamp'],
-                'value' => $heartRate->value,
+                'value' => $heartRate->bpm,
             ];
         }
     }
@@ -281,7 +281,7 @@ final class ActivityData
                 timestamp: $point['timestamp'],
                 pace: $pace,
                 ftp: $ftp,
-                heartRate: $heartRate?->value,
+                heartRate: $heartRate?->bpm,
                 maxHeartRate: $maxHeartRate,
             );
         }
@@ -324,7 +324,7 @@ final class ActivityData
                 timestamp: $point['timestamp'],
                 pace: $dummyPace,
                 ftp: $dummyFtp,
-                heartRate: $heartRate->value,
+                heartRate: $heartRate->bpm,
                 maxHeartRate: $maxHeartRate,
             );
         }
