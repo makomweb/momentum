@@ -17,14 +17,14 @@ final readonly class ZoneAnalysis
     ) {
     }
 
-    public function getPaceZoneStatistics(): PaceZoneStatistics
+    public function getPaceZoneStatistics(): ZoneStatistics
     {
-        return PaceZoneStatistics::fromSessions($this->paceZoneSessions, $this->totalActivitySeconds);
+        return ZoneStatistics::fromSessions($this->paceZoneSessions, $this->totalActivitySeconds, PaceZone::cases());
     }
 
-    public function getHeartRateZoneStatistics(): HeartRateZoneStatistics
+    public function getHeartRateZoneStatistics(): ZoneStatistics
     {
-        return HeartRateZoneStatistics::fromSessions($this->heartRateZoneSessions, $this->totalActivitySeconds);
+        return ZoneStatistics::fromSessions($this->heartRateZoneSessions, $this->totalActivitySeconds, HeartRateZone::cases());
     }
 
     /**

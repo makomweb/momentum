@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class HeartRateZoneDuration
+final readonly class ZoneDuration
 {
     public function __construct(
-        public HeartRateZone $zone,
+        public PaceZone|HeartRateZone $zone,
         public int $seconds,
         public int $totalSeconds,
     ) {

@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Momentum\HeartRateZoneDuration;
-use App\Momentum\PaceZoneDuration;
 use App\Momentum\ZoneAnalysis;
+use App\Momentum\ZoneDuration;
 use App\Momentum\ZoneTransitionTracker;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
@@ -142,11 +141,11 @@ final class ActivityController extends AbstractController
                 'start_date' => $startDate->format('c'),
             ],
             'pace_zones' => array_map(
-                fn (PaceZoneDuration $paceZoneDuration) => $paceZoneDuration->toArray(),
+                fn (ZoneDuration $zoneDuration) => $zoneDuration->toArray(),
                 $paceStats->statistics
             ),
             'heart_rate_zones' => array_map(
-                fn (HeartRateZoneDuration $zoneDuration) => $zoneDuration->toArray(),
+                fn (ZoneDuration $zoneDuration) => $zoneDuration->toArray(),
                 $hrStats->statistics
             ),
             'polarized_training' => [
