@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Momentum\AthleteInterface;
+use App\Momentum\HeartRate;
 use App\Momentum\Pace;
 use App\Strava\API\Athlete;
-use App\Strava\API\HeartRate;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;

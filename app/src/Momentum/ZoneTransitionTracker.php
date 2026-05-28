@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-use App\Strava\API\HeartRate;
-
 final readonly class ZoneTransitionTracker
 {
     private ZoneTracker $paceTracker;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit;
 
+use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceZone;
 use App\Momentum\ZoneTransitionTracker;
-use App\Strava\API\HeartRate;
 use App\Strava\API\Velocity;
 use PHPUnit\Framework\TestCase;
 

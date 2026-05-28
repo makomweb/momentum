@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit;
 
 use App\Momentum\AthleteInterface;
+use App\Momentum\HeartRate;
 use App\Momentum\Pace;
-use App\Strava\API\HeartRate;
 
 trait AthleteFactory
 {

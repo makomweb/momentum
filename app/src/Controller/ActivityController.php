@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Momentum\HeartRate;
 use App\Momentum\ZoneAnalysis;
 use App\Momentum\ZoneDuration;
 use App\Momentum\ZoneTransitionTracker;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
-use App\Strava\API\HeartRate;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;

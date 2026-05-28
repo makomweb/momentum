@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Strava\API;
-
-use App\Momentum\HeartRateZone;
+namespace App\Momentum;
 
 final readonly class HeartRate implements \Stringable
 {

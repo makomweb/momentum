@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\HeartRate;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
-use App\Strava\API\HeartRate;
 use App\Strava\API\SpeedUnit;
 use App\Strava\API\Velocity;
 

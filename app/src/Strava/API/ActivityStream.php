@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Momentum\HeartRate;
 use App\Momentum\MovingAverage;
 
 final readonly class ActivityStream
