@@ -6,66 +6,41 @@ namespace App\Momentum;
 
 final readonly class PaceZoneStatistics
 {
-    /** @var array<string, array{zone: PaceZone, duration_seconds: int, duration_percentage: float}> */
-    private array $stats;
+    /** @param array<string, PaceZoneDuration> $statistics */
+    private function __construct(public array $statistics = [], public int $totalSeconds = 0)
+    {
+    }
 
     /**
-     * @param array<string, array{zone: PaceZone, duration_seconds: int, duration_percentage: float}> $stats
-     * @param ZoneSession[]                                                                           $sessions
+     * @param ZoneSession[] $sessions
      */
-    private function __construct(
-        array $stats,
-        public int $totalSeconds,
-        private array $sessions,
-    ) {
-        $this->stats = $stats;
-    }
-
-    /** @param ZoneSession[] $sessions */
     public static function fromSessions(array $sessions, int $totalSeconds): self
     {
-        $stats = [];
+        /** @var array<string, PaceZoneDuration> $statistics */
+        $statistics = array_map(
+            static fn (PaceZone $zone) => array_reduce(
+                $sessions,
+                static fn (PaceZoneDuration $carry, ZoneSession $session) => $carry->add($session),
+                new PaceZoneDuration($zone, 0, $totalSeconds)
+            ),
+            PaceZone::cases()
+        );
 
-        foreach (PaceZone::cases() as $zone) {
-            $timeInZone = 0;
-            foreach ($sessions as $session) {
-                if ($session->isEqual($zone)) {
-                    $timeInZone += $session->durationSeconds;
-                }
-            }
-            $stats[$zone->value] = [
-                'zone' => $zone,
-                'duration_seconds' => $timeInZone,
-                'duration_percentage' => $totalSeconds > 0 ? ($timeInZone / $totalSeconds) * 100 : 0.0,
-            ];
-        }
-
-        return new self($stats, $totalSeconds, $sessions);
+        return new self($statistics, $totalSeconds);
     }
 
-    public function getTimeInZone(PaceZone $zone): int
+    public function getDurationInZone(PaceZone $zone): int
     {
-        return $this->stats[$zone->value]['duration_seconds'] ?? 0;
+        return $this->getDuration($zone)->seconds;
     }
 
     public function getPercentageInZone(PaceZone $zone): float
     {
-        return $this->stats[$zone->value]['duration_percentage'] ?? 0.0;
+        return $this->getDuration($zone)->getDurationPercentage();
     }
 
-    /**
-     * @return array<string, array{zone: PaceZone, duration_seconds: int, duration_percentage: float}>
-     */
-    public function all(): array
+    private function getDuration(PaceZone $zone): PaceZoneDuration
     {
-        return $this->stats;
-    }
-
-    /**
-     * @return ZoneSession[]
-     */
-    public function getZoneSessions(): array
-    {
-        return $this->sessions;
+        return $this->statistics[$zone->value];
     }
 }

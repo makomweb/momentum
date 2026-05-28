@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Momentum\HeartRateZoneDuration;
+use App\Momentum\PaceZoneDuration;
 use App\Momentum\ZoneAnalysis;
 use App\Momentum\ZoneTransitionTracker;
 use App\Repository\ActivityRepository;
@@ -141,12 +142,8 @@ final class ActivityController extends AbstractController
                 'start_date' => $startDate->format('c'),
             ],
             'pace_zones' => array_map(
-                fn (array $zone) => [
-                    'zone' => $zone['zone']->value,
-                    'duration_seconds' => $zone['duration_seconds'],
-                    'duration_percentage' => round($zone['duration_percentage'], 2),
-                ],
-                $paceStats->all()
+                fn (PaceZoneDuration $paceZoneDuration) => $paceZoneDuration->toArray(),
+                $paceStats->statistics
             ),
             'heart_rate_zones' => array_map(
                 fn (HeartRateZoneDuration $zoneDuration) => $zoneDuration->toArray(),

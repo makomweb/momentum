@@ -686,9 +686,9 @@
                                 </div>
                                 <div class="zone-card-body">
                                     <div class="zone-list">
-                                        {% for zoneKey, stat in paceStats.all() %}
+                                        {% for zoneKey, stat in paceStats.statistics %}
                                             {% set zone = stat.zone %}
-                                            {% set percentage = stat.duration_percentage %}
+                                            {% set percentage = stat.getDurationPercentage() %}
                                             <div class="zone-row">
                                                 <div class="zone-name">{{ zone.value }}</div>
                                                 <div class="zone-bar">
@@ -727,14 +727,14 @@
                     </div>
 
                     <div class="zone-analysis-side">
-                        {% if paceStats.getZoneSessions() | length > 0 %}
+                        {% if zoneAnalysis.paceZoneSessions | length > 0 %}
                             <div class="timeline-card">
                                 <div class="timeline-card-header">
                                     <h3 class="timeline-title">⏱ Pace Zone Transitions</h3>
                                 </div>
                                 <div class="timeline-card-body">
                                     <div class="timeline-list">
-                                        {% for session in paceStats.getZoneSessions() %}
+                                        {% for session in zoneAnalysis.paceZoneSessions %}
                                             <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
                                                 <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
                                                 <div class="timeline-meta">
