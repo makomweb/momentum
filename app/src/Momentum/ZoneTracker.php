@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-/**
- * Tracks time spent in a single zone type (pace or heart rate).
- * Handles gap detection and zone session recording.
- */
 final class ZoneTracker
 {
     private const int GAP_THRESHOLD = 10; // seconds
@@ -17,7 +13,7 @@ final class ZoneTracker
     private ?\DateTimeImmutable $lastPointTimestamp = null;
 
     /** @var ZoneSession[] */
-    public array $sessions = [];
+    private array $sessions = [];
 
     public function record(PaceZone|HeartRateZone $zone, \DateTimeImmutable $timestamp): void
     {
@@ -78,5 +74,11 @@ final class ZoneTracker
             endTime: $this->lastPointTimestamp,
             zone: $this->currentZone
         );
+    }
+
+    /** @return ZoneSession[] */
+    public function getSessions(): array
+    {
+        return $this->sessions;
     }
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final class ZoneTransitionTracker
+final readonly class ZoneTransitionTracker
 {
-    private readonly ZoneTracker $paceTracker;
-    private readonly ZoneTracker $heartRateTracker;
+    private ZoneTracker $paceTracker;
+    private ZoneTracker $heartRateTracker;
 
     public function __construct()
     {
@@ -40,7 +40,7 @@ final class ZoneTransitionTracker
      */
     public function getPaceZoneSessions(): array
     {
-        return $this->paceTracker->sessions;
+        return $this->paceTracker->getSessions();
     }
 
     /**
@@ -48,6 +48,6 @@ final class ZoneTransitionTracker
      */
     public function getHeartRateZoneSessions(): array
     {
-        return $this->heartRateTracker->sessions;
+        return $this->heartRateTracker->getSessions();
     }
 }
