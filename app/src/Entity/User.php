@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Momentum\AthleteInterface;
 use App\Momentum\Pace;
 use App\Strava\API\Athlete;
+use App\Strava\API\HeartRate;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
-final class User implements UserInterface, PasswordAuthenticatedUserInterface
+final class User implements UserInterface, PasswordAuthenticatedUserInterface, AthleteInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -33,7 +35,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $profilePictureMedium;
 
     #[ORM\Column]
-    private float $ftp;
+    private float $treshold;
 
     #[ORM\Column]
     private int $maxHeartRate;
@@ -48,7 +50,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->name = $name;
         $this->profilePicture = $profilePicture;
         $this->profilePictureMedium = $profilePictureMedium;
-        $this->ftp = 0.0;
+        $this->treshold = 0.0;
         $this->maxHeartRate = 0;
     }
 
@@ -119,23 +121,23 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return sprintf('%s (Strava ID: %d)', $this->name, $this->stravaId);
     }
 
-    public function getFtp(): Pace
+    public function getTreshold(): Pace
     {
-        return new Pace($this->ftp);
+        return new Pace($this->treshold);
     }
 
-    public function setFtp(Pace $ftp): void
+    public function setFtp(Pace $treshold): void
     {
-        $this->ftp = $ftp->value;
+        $this->treshold = $treshold->value;
     }
 
-    public function getMaxHeartRate(): int
+    public function getMaxHeartRate(): HeartRate
     {
-        return $this->maxHeartRate;
+        return new HeartRate($this->maxHeartRate);
     }
 
-    public function setMaxHeartRate(int $maxHeartRate): void
+    public function setMaxHeartRate(HeartRate $maxHeartRate): void
     {
-        $this->maxHeartRate = $maxHeartRate;
+        $this->maxHeartRate = $maxHeartRate->bpm;
     }
 }

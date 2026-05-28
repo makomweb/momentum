@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use App\Momentum\Pace;
-use App\Momentum\ZoneSession;
-use App\Momentum\ZoneTransitionTracker;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
 use App\Strava\API\HeartRate;

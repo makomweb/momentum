@@ -8,11 +8,14 @@ use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceZone;
 use App\Momentum\ZoneTransitionTracker;
+use App\Strava\API\HeartRate;
 use App\Strava\API\Velocity;
 use PHPUnit\Framework\TestCase;
 
 final class RealActivityZoneValidationTest extends TestCase
 {
+    use AthleteFactory;
+
     public function test_real_activity_vo2max_zone_validation(): void
     {
         // Load real activity data
@@ -38,23 +41,21 @@ final class RealActivityZoneValidationTest extends TestCase
 
         // User config
         $ftp = new Pace(6.0); // 6:00 min/km FTP
-        $maxHeartRate = 190;
+        $maxHeartRate = new HeartRate(190);
 
         // Process zones
-        $tracker = new ZoneTransitionTracker();
+        $tracker = ZoneTransitionTracker::for(self::createAthlete($ftp, $maxHeartRate));
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 
         for ($i = 0; $i < count($timeData); ++$i) {
             $timestamp = $startTime->add(new \DateInterval('PT'.((int) $timeData[$i]).'S'));
             $velocity = new Velocity((float) $velocityData[$i]);
-            $hr = null !== $hrData[$i] ? (int) $hrData[$i] : null;
+            $hr = null !== $hrData[$i] ? (int) $hrData[$i] : 0;
 
             $tracker->processPoint(
                 timestamp: $timestamp,
                 pace: $velocity->asPace(),
-                ftp: $ftp,
-                heartRate: $hr,
-                maxHeartRate: $maxHeartRate,
+                heartRate: new HeartRate($hr)
             );
         }
 
@@ -98,7 +99,7 @@ final class RealActivityZoneValidationTest extends TestCase
                     // );
 
                     // VO2max should have HR > 80% of max (>152 for 190 max)
-                    if ($maxHRInSession >= 0.80 * $maxHeartRate) {
+                    if ($maxHRInSession >= 0.80 * $maxHeartRate->bpm) {
                         $vo2maxWithHighHR += $session->getDurationSeconds();
                     }
                 }
@@ -124,9 +125,9 @@ final class RealActivityZoneValidationTest extends TestCase
         // A pace zone should only be confirmed if HR zone matches
 
         $ftp = new Pace(6.0);
-        $maxHeartRate = 190;
+        $maxHeartRate = new HeartRate(190);
 
-        $tracker = new ZoneTransitionTracker();
+        $tracker = ZoneTransitionTracker::for(self::createAthlete($ftp, $maxHeartRate));
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 
         // Scenario: Quick velocity spike (>VO2max pace) but low HR (Zone 1)
@@ -138,14 +139,12 @@ final class RealActivityZoneValidationTest extends TestCase
             $velocity = new Velocity(3.33);
 
             // But low HR: 95 bpm (50% of 190 = Zone 1 recovery)
-            $hr = 95;
+            $hr = new HeartRate(95);
 
             $tracker->processPoint(
                 timestamp: $timestamp,
                 pace: $velocity->asPace(),
-                ftp: $ftp,
-                heartRate: $hr,
-                maxHeartRate: $maxHeartRate,
+                heartRate: $hr
             );
         }
 

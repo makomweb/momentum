@@ -11,6 +11,7 @@ use App\Momentum\ZoneTransitionTracker;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
+use App\Strava\API\HeartRate;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -64,9 +65,6 @@ final class ActivityController extends AbstractController
             return $this->json(['error' => 'Activity not found'], 404);
         }
 
-        $ftp = $user->getFtp();
-        $maxHeartRate = $user->getMaxHeartRate();
-
         try {
             $stream = $this->streamCache->get(
                 $user->getStravaId(),
@@ -81,7 +79,7 @@ final class ActivityController extends AbstractController
         }
 
         // Create zone sessions from the activity stream
-        $tracker = new ZoneTransitionTracker();
+        $tracker = ZoneTransitionTracker::for($user);
 
         $startDate = $activity->getStartDateLocalTime();
 
@@ -109,9 +107,7 @@ final class ActivityController extends AbstractController
             $tracker->processPoint(
                 timestamp: $point['timestamp'],
                 pace: $pace,
-                ftp: $ftp,
-                heartRate: $heartRate?->bpm,
-                maxHeartRate: $maxHeartRate,
+                heartRate: $heartRate ?? new HeartRate(),
             );
         }
 
@@ -188,11 +184,10 @@ final class ActivityController extends AbstractController
         $metaData = $activityData->getMetaData();
 
         $analysis = null;
-        $ftp = $user->getFtp();
-        $maxHeartRate = $user->getMaxHeartRate();
+        $treshold = $user->getTreshold();
 
-        if (!$ftp->isZero()) {
-            $tracker = new ZoneTransitionTracker();
+        if (!$treshold->isZero()) {
+            $tracker = ZoneTransitionTracker::for($user);
             $startDate = $activity->getStartDateLocalTime();
 
             foreach ($stream->yield($startDate, 50) as $point) {
@@ -205,6 +200,7 @@ final class ActivityController extends AbstractController
 
                 $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
 
+                // Reject unreasonably slow velocities
                 if ($smoothedVelocity->metersPerSecond < 0.1) {
                     continue;
                 }
@@ -218,9 +214,7 @@ final class ActivityController extends AbstractController
                 $tracker->processPoint(
                     timestamp: $point['timestamp'],
                     pace: $pace,
-                    ftp: $ftp,
-                    heartRate: $heartRate?->bpm,
-                    maxHeartRate: $maxHeartRate,
+                    heartRate: $heartRate ?? new HeartRate(),
                 );
             }
 

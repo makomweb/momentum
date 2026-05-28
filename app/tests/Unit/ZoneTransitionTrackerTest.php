@@ -8,21 +8,27 @@ use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceZone;
 use App\Momentum\ZoneTransitionTracker;
+use App\Strava\API\HeartRate;
 use App\Strava\API\Velocity;
 use PHPUnit\Framework\TestCase;
 
 final class ZoneTransitionTrackerTest extends TestCase
 {
+    use AthleteFactory;
+
     private ZoneTransitionTracker $tracker;
-    private Pace $ftp;
-    private int $maxHeartRate;
+    private Pace $treshold;
+    private HeartRate $maxHeartRate;
 
     protected function setUp(): void
     {
-        $this->tracker = new ZoneTransitionTracker();
-        // FTP of 6:00 min/km = 360 seconds per km
-        $this->ftp = new Pace(6.0);
-        $this->maxHeartRate = 200;
+        // 6:00 min/km = 360 seconds per km
+        $this->treshold = new Pace(6.0);
+        $this->maxHeartRate = new HeartRate(200);
+
+        $this->tracker = ZoneTransitionTracker::for(
+            self::createAthlete($this->treshold, $this->maxHeartRate)
+        );
     }
 
     public function test_single_pace_zone_transition(): void
@@ -39,7 +45,6 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: $baseVelocity->asPace(),
-                ftp: $this->ftp,
             );
         }
 
@@ -51,8 +56,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 60; $i < 120; ++$i) {
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
-                pace: $fasterVelocity->asPace(),
-                ftp: $this->ftp,
+                pace: $fasterVelocity->asPace()
             );
         }
 
@@ -81,9 +85,7 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: $velocity->asPace(),
-                ftp: $this->ftp,
-                heartRate: 130,
-                maxHeartRate: $this->maxHeartRate,
+                heartRate: new HeartRate(130),
             );
         }
 
@@ -94,9 +96,7 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: $velocity->asPace(),
-                ftp: $this->ftp,
-                heartRate: 170,
-                maxHeartRate: $this->maxHeartRate,
+                heartRate: new HeartRate(170),
             );
         }
 
@@ -130,8 +130,7 @@ final class ZoneTransitionTrackerTest extends TestCase
             for ($i = 0; $i < $zone['duration']; ++$i) {
                 $this->tracker->processPoint(
                     timestamp: $startTime->add(new \DateInterval("PT{$timestamp}S")),
-                    pace: $zone['velocity']->asPace(),
-                    ftp: $this->ftp,
+                    pace: $zone['velocity']->asPace()
                 );
                 ++$timestamp;
             }
@@ -160,8 +159,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 100; ++$i) {
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
-                pace: $velocity->asPace(),
-                ftp: $this->ftp,
+                pace: $velocity->asPace()
             );
         }
 
@@ -192,9 +190,7 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: (new Velocity(2.381))->asPace(), // Zone 2 pace (7:00)
-                ftp: $this->ftp,
-                heartRate: 170,
-                maxHeartRate: $this->maxHeartRate,
+                heartRate: new HeartRate(170)
             );
         }
 
@@ -218,8 +214,7 @@ final class ZoneTransitionTrackerTest extends TestCase
             // Don't provide heart rate data
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
-                pace: $velocity->asPace(),
-                ftp: $this->ftp,
+                pace: $velocity->asPace()
             );
         }
 
@@ -237,7 +232,6 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: (new Velocity(2.381))->asPace(), // Zone 2 pace
-                ftp: $this->ftp,
             );
         }
 
@@ -245,7 +239,6 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: (new Velocity(3.03))->asPace(), // Zone 5 pace
-                ftp: $this->ftp,
             );
         }
 
@@ -269,7 +262,6 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: (new Velocity(2.381))->asPace(), // Zone 2 pace
-                ftp: $this->ftp,
             );
         }
 
@@ -279,7 +271,6 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: (new Velocity(2.381))->asPace(), // Zone 2 pace (same zone!)
-                ftp: $this->ftp,
             );
         }
 
@@ -302,9 +293,7 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: (new Velocity(2.381))->asPace(),
-                ftp: $this->ftp,
-                heartRate: 150,
-                maxHeartRate: $this->maxHeartRate,
+                heartRate: new HeartRate(150)
             );
         }
 
@@ -312,9 +301,7 @@ final class ZoneTransitionTrackerTest extends TestCase
             $this->tracker->processPoint(
                 timestamp: $startTime->add(new \DateInterval("PT{$i}S")),
                 pace: (new Velocity(2.381))->asPace(),
-                ftp: $this->ftp,
-                heartRate: 150,
-                maxHeartRate: $this->maxHeartRate,
+                heartRate: new HeartRate(150)
             );
         }
 

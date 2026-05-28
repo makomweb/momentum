@@ -4,28 +4,33 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
+use App\Strava\API\HeartRate;
+
 final readonly class ZoneTransitionTracker
 {
     private ZoneTracker $paceTracker;
     private ZoneTracker $heartRateTracker;
 
-    public function __construct()
+    private function __construct(private Pace $treshold, private HeartRate $maxHeartRate)
     {
         $this->paceTracker = new ZoneTracker();
         $this->heartRateTracker = new ZoneTracker();
     }
 
+    public static function for(AthleteInterface $athlete): self
+    {
+        return new self($athlete->getTreshold(), $athlete->getMaxHeartRate());
+    }
+
     public function processPoint(
         \DateTimeImmutable $timestamp,
         Pace $pace,
-        Pace $ftp,
-        ?int $heartRate = null,
-        ?int $maxHeartRate = null,
+        HeartRate $heartRate = new HeartRate(),
     ): void {
-        $this->paceTracker->record(PaceZone::calculate($pace, $ftp), $timestamp);
+        $this->paceTracker->record($pace->getZone($this->treshold), $timestamp);
 
-        if (null !== $heartRate && null !== $maxHeartRate && $maxHeartRate > 0) {
-            $this->heartRateTracker->record(HeartRateZone::calculate($heartRate, $maxHeartRate), $timestamp);
+        if ($heartRate->isValid() && $this->maxHeartRate->isValid()) {
+            $this->heartRateTracker->record($heartRate->getZone($this->maxHeartRate), $timestamp);
         }
     }
 

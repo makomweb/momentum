@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Momentum\Pace;
+use App\Strava\API\HeartRate;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,12 +33,12 @@ final class ProfileSettingsController extends AbstractController
         assert($user instanceof User);
 
         $errors = [];
-        $ftp = $user->getFtp();
+        $treshold = $user->getTreshold();
         $maxHeartRate = $user->getMaxHeartRate();
 
         dump('Logged in user:', [
             'Name' => $user->getName(), 'Strava ID' => $user->getStravaId(),
-            'FTP' => $ftp, 'max HR' => $maxHeartRate]
+            'Treshold' => $treshold, 'max HR' => $maxHeartRate]
         );
 
         if ('POST' === $request->getMethod()) {
@@ -60,16 +61,16 @@ final class ProfileSettingsController extends AbstractController
                 }
             }
 
-            $maxHeartRate = 0;
+            $maxHeartRate = new HeartRate();
             if ('' !== $maxHeartRateRaw) {
                 if (!ctype_digit($maxHeartRateRaw) || (int) $maxHeartRateRaw <= 0) {
                     $errors[] = 'Max heart rate must be a positive integer.';
                 } else {
-                    $maxHeartRate = (int) $maxHeartRateRaw;
+                    $maxHeartRate = new HeartRate((int) $maxHeartRateRaw);
                 }
             }
 
-            if ([] === $errors) {
+            if (empty($errors)) {
                 $user->setFtp($ftp);
                 $user->setMaxHeartRate($maxHeartRate);
 
@@ -88,7 +89,7 @@ final class ProfileSettingsController extends AbstractController
         }
 
         return $this->render('profile/settings.html.twig', [
-            'ftp' => $ftp,
+            'treshold' => $treshold,
             'maxHeartRate' => $maxHeartRate,
             'csrf_token' => $this->csrfTokenManager->getToken('profile_settings')->getValue(),
         ]);
