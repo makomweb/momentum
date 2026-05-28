@@ -40,7 +40,7 @@ final class ZoneTransitionTracker
      */
     public function getPaceZoneSessions(): array
     {
-        return $this->paceTracker->getSessions();
+        return $this->paceTracker->sessions;
     }
 
     /**
@@ -48,6 +48,6 @@ final class ZoneTransitionTracker
      */
     public function getHeartRateZoneSessions(): array
     {
-        return $this->heartRateTracker->getSessions();
+        return $this->heartRateTracker->sessions;
     }
 }

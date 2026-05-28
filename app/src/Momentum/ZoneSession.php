@@ -10,13 +10,17 @@ final readonly class ZoneSession
         public \DateTimeImmutable $startTime,
         public \DateTimeImmutable $endTime,
         public PaceZone|HeartRateZone $zone,
-        public int $durationSeconds,
     ) {
+    }
+
+    public function getDurationSeconds(): int
+    {
+        return $this->endTime->getTimestamp() - $this->startTime->getTimestamp();
     }
 
     public function getDurationPercentage(int $totalActivitySeconds): float
     {
-        return $totalActivitySeconds > 0 ? ($this->durationSeconds / $totalActivitySeconds) * 100 : 0.0;
+        return $totalActivitySeconds > 0 ? ($this->getDurationSeconds() / $totalActivitySeconds) * 100 : 0.0;
     }
 
     /**

@@ -71,7 +71,7 @@ final class RealActivityZoneValidationTest extends TestCase
 
         foreach ($paceSessions as $session) {
             if (PaceZone::ZONE_5 === $session->zone) {
-                $vo2maxTime += $session->durationSeconds;
+                $vo2maxTime += $session->getDurationSeconds();
                 $vo2maxSessions[] = $session;
 
                 // Check HR during this session
@@ -92,14 +92,14 @@ final class RealActivityZoneValidationTest extends TestCase
 
                     // echo sprintf(
                     //     "\nVO2max session %d secs: HR avg %.0f, max %d\n",
-                    //     $session->durationSeconds,
+                    //     $session->getDurationSeconds(),
                     //     $avgHRInSession,
                     //     $maxHRInSession
                     // );
 
                     // VO2max should have HR > 80% of max (>152 for 190 max)
                     if ($maxHRInSession >= 0.80 * $maxHeartRate) {
-                        $vo2maxWithHighHR += $session->durationSeconds;
+                        $vo2maxWithHighHR += $session->getDurationSeconds();
                     }
                 }
             }

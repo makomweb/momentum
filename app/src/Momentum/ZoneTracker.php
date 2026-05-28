@@ -17,14 +17,14 @@ final class ZoneTracker
     private ?\DateTimeImmutable $lastPointTimestamp = null;
 
     /** @var ZoneSession[] */
-    private array $sessions = [];
+    public array $sessions = [];
 
     public function record(PaceZone|HeartRateZone $zone, \DateTimeImmutable $timestamp): void
     {
         if (null !== $this->lastPointTimestamp) {
             $gap = $timestamp->getTimestamp() - $this->lastPointTimestamp->getTimestamp();
             if ($gap > self::GAP_THRESHOLD) {
-                $this->closeCurrentZone($this->lastPointTimestamp);
+                $this->closeCurrentZone();
                 $this->currentZone = $zone;
                 $this->zoneEnteredAt = $timestamp;
                 $this->lastPointTimestamp = $timestamp;
@@ -39,7 +39,7 @@ final class ZoneTracker
             return;
         }
 
-        $this->closeCurrentZone($timestamp);
+        $this->closeCurrentZone();
         $this->currentZone = $zone;
         $this->zoneEnteredAt = $timestamp;
     }
@@ -61,30 +61,22 @@ final class ZoneTracker
         $this->sessions[] = new ZoneSession(
             startTime: $this->zoneEnteredAt,
             endTime: $effectiveEnd,
-            zone: $this->currentZone,
-            durationSeconds: $effectiveEnd->getTimestamp() - $this->zoneEnteredAt->getTimestamp(),
+            zone: $this->currentZone
         );
     }
 
-    /**
-     * @return ZoneSession[]
-     */
-    public function getSessions(): array
-    {
-        return $this->sessions;
-    }
-
-    private function closeCurrentZone(\DateTimeImmutable $endTime): void
+    private function closeCurrentZone(): void
     {
         if (null === $this->currentZone || null === $this->zoneEnteredAt) {
             return;
         }
 
+        assert($this->lastPointTimestamp instanceof \DateTimeImmutable, 'Was not opened yet!');
+
         $this->sessions[] = new ZoneSession(
             startTime: $this->zoneEnteredAt,
-            endTime: $endTime,
-            zone: $this->currentZone,
-            durationSeconds: $endTime->getTimestamp() - $this->zoneEnteredAt->getTimestamp(),
+            endTime: $this->lastPointTimestamp,
+            zone: $this->currentZone
         );
     }
 }
