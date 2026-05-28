@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class YieldConfirmedPaceZoneSessions
+final readonly class ConfirmedPaceZoneSessions
 {
     /**
      * @param ZoneSession[] $paceZoneSessions

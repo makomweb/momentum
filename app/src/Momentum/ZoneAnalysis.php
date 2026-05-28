@@ -35,9 +35,9 @@ final readonly class ZoneAnalysis
      */
     public function getConfirmedPaceZoneSessions(): array
     {
-        $yielder = new YieldConfirmedPaceZoneSessions($this->paceZoneSessions, $this->heartRateZoneSessions);
+        $confirmed = new ConfirmedPaceZoneSessions($this->paceZoneSessions, $this->heartRateZoneSessions);
 
-        return iterator_to_array($yielder->yieldSessions());
+        return iterator_to_array($confirmed->yieldSessions());
     }
 
     /**

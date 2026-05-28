@@ -6,7 +6,7 @@ namespace App\Momentum;
 
 final class ZoneTracker
 {
-    private const int GAP_THRESHOLD = 10; // seconds
+    private const int GAP_THRESHOLD = 5; // seconds
 
     private PaceZone|HeartRateZone|null $currentZone = null;
     private ?\DateTimeImmutable $zoneEnteredAt = null;
