@@ -29,7 +29,7 @@ class MovingAverageTest extends TestCase
     {
         $start = new \DateTimeImmutable();
 
-        $items = array_values(iterator_to_array($this->stream->yield($start, period: 10)));
+        $items = array_values(iterator_to_array($this->stream->yield($start, movingAveragePeriod: 10)));
         assert(!empty($items));
 
         $last = array_last($items);
@@ -51,7 +51,7 @@ class MovingAverageTest extends TestCase
     {
         $start = new \DateTimeImmutable();
 
-        $items = array_values(iterator_to_array($this->stream->yield($start, period: 10)));
+        $items = array_values(iterator_to_array($this->stream->yield($start, movingAveragePeriod: 10)));
         assert(!empty($items));
 
         $last = array_last($items);
