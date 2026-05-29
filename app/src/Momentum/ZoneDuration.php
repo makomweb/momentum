@@ -16,7 +16,7 @@ final readonly class ZoneDuration
     public function add(ZoneSession $session): self
     {
         if ($session->isEqual($this->zone)) {
-            return new self($this->zone, $this->seconds + $session->getDurationSeconds(), $this->totalSeconds);
+            return new self($this->zone, $this->seconds + $session->getSeconds(), $this->totalSeconds);
         }
 
         return $this;

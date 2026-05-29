@@ -7,20 +7,20 @@ namespace App\Momentum;
 final readonly class ZoneSession
 {
     public function __construct(
-        public \DateTimeImmutable $startTime,
-        public \DateTimeImmutable $endTime,
         public PaceZone|HeartRateZone $zone,
+        public \DateTimeImmutable $start,
+        public \DateTimeImmutable $end,
     ) {
     }
 
-    public function getDurationSeconds(): int
+    public function getSeconds(): int
     {
-        return $this->endTime->getTimestamp() - $this->startTime->getTimestamp();
+        return $this->end->getTimestamp() - $this->start->getTimestamp();
     }
 
-    public function getDurationPercentage(int $totalActivitySeconds): float
+    public function getPercentage(int $total): float
     {
-        return $totalActivitySeconds > 0 ? ($this->getDurationSeconds() / $totalActivitySeconds) * 100 : 0.0;
+        return $total > 0 ? ($this->getSeconds() / $total) * 100 : 0.0;
     }
 
     /**

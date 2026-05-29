@@ -55,9 +55,9 @@ final class ZoneTracker
         }
 
         $this->sessions[] = new ZoneSession(
-            startTime: $this->zoneEnteredAt,
-            endTime: $effectiveEnd,
-            zone: $this->currentZone
+            zone: $this->currentZone,
+            start: $this->zoneEnteredAt,
+            end: $effectiveEnd
         );
     }
 
@@ -70,9 +70,9 @@ final class ZoneTracker
         assert($this->lastPointTimestamp instanceof \DateTimeImmutable, 'Was not opened yet!');
 
         $this->sessions[] = new ZoneSession(
-            startTime: $this->zoneEnteredAt,
-            endTime: $this->lastPointTimestamp,
-            zone: $this->currentZone
+            zone: $this->currentZone,
+            start: $this->zoneEnteredAt,
+            end: $this->lastPointTimestamp
         );
     }
 

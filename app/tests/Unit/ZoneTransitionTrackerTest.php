@@ -76,9 +76,9 @@ final class ZoneTransitionTrackerTest extends TestCase
 
         self::assertCount(2, $sessions, 'Should have 2 pace zone sessions');
         self::assertTrue($sessions[0]->isEqual(PaceZone::ZONE_2));
-        self::assertEquals(60, $sessions[0]->getDurationSeconds());
+        self::assertEquals(60, $sessions[0]->getSeconds());
         self::assertTrue($sessions[1]->isEqual(PaceZone::ZONE_5));
-        self::assertEquals(60, $sessions[1]->getDurationSeconds());
+        self::assertEquals(60, $sessions[1]->getSeconds());
     }
 
     public function test_heart_rate_zone_transition(): void
@@ -122,9 +122,9 @@ final class ZoneTransitionTrackerTest extends TestCase
 
         self::assertCount(2, $sessions, 'Should have 2 heart rate zone sessions');
         self::assertTrue($sessions[0]->isEqual(HeartRateZone::ZONE_2));
-        self::assertEquals(50, $sessions[0]->getDurationSeconds());
+        self::assertEquals(50, $sessions[0]->getSeconds());
         self::assertTrue($sessions[1]->isEqual(HeartRateZone::ZONE_4));
-        self::assertEquals(50, $sessions[1]->getDurationSeconds());
+        self::assertEquals(50, $sessions[1]->getSeconds());
     }
 
     public function test_multiple_transitions(): void
@@ -162,13 +162,13 @@ final class ZoneTransitionTrackerTest extends TestCase
 
         self::assertCount(4, $sessions, 'Should have 4 pace zone sessions');
         self::assertTrue($sessions[0]->isEqual(PaceZone::ZONE_2));
-        self::assertEquals(30, $sessions[0]->getDurationSeconds());
+        self::assertEquals(30, $sessions[0]->getSeconds());
         self::assertTrue($sessions[1]->isEqual(PaceZone::ZONE_3));
-        self::assertEquals(40, $sessions[1]->getDurationSeconds());
+        self::assertEquals(40, $sessions[1]->getSeconds());
         self::assertTrue($sessions[2]->isEqual(PaceZone::ZONE_5));
-        self::assertEquals(20, $sessions[2]->getDurationSeconds());
+        self::assertEquals(20, $sessions[2]->getSeconds());
         self::assertTrue($sessions[3]->isEqual(PaceZone::ZONE_2));
-        self::assertEquals(35, $sessions[3]->getDurationSeconds());
+        self::assertEquals(35, $sessions[3]->getSeconds());
     }
 
     public function test_zone_session_duration_percentage(): void
@@ -192,7 +192,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         $sessions = $this->tracker->getPaceZoneSessions();
         self::assertCount(1, $sessions);
 
-        $percentage = $sessions[0]->getDurationPercentage(100);
+        $percentage = $sessions[0]->getPercentage(100);
         self::assertEqualsWithDelta(100.0, $percentage, 0.01, 'Should be 100% of total time');
     }
 
@@ -287,10 +287,10 @@ final class ZoneTransitionTrackerTest extends TestCase
 
         $sessions = $this->tracker->getPaceZoneSessions();
 
-        self::assertEquals($startTime, $sessions[0]->startTime);
-        self::assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[0]->endTime);
-        self::assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[1]->startTime);
-        self::assertEquals($endTime, $sessions[1]->endTime);
+        self::assertEquals($startTime, $sessions[0]->start);
+        self::assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[0]->end);
+        self::assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[1]->start);
+        self::assertEquals($endTime, $sessions[1]->end);
     }
 
     public function test_gap_in_data_prevents_zone_extension(): void
@@ -331,8 +331,8 @@ final class ZoneTransitionTrackerTest extends TestCase
 
         // Should have 2 sessions due to gap, not 1 extended session
         self::assertCount(2, $sessions);
-        self::assertEquals(7, $sessions[0]->getDurationSeconds());
-        self::assertEquals(16, $sessions[1]->getDurationSeconds());
+        self::assertEquals(7, $sessions[0]->getSeconds());
+        self::assertEquals(16, $sessions[1]->getSeconds());
     }
 
     public function test_finalize_does_not_create_negative_duration_when_end_time_precedes_last_point(): void
@@ -368,9 +368,9 @@ final class ZoneTransitionTrackerTest extends TestCase
 
         self::assertSame(2, count($paceSessions));
         self::assertSame(2, count($heartRateSessions));
-        self::assertSame(9, $paceSessions[0]->getDurationSeconds());
-        self::assertSame(9, $paceSessions[1]->getDurationSeconds());
-        self::assertSame(9, $heartRateSessions[0]->getDurationSeconds());
-        self::assertSame(9, $heartRateSessions[1]->getDurationSeconds());
+        self::assertSame(9, $paceSessions[0]->getSeconds());
+        self::assertSame(9, $paceSessions[1]->getSeconds());
+        self::assertSame(9, $heartRateSessions[0]->getSeconds());
+        self::assertSame(9, $heartRateSessions[1]->getSeconds());
     }
 }

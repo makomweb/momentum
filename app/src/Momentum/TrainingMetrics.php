@@ -68,14 +68,14 @@ final readonly class TrainingMetrics
     {
         if ($session->isEasy()) {
             return new self(
-                $this->easySeconds + $session->getDurationSeconds(),
+                $this->easySeconds + $session->getSeconds(),
                 $this->hardSeconds,
                 $this->totalSeconds
             );
         } elseif ($session->isHard()) {
             return new self(
                 $this->easySeconds,
-                $this->hardSeconds + $session->getDurationSeconds(),
+                $this->hardSeconds + $session->getSeconds(),
                 $this->totalSeconds
             );
         }

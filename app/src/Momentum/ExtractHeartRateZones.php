@@ -22,10 +22,10 @@ final readonly class ExtractHeartRateZones
     {
         return array_reduce(
             $this->heartRateSessions,
-            new class($paceSession->startTime, $paceSession->endTime) {
+            new class($paceSession->start, $paceSession->end) {
                 public function __construct(
-                    private \DateTimeImmutable $startTime,
-                    private \DateTimeImmutable $endTime,
+                    private \DateTimeImmutable $start,
+                    private \DateTimeImmutable $end,
                 ) {
                 }
 
@@ -36,7 +36,7 @@ final readonly class ExtractHeartRateZones
                  */
                 public function reduce(array $carry, ZoneSession $session): array
                 {
-                    if ($session->endTime > $this->startTime && $session->startTime < $this->endTime) {
+                    if ($session->end > $this->start && $session->start < $this->end) {
                         if ($session->zone instanceof HeartRateZone) {
                             $carry[$session->zone->value] = $session->zone;
                         }
