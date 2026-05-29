@@ -49,7 +49,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => null,
                 'heart_rate_avg' => null,
                 'velocity' => $baseVelocity,
-                'velocity_avg' => null,
+                'velocity_avg' => $baseVelocity,
             ]));
         }
 
@@ -65,7 +65,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => null,
                 'heart_rate_avg' => null,
                 'velocity' => $fasterVelocity,
-                'velocity_avg' => null,
+                'velocity_avg' => $fasterVelocity,
             ]));
         }
 
@@ -97,7 +97,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => new HeartRate(130),
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
-                'velocity_avg' => null,
+                'velocity_avg' => $velocity,
             ]));
         }
 
@@ -111,7 +111,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => new HeartRate(170),
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
-                'velocity_avg' => null,
+                'velocity_avg' => $velocity,
             ]));
         }
 
@@ -149,7 +149,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                     'heart_rate' => null,
                     'heart_rate_avg' => null,
                     'velocity' => $zone['velocity'],
-                    'velocity_avg' => null,
+                    'velocity_avg' => $zone['velocity'],
                 ]));
                 ++$timestamp;
             }
@@ -182,7 +182,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => null,
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
-                'velocity_avg' => null,
+                'velocity_avg' => $velocity,
             ]));
         }
 
@@ -210,13 +210,14 @@ final class ZoneTransitionTrackerTest extends TestCase
 
         // Slow pace (Zone 2) with high HR (Zone 4)
         for ($i = 0; $i < 30; ++$i) {
+            $velocity = Velocity::create(new Pace(7.0));
             $this->tracker->processPoint(new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
                 'distance' => null,
                 'heart_rate' => new HeartRate(170),
                 'heart_rate_avg' => null,
-                'velocity' => Velocity::create(new Pace(7.0)), // Zone 2 pace (7:00)
-                'velocity_avg' => null,
+                'velocity' => $velocity,
+                'velocity_avg' => $velocity,
             ]));
         }
 
@@ -244,7 +245,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => null,
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
-                'velocity_avg' => null,
+                'velocity_avg' => $velocity,
             ]));
         }
 
@@ -265,7 +266,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => null,
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381), // Zone 2 pace
-                'velocity_avg' => null,
+                'velocity_avg' => new Velocity(2.381),
             ]));
         }
 
@@ -276,7 +277,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => null,
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(3.03), // Zone 5 pace
-                'velocity_avg' => null,
+                'velocity_avg' => new Velocity(3.03),
             ]));
         }
 
@@ -303,7 +304,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => null,
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381), // Zone 2 pace
-                'velocity_avg' => null,
+                'velocity_avg' => new Velocity(2.381),
             ]));
         }
 
@@ -316,7 +317,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => null,
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381), // Zone 2 pace (same zone!)
-                'velocity_avg' => null,
+                'velocity_avg' => new Velocity(2.381),
             ]));
         }
 
@@ -342,7 +343,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => new HeartRate(150),
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381),
-                'velocity_avg' => null,
+                'velocity_avg' => new Velocity(2.381),
             ]));
         }
 
@@ -353,7 +354,7 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate' => new HeartRate(150),
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381),
-                'velocity_avg' => null,
+                'velocity_avg' => new Velocity(2.381),
             ]));
         }
 

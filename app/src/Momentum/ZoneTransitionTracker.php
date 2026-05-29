@@ -22,7 +22,7 @@ final readonly class ZoneTransitionTracker
 
     public function processPoint(ActivityDataPoint $dataPoint): void
     {
-        $this->paceTracker->record($dataPoint->getVelocity()->asPace()->getZone($this->treshold), $dataPoint->getTimestamp());
+        $this->paceTracker->record($dataPoint->getVelocityAverage()->asPace()->getZone($this->treshold), $dataPoint->getTimestamp());
 
         if ($dataPoint->getHeartRate()->isValid() && $this->maxHeartRate->isValid()) {
             $this->heartRateTracker->record($dataPoint->getHeartRate()->getZone($this->maxHeartRate), $dataPoint->getTimestamp());
