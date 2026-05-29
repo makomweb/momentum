@@ -10,6 +10,7 @@ use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceZone;
 use App\Momentum\Velocity;
+use App\Momentum\ZoneTracker;
 use App\Momentum\ZoneTransitionTracker;
 use PHPUnit\Framework\TestCase;
 
@@ -308,9 +309,11 @@ final class ZoneTransitionTrackerTest extends TestCase
             ]));
         }
 
-        // Gap: no points from seconds 8-19 (> 10 second gap threshold)
-        // Resume with Zone 2 pace at second 20
-        for ($i = 20; $i <= 30; ++$i) {
+        self::assertEquals(5, ZoneTracker::GAP_THRESHOLD);
+
+        // Gap: no points from seconds 8-14 (> 5 second gap threshold)
+        // Resume with Zone 2 pace at second 15
+        for ($i = 15; $i <= 30; ++$i) {
             $this->tracker->processPoint(new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
                 'distance' => null,
@@ -329,7 +332,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         // Should have 2 sessions due to gap, not 1 extended session
         self::assertCount(2, $sessions);
         self::assertEquals(7, $sessions[0]->getDurationSeconds());
-        self::assertEquals(11, $sessions[1]->getDurationSeconds());
+        self::assertEquals(16, $sessions[1]->getDurationSeconds());
     }
 
     public function test_finalize_does_not_create_negative_duration_when_end_time_precedes_last_point(): void
