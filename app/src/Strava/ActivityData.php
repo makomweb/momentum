@@ -53,29 +53,12 @@ final class ActivityData
      */
     private function yieldVelocityRawPoints(): \Generator
     {
-        $type = $this->activity->data['type'];
-
         foreach ($this->yieldDataPoints() as $point) {
-            if ($point->getVelocity()->isZero()) {
-                continue;
-            }
-
-            $velocity = $point->getVelocity();
-
-            $value = match ($type) {
-                'Run', 'Walk', 'Hike' => $velocity->asPace()->value,
-                'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->value,
-                'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
-                default => null,
-            };
-
-            if (null === $value) {
-                continue;
-            }
-
             yield [
                 'timestamp' => $point->getTimestamp()->format('H:i:s'),
-                'value' => $value,
+                'value' => $point->hasVelocity()
+                    ? $this->convertVelocity($point->getVelocity())
+                    : 0.0,
             ];
         }
     }
@@ -93,29 +76,12 @@ final class ActivityData
      */
     private function yieldVelocityAveragePoints(): \Generator
     {
-        $type = $this->activity->data['type'];
-
         foreach ($this->yieldDataPoints() as $point) {
-            if ($point->getVelocityAverage()->isZero()) {
-                continue;
-            }
-
-            $velocity = $point->getVelocityAverage();
-
-            $value = match ($type) {
-                'Run', 'Walk', 'Hike' => $velocity->asPace()->value,
-                'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->value,
-                'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
-                default => null,
-            };
-
-            if (null === $value) {
-                continue;
-            }
-
             yield [
                 'timestamp' => $point->getTimestamp()->format('H:i:s'),
-                'value' => $value,
+                'value' => $point->hasVelocity()
+                    ? $this->convertVelocity($point->getVelocityAverage())
+                    : 0.0,
             ];
         }
     }
@@ -222,5 +188,17 @@ final class ActivityData
         }
 
         return Velocity::max($velocities);
+    }
+
+    private function convertVelocity(Velocity $velocity): float
+    {
+        $type = $this->activity->data['type'];
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike' => $velocity->asPace()->value,
+            'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->value,
+            'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
+            default => 0.0,
+        };
     }
 }
