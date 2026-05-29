@@ -662,10 +662,10 @@
                                         </div>
                                     </div>
                                     <div class="zone-summary-metric-inner">
-                                        <div class="zone-summary-label">Tempo · Z3</div>
-                                        <div class="zone-summary-value" style="color: #ff9800;">{{ metrics.getTempoPercentage() | number_format(1, '.') }}%</div>
+                                        <div class="zone-summary-label">Medium · Z3</div>
+                                        <div class="zone-summary-value" style="color: #ff9800;">{{ metrics.getMediumPercentage() | number_format(1, '.') }}%</div>
                                         <div class="zone-summary-bar">
-                                            <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getTempoPercentage(), 100) | number_format(1, '.') }}%; background: #ff9800;"></div>
+                                            <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getMediumPercentage(), 100) | number_format(1, '.') }}%; background: #ff9800;"></div>
                                         </div>
                                     </div>
                                     <div class="zone-summary-metric-inner">
@@ -738,8 +738,8 @@
                                             <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
                                                 <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
                                                 <div class="timeline-meta">
-                                                    <span>{{ session.startTime | local_date('H:i:s') }}</span>
-                                                    <span>→ {{ '%02d:%02d' | format((session.durationSeconds // 60), (session.durationSeconds % 60)) }}</span>
+                                                    <span>{{ session.start | local_date('H:i:s') }}</span>
+                                                    <span>→ {{ '%02d:%02d' | format((session.seconds // 60), (session.seconds % 60)) }}</span>
                                                 </div>
                                             </div>
                                         {% endfor %}
@@ -903,8 +903,8 @@
             {% for session in confirmedPaceSessions %}
                 {
                     name: '{{ session.zone.value }}',
-                    startTime: '{{ session.startTime.format('H:i:s') }}',
-                    endTime: '{{ session.endTime.format('H:i:s') }}',
+                    startTime: '{{ session.start.format('H:i:s') }}',
+                    endTime: '{{ session.end.format('H:i:s') }}',
                     color: '{{ session.zone.getColor() }}'
                 }{{ not loop.last ? ',' : '' }}
             {% endfor %}
@@ -988,8 +988,8 @@
             {% for session in hrZoneSessions %}
                 {
                     name: '{{ session.zone.value }}',
-                    startTime: '{{ session.startTime.format('H:i:s') }}',
-                    endTime: '{{ session.endTime.format('H:i:s') }}',
+                    startTime: '{{ session.start.format('H:i:s') }}',
+                    endTime: '{{ session.end.format('H:i:s') }}',
                     color: '{{ session.zone.getColor() }}'
                 }{{ not loop.last ? ',' : '' }}
             {% endfor %}

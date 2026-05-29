@@ -6,8 +6,13 @@ namespace App\Momentum;
 
 final readonly class HeartRate implements \Stringable
 {
-    public function __construct(public int $bpm = 0)
+    public function __construct(public int $bpm)
     {
+    }
+
+    public static function ZERO(): self
+    {
+        return new self(0);
     }
 
     public function isValid(): bool

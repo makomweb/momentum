@@ -100,7 +100,7 @@ final class ActivityController extends AbstractController
         $analysis = new ZoneAnalysis(
             paceZoneSessions: $paceZoneSessions,
             heartRateZoneSessions: $hrZoneSessions,
-            totalActivitySeconds: (int) $movingTimeInterval->format('%s'),
+            totalSeconds: (int) $movingTimeInterval->format('%s'),
         );
 
         $paceStats = $analysis->getPaceZoneStatistics();
@@ -124,8 +124,8 @@ final class ActivityController extends AbstractController
             'polarized_training' => [
                 'easy_seconds' => $metrics->easySeconds,
                 'easy_percentage' => round($metrics->getEasyPercentage(), 2),
-                'tempo_seconds' => $metrics->getTempoSeconds(),
-                'tempo_percentage' => round($metrics->getTempoPercentage(), 2),
+                'medium_seconds' => $metrics->getMediumSeconds(),
+                'medium_percentage' => round($metrics->getMediumPercentage(), 2),
                 'hard_seconds' => $metrics->hardSeconds,
                 'hard_percentage' => round($metrics->getHardPercentage(), 2),
             ],
@@ -183,7 +183,7 @@ final class ActivityController extends AbstractController
             $analysis = new ZoneAnalysis(
                 paceZoneSessions: $paceZoneSessions,
                 heartRateZoneSessions: $hrZoneSessions,
-                totalActivitySeconds: (int) $movingTimeInterval->format('%s'),
+                totalSeconds: (int) $movingTimeInterval->format('%s'),
             );
         }
 

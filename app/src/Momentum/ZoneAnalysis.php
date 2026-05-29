@@ -13,18 +13,18 @@ final readonly class ZoneAnalysis
     public function __construct(
         public array $paceZoneSessions,
         public array $heartRateZoneSessions,
-        public int $totalActivitySeconds,
+        public int $totalSeconds,
     ) {
     }
 
     public function getPaceZoneStatistics(): ZoneStatistics
     {
-        return ZoneStatistics::fromSessions($this->paceZoneSessions, $this->totalActivitySeconds, PaceZone::cases());
+        return ZoneStatistics::fromSessions($this->paceZoneSessions, $this->totalSeconds, PaceZone::cases());
     }
 
     public function getHeartRateZoneStatistics(): ZoneStatistics
     {
-        return ZoneStatistics::fromSessions($this->heartRateZoneSessions, $this->totalActivitySeconds, HeartRateZone::cases());
+        return ZoneStatistics::fromSessions($this->heartRateZoneSessions, $this->totalSeconds, HeartRateZone::cases());
     }
 
     /**
@@ -48,6 +48,6 @@ final readonly class ZoneAnalysis
     {
         $sessions = $this->getConfirmedPaceZoneSessions();
 
-        return TrainingMetrics::fromSessions($sessions, $this->totalActivitySeconds);
+        return TrainingMetrics::fromSessions($sessions, $this->totalSeconds);
     }
 }

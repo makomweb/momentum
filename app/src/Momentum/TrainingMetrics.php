@@ -35,32 +35,32 @@ final readonly class TrainingMetrics
         return $this->totalSeconds > 0 ? ($this->hardSeconds / $this->totalSeconds) * 100 : 0.0;
     }
 
-    public function getTempoSeconds(): int
+    public function getMediumSeconds(): int
     {
         return $this->totalSeconds - $this->easySeconds - $this->hardSeconds;
     }
 
-    public function getTempoPercentage(): float
+    public function getMediumPercentage(): float
     {
-        return $this->totalSeconds > 0 ? ($this->getTempoSeconds() / $this->totalSeconds) * 100 : 0.0;
+        return $this->totalSeconds > 0 ? ($this->getMediumSeconds() / $this->totalSeconds) * 100 : 0.0;
     }
 
     /**
-     * Returns true if training aligns with balanced training principles to minimize gray zone training.
+     * Returns true if training aligns with balanced training principles to minimize gray zone (medium) training.
      * At least easy threshold, not more than hard treshold!
      */
     public function isBalanced(
         float $easyThreshold = 45.0 /* percent */,
         float $hardThreshold = 45.0, /* percent */
     ): bool {
-        $maxTempo = 100.0 - ($easyThreshold + $hardThreshold);
+        $maxMedium = 100.0 - ($easyThreshold + $hardThreshold);
 
         $easyPercentage = $this->getEasyPercentage();
-        $TempoPercentage = $this->getTempoPercentage();
+        $mediumPercentage = $this->getMediumPercentage();
         $hardPercentage = $this->getHardPercentage();
 
         return $easyPercentage >= $easyThreshold
-            && $TempoPercentage <= $maxTempo
+            && $mediumPercentage <= $maxMedium
             && $hardPercentage <= $hardThreshold;
     }
 

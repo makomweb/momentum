@@ -10,6 +10,11 @@ final readonly class Velocity
     {
     }
 
+    public static function ZERO(): self
+    {
+        return new self(0.0);
+    }
+
     /** @param float[] $velocities */
     public static function max(array $velocities): self
     {

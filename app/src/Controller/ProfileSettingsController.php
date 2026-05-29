@@ -61,7 +61,7 @@ final class ProfileSettingsController extends AbstractController
                 }
             }
 
-            $maxHeartRate = new HeartRate();
+            $maxHeartRate = HeartRate::ZERO();
             if ('' !== $maxHeartRateRaw) {
                 if (!ctype_digit($maxHeartRateRaw) || (int) $maxHeartRateRaw <= 0) {
                     $errors[] = 'Max heart rate must be a positive integer.';

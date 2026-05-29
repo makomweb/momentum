@@ -34,14 +34,14 @@ final readonly class ActivityDataPoint
     {
         $hr = $this->data['heart_rate'];
 
-        return $hr ?? new HeartRate();
+        return $hr ?? HeartRate::ZERO();
     }
 
     public function getHeartRateAverage(): HeartRate
     {
         $hr = $this->data['heart_rate_avg'];
 
-        return $hr ?? new HeartRate();
+        return $hr ?? HeartRate::ZERO();
     }
 
     public function hasVelocity(): bool
@@ -54,13 +54,13 @@ final readonly class ActivityDataPoint
     {
         $velocity = $this->data['velocity'];
 
-        return $velocity ?? new Velocity();
+        return $velocity ?? Velocity::ZERO();
     }
 
     public function getVelocityAverage(): Velocity
     {
         $velocity = $this->data['velocity_avg'];
 
-        return $velocity ?? new Velocity();
+        return $velocity ?? Velocity::ZERO();
     }
 }
