@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Strava;
 
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\PaceUnit;
 use App\Momentum\SpeedUnit;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity;
@@ -62,7 +63,8 @@ final class ActivityData
             $velocity = $point->getVelocity();
 
             $value = match ($type) {
-                'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
+                'Run', 'Walk', 'Hike' => $velocity->asPace()->value,
+                'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->value,
                 'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
                 default => null,
             };
@@ -101,7 +103,8 @@ final class ActivityData
             $velocity = $point->getVelocityAverage();
 
             $value = match ($type) {
-                'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
+                'Run', 'Walk', 'Hike' => $velocity->asPace()->value,
+                'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->value,
                 'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
                 default => null,
             };

@@ -22,6 +22,15 @@ final readonly class Pace implements \Stringable
         return $this->value < 0.1;
     }
 
+    public function as(PaceUnit $unit): self
+    {
+        return match (true) {
+            ($this->unit == $unit) => $this,
+            PaceUnit::MINUTES_PER_100_METERS == $unit => new self($this->value / 10, $unit),
+            PaceUnit::MINUTES_PER_KILOMETER == $unit => new self($this->value * 10, $unit),
+        };
+    }
+
     public function __toString(): string
     {
         $minutes = (int) $this->value;
