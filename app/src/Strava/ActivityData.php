@@ -100,13 +100,10 @@ final class ActivityData
     private function yieldHeartRatePoints(): \Generator
     {
         foreach ($this->yieldDataPoints() as $point) {
-            $heartRate = $point->getHeartRate();
-            if ($heartRate->isValid()) {
-                yield [
-                    'timestamp' => $point->getTimestamp()->format('H:i:s'),
-                    'value' => $heartRate->bpm,
-                ];
-            }
+            yield [
+                'timestamp' => $point->getTimestamp()->format('H:i:s'),
+                'value' => $point->getHeartRate()->bpm,
+            ];
         }
     }
 
