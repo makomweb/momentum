@@ -6,10 +6,10 @@ namespace App\Strava;
 
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
+use App\Momentum\Speed;
+use App\Momentum\SpeedUnit;
 use App\Strava\API\Activity;
 use App\Strava\API\Distance;
-use App\Strava\API\Speed;
-use App\Strava\API\SpeedUnit;
 
 final readonly class ActivityMetaData
 {

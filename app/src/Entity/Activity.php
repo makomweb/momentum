@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use App\Strava\API\Activity as StravaApiActivity;
-use App\Strava\API\SpeedUnit;
-use App\Strava\API\Velocity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]

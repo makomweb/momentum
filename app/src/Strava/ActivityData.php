@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\ActivityDataPoint;
+use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use App\Strava\API\Activity;
-use App\Strava\API\ActivityDataPoint;
 use App\Strava\API\ActivityStream;
-use App\Strava\API\SpeedUnit;
-use App\Strava\API\Velocity;
 
 final class ActivityData
 {

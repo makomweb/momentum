@@ -3,9 +3,9 @@
 namespace App\Tests\Unit;
 
 use App\Momentum\PaceUnit;
-use App\Strava\API\Speed;
-use App\Strava\API\SpeedUnit;
-use App\Strava\API\Velocity;
+use App\Momentum\Speed;
+use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

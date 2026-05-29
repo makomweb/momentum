@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Twig;
 
-use App\Strava\API\SpeedUnit;
-use App\Strava\API\Velocity;
+use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
