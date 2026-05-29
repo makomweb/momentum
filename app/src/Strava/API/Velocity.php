@@ -8,7 +8,7 @@ use App\Momentum\Pace;
 
 final readonly class Velocity
 {
-    public function __construct(public float $metersPerSecond)
+    public function __construct(public float $metersPerSecond = 0)
     {
     }
 
@@ -18,6 +18,25 @@ final readonly class Velocity
         $max = !empty($velocities) ? max($velocities) : 0;
 
         return new self($max);
+    }
+
+    public static function create(Pace $pace): self
+    {
+        if ($pace->isZero()) {
+            return new self(0.0);
+        }
+
+        return new self(16.667 / $pace->value);
+    }
+
+    public function isZero(): bool
+    {
+        return $this->asPace()->isZero();
+    }
+
+    public function tooSlow(): bool
+    {
+        return $this->asPace()->value > 60.0; // > 60 min/km
     }
 
     public function asSpeed(): Speed

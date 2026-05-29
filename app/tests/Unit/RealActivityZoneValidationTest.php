@@ -9,6 +9,7 @@ use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceZone;
 use App\Momentum\ZoneTransitionTracker;
+use App\Strava\API\ActivityDataPoint;
 use App\Strava\API\Velocity;
 use PHPUnit\Framework\TestCase;
 
@@ -52,11 +53,14 @@ final class RealActivityZoneValidationTest extends TestCase
             $velocity = new Velocity((float) $velocityData[$i]);
             $hr = null !== $hrData[$i] ? (int) $hrData[$i] : 0;
 
-            $tracker->processPoint(
-                timestamp: $timestamp,
-                pace: $velocity->asPace(),
-                heartRate: new HeartRate($hr)
-            );
+            $tracker->processPoint(new ActivityDataPoint([
+                'timestamp' => $timestamp,
+                'distance' => null,
+                'heart_rate' => new HeartRate($hr),
+                'heart_rate_avg' => null,
+                'velocity' => $velocity,
+                'velocity_avg' => null,
+            ]));
         }
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) $timeData[-1]).'S'));
@@ -141,11 +145,14 @@ final class RealActivityZoneValidationTest extends TestCase
             // But low HR: 95 bpm (50% of 190 = Zone 1 recovery)
             $hr = new HeartRate(95);
 
-            $tracker->processPoint(
-                timestamp: $timestamp,
-                pace: $velocity->asPace(),
-                heartRate: $hr
-            );
+            $tracker->processPoint(new ActivityDataPoint([
+                'timestamp' => $timestamp,
+                'distance' => null,
+                'heart_rate' => $hr,
+                'heart_rate_avg' => null,
+                'velocity' => $velocity,
+                'velocity_avg' => null,
+            ]));
         }
 
         $tracker->finalize($startTime->add(new \DateInterval('PT60S')));

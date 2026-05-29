@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
+use App\Strava\API\ActivityDataPoint;
+
 final readonly class ZoneTransitionTracker
 {
     private ZoneTracker $paceTracker;
@@ -20,15 +22,12 @@ final readonly class ZoneTransitionTracker
         return new self($athlete->getTreshold(), $athlete->getMaxHeartRate());
     }
 
-    public function processPoint(
-        \DateTimeImmutable $timestamp,
-        Pace $pace,
-        HeartRate $heartRate = new HeartRate(),
-    ): void {
-        $this->paceTracker->record($pace->getZone($this->treshold), $timestamp);
+    public function processPoint(ActivityDataPoint $dataPoint): void
+    {
+        $this->paceTracker->record($dataPoint->getVelocity()->asPace()->getZone($this->treshold), $dataPoint->getTimestamp());
 
-        if ($heartRate->isValid() && $this->maxHeartRate->isValid()) {
-            $this->heartRateTracker->record($heartRate->getZone($this->maxHeartRate), $timestamp);
+        if ($dataPoint->getHeartRate()->isValid() && $this->maxHeartRate->isValid()) {
+            $this->heartRateTracker->record($dataPoint->getHeartRate()->getZone($this->maxHeartRate), $dataPoint->getTimestamp());
         }
     }
 

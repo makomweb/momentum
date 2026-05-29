@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Momentum\HeartRate;
 use App\Momentum\ZoneAnalysis;
 use App\Momentum\ZoneDuration;
 use App\Momentum\ZoneTransitionTracker;
@@ -84,31 +83,9 @@ final class ActivityController extends AbstractController
         $startDate = $activity->getStartDateLocalTime();
 
         foreach ($stream->yield($startDate, 50) as $point) {
-            $velocity = $point['velocity'];
-            $heartRate = $point['heart_rate'];
-
-            if (null === $velocity || $velocity->metersPerSecond < 0.1) {
-                continue;
+            if ($point->hasVelocity() && !$point->getVelocityAverage()->tooSlow()) {
+                $tracker->processPoint($point);
             }
-
-            // Use smoothed velocity from ActivityStream
-            $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
-
-            if ($smoothedVelocity->metersPerSecond < 0.1) {
-                continue;
-            }
-
-            // Convert to pace and reject unreasonably slow paces (> 60 min/km)
-            $pace = $smoothedVelocity->asPace();
-            if ($pace->value > 60.0) {
-                continue;
-            }
-
-            $tracker->processPoint(
-                timestamp: $point['timestamp'],
-                pace: $pace,
-                heartRate: $heartRate ?? new HeartRate(),
-            );
         }
 
         // Get end time from the activity's moving time
@@ -191,31 +168,9 @@ final class ActivityController extends AbstractController
             $startDate = $activity->getStartDateLocalTime();
 
             foreach ($stream->yield($startDate, 50) as $point) {
-                $velocity = $point['velocity'];
-                $heartRate = $point['heart_rate'];
-
-                if (null === $velocity || $velocity->metersPerSecond < 0.1) {
-                    continue;
+                if ($point->hasVelocity() && !$point->getVelocityAverage()->tooSlow()) {
+                    $tracker->processPoint($point);
                 }
-
-                $smoothedVelocity = $point['velocity_avg'] ?? $velocity;
-
-                // Reject unreasonably slow velocities
-                if ($smoothedVelocity->metersPerSecond < 0.1) {
-                    continue;
-                }
-
-                // Convert to pace and reject unreasonably slow paces (> 60 min/km)
-                $pace = $smoothedVelocity->asPace();
-                if ($pace->value > 60.0) {
-                    continue;
-                }
-
-                $tracker->processPoint(
-                    timestamp: $point['timestamp'],
-                    pace: $pace,
-                    heartRate: $heartRate ?? new HeartRate(),
-                );
             }
 
             $movingTimeInterval = $activity->getMovingTime();

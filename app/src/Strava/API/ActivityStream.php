@@ -86,14 +86,7 @@ final readonly class ActivityStream
     }
 
     /**
-     * @return \Generator<array{
-     *  timestamp: \DateTimeImmutable,
-     *  distance: float|null,
-     *  heart_rate: HeartRate|null,
-     *  heart_rate_avg: HeartRate|null,
-     *  velocity: Velocity|null,
-     *  velocity_avg: Velocity|null,
-     * }>
+     * @return \Generator<ActivityDataPoint>
      */
     public function yield(\DateTimeImmutable $start, int $period): \Generator
     {
@@ -140,14 +133,14 @@ final readonly class ActivityStream
                 $heartRateAvgValue = new HeartRate((int) $heartRateAvg->getValue());
             }
 
-            yield [
+            yield new ActivityDataPoint([
                 'timestamp' => $timestamp,
                 'distance' => $distance,
                 'heart_rate' => $heartRate,
                 'heart_rate_avg' => $heartRateAvgValue,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocityAvgValue,
-            ];
+            ]);
         }
     }
 }
