@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Momentum\ActivityDataPoint;
+use App\Momentum\AthleteInterface;
 use App\Momentum\ZoneAnalysis;
 use App\Momentum\ZoneDuration;
+use App\Momentum\ZoneSessions;
 use App\Momentum\ZoneTransitionTracker;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
+use App\Strava\API\Activity;
+use App\Strava\API\ActivityStream;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -78,30 +83,26 @@ final class ActivityController extends AbstractController
         }
 
         // Create zone sessions from the activity stream
-        $tracker = ZoneTransitionTracker::for($user);
+        // $tracker = ZoneTransitionTracker::for($user);
 
-        $startDate = $activity->getStartDateLocalTime();
+        // $startDate = $activity->getStartDateLocalTime();
 
-        foreach ($stream->yield($startDate, 50) as $point) {
-            if ($point->hasVelocity() && !$point->getVelocityAverage()->tooSlow()) {
-                $tracker->processPoint($point);
-            }
-        }
+        // foreach ($stream->yield($startDate, 50) as $point) {
+        //     if ($point->hasVelocity() && !$point->getVelocityAverage()->tooSlow()) {
+        //         $tracker->processPoint($point);
+        //     }
+        // }
 
-        // Get end time from the activity's moving time
-        $movingTimeInterval = $activity->getMovingTime();
-        $endTime = $startDate->add($movingTimeInterval);
+        // // Get end time from the activity's moving time
+        // $movingTimeInterval = $activity->getMovingTime();
+        // $endTime = $startDate->add($movingTimeInterval);
 
-        $tracker->finalize($endTime);
+        // $tracker->finalize($endTime);
 
-        $paceZoneSessions = $tracker->getPaceZoneSessions();
-        $hrZoneSessions = $tracker->getHeartRateZoneSessions();
+        // $paceZoneSessions = $tracker->getPaceZoneSessions();
+        // $hrZoneSessions = $tracker->getHeartRateZoneSessions();
 
-        $analysis = new ZoneAnalysis(
-            paceZoneSessions: $paceZoneSessions,
-            heartRateZoneSessions: $hrZoneSessions,
-            totalSeconds: (int) $movingTimeInterval->format('%s'),
-        );
+        $analysis = self::createAnalysis($user, $activity, $stream);
 
         $paceStats = $analysis->getPaceZoneStatistics();
         $hrStats = $analysis->getHeartRateZoneStatistics();
@@ -111,7 +112,7 @@ final class ActivityController extends AbstractController
             'activity' => [
                 'id' => $activity->getId(),
                 'name' => $activity->getName(),
-                'start_date' => $startDate->format('c'),
+                'start_date' => $activity->getStartDateLocalTime()->format('c'),
             ],
             'pace_zones' => array_map(
                 fn (ZoneDuration $zoneDuration) => $zoneDuration->toArray(),
@@ -130,6 +131,26 @@ final class ActivityController extends AbstractController
                 'hard_percentage' => round($metrics->getHardPercentage(), 2),
             ],
         ]);
+    }
+
+    private static function createAnalysis(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): ZoneAnalysis
+    {
+        $startDate = $activity->getStartDateLocalTime();
+
+        /** @var ActivityDataPoint[] $dataPoints */
+        $dataPoints = array_reduce(
+            iterator_to_array($stream->yield($startDate, 50)),
+            static fn (array $carry, ActivityDataPoint $p) => ($p->hasVelocity() && !$p->getVelocityAverage()->tooSlow()) ? [...$carry, $p] : $carry,
+            []
+        );
+
+        $zoneSessions = ZoneSessions::create($athlete, $activity->getEndDateLocalTime(), $dataPoints);
+
+        return new ZoneAnalysis(
+            paceZoneSessions: $zoneSessions->getPaceZoneSessions(),
+            heartRateZoneSessions: $zoneSessions->getHeartRateSessions(),
+            totalSeconds: intval($activity->getMovingTime()->format('%s'))
+        );
     }
 
     private function analyzeActivity(User $user, int $stravaActivityId): Response
@@ -162,30 +183,9 @@ final class ActivityController extends AbstractController
 
         $analysis = null;
         $treshold = $user->getTreshold();
+        assert(!$treshold->isZero(), 'Configure a treshold first!');
 
-        if (!$treshold->isZero()) {
-            $tracker = ZoneTransitionTracker::for($user);
-            $startDate = $activity->getStartDateLocalTime();
-
-            foreach ($stream->yield($startDate, 50) as $point) {
-                if ($point->hasVelocity() && !$point->getVelocityAverage()->tooSlow()) {
-                    $tracker->processPoint($point);
-                }
-            }
-
-            $movingTimeInterval = $activity->getMovingTime();
-            $endTime = $startDate->add($movingTimeInterval);
-            $tracker->finalize($endTime);
-
-            $paceZoneSessions = $tracker->getPaceZoneSessions();
-            $hrZoneSessions = $tracker->getHeartRateZoneSessions();
-
-            $analysis = new ZoneAnalysis(
-                paceZoneSessions: $paceZoneSessions,
-                heartRateZoneSessions: $hrZoneSessions,
-                totalSeconds: (int) $movingTimeInterval->format('%s'),
-            );
-        }
+        $analysis = self::createAnalysis($user, $activity, $stream);
 
         return $this->render('activity/analysis.html.twig', [
             'activityData' => $activityData,

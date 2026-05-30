@@ -119,6 +119,11 @@ final readonly class Activity implements \Stringable
         return \DateInterval::createFromDateString("$seconds seconds");
     }
 
+    public function getEndDateLocalTime(): \DateTimeImmutable
+    {
+        return $this->getStartDateLocalTime()->add($this->getMovingTime());
+    }
+
     public function getDistance(): Distance
     {
         return new Distance($this->data['distance']);

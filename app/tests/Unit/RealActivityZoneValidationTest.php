@@ -10,6 +10,7 @@ use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceZone;
 use App\Momentum\Velocity;
+use App\Momentum\ZoneSessions;
 use App\Momentum\ZoneTransitionTracker;
 use PHPUnit\Framework\TestCase;
 
@@ -45,28 +46,41 @@ final class RealActivityZoneValidationTest extends TestCase
         $maxHeartRate = new HeartRate(190);
 
         // Process zones
-        $tracker = ZoneTransitionTracker::for(self::createAthlete($ftp, $maxHeartRate));
+        // $tracker = ZoneTransitionTracker::for(self::createAthlete($ftp, $maxHeartRate));
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 
+        $dataPoints = [];
         for ($i = 0; $i < count($timeData); ++$i) {
             $timestamp = $startTime->add(new \DateInterval('PT'.((int) $timeData[$i]).'S'));
             $velocity = new Velocity((float) $velocityData[$i]);
             $hr = null !== $hrData[$i] ? (int) $hrData[$i] : 0;
 
-            $tracker->processPoint(new ActivityDataPoint([
+            // $tracker->processPoint(new ActivityDataPoint([
+            //     'timestamp' => $timestamp,
+            //     'distance' => null,
+            //     'heart_rate' => new HeartRate($hr),
+            //     'heart_rate_avg' => null,
+            //     'velocity' => $velocity,
+            //     'velocity_avg' => null,
+            // ]));
+
+            $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $timestamp,
                 'distance' => null,
                 'heart_rate' => new HeartRate($hr),
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => null,
-            ]));
+            ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) $timeData[-1]).'S'));
-        $tracker->finalize($endTime);
+        $zoneZessions = ZoneSessions::create(self::createAthlete($ftp, $maxHeartRate), $endTime, $dataPoints);
 
-        $paceSessions = $tracker->getPaceZoneSessions();
+        // $tracker->finalize($endTime);
+
+        // $paceSessions = $tracker->getPaceZoneSessions();
+        $paceSessions = $zoneZessions->getPaceZoneSessions();
         $totalSeconds = (int) $timeData[-1];
 
         // Analyze VO2max sessions
@@ -81,6 +95,7 @@ final class RealActivityZoneValidationTest extends TestCase
 
                 // Check HR during this session
                 $sessionStart = $session->start->getTimestamp();
+                assert(!is_null($session->end), 'Session must be closed first!');
                 $sessionEnd = $session->end->getTimestamp();
                 $sessionHRs = [];
 
@@ -131,9 +146,10 @@ final class RealActivityZoneValidationTest extends TestCase
         $ftp = new Pace(6.0);
         $maxHeartRate = new HeartRate(190);
 
-        $tracker = ZoneTransitionTracker::for(self::createAthlete($ftp, $maxHeartRate));
+        // $tracker = ZoneTransitionTracker::for(self::createAthlete($ftp, $maxHeartRate));
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 
+        $dataPoints = [];
         // Scenario: Quick velocity spike (>VO2max pace) but low HR (Zone 1)
         // This should NOT be classified as VO2max
         for ($i = 0; $i < 60; ++$i) {
@@ -145,20 +161,35 @@ final class RealActivityZoneValidationTest extends TestCase
             // But low HR: 95 bpm (50% of 190 = Zone 1 recovery)
             $hr = new HeartRate(95);
 
-            $tracker->processPoint(new ActivityDataPoint([
+            // $tracker->processPoint(new ActivityDataPoint([
+            //     'timestamp' => $timestamp,
+            //     'distance' => null,
+            //     'heart_rate' => $hr,
+            //     'heart_rate_avg' => null,
+            //     'velocity' => $velocity,
+            //     'velocity_avg' => null,
+            // ]));
+
+            $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $timestamp,
                 'distance' => null,
                 'heart_rate' => $hr,
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => null,
-            ]));
+            ]);
         }
 
-        $tracker->finalize($startTime->add(new \DateInterval('PT60S')));
+        // $tracker->finalize($startTime->add(new \DateInterval('PT60S')));
 
-        $paceSessions = $tracker->getPaceZoneSessions();
-        $hrSessions = $tracker->getHeartRateZoneSessions();
+        $endTime = $startTime->add(new \DateInterval('PT60S'));
+        $zoneZessions = ZoneSessions::create(self::createAthlete($ftp, $maxHeartRate), $endTime, $dataPoints);
+
+        // $paceSessions = $tracker->getPaceZoneSessions();
+        // $hrSessions = $tracker->getHeartRateZoneSessions();
+
+        $paceSessions = $zoneZessions->getPaceZoneSessions();
+        $hrSessions = $zoneZessions->getHeartRateSessions();
 
         // CURRENT BEHAVIOR (wrong):
         // This will be classified as ZONE_5 (VO2max) because only pace is considered

@@ -45,9 +45,10 @@ final readonly class ZoneEntries
     private function yieldPaceZoneEntries(): \Generator
     {
         foreach ($this->dataPoints as $dataPoint) {
-            $zone = $dataPoint->getVelocityAverage()->asPace()->getZone($this->treshold);
-
-            yield new PaceZoneEntry($zone, $dataPoint->getTimestamp());
+            if ($dataPoint->hasVelocity()) {
+                $zone = $dataPoint->getVelocityAverage()->asPace()->getZone($this->treshold);
+                yield new PaceZoneEntry($zone, $dataPoint->getTimestamp());
+            }
         }
     }
 

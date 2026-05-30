@@ -16,42 +16,32 @@ final readonly class ZoneSessions
         return new self($endTime, new ZoneEntries($athlete->getTreshold(), $athlete->getMaxHeartRate(), $dataPoints));
     }
 
-    /** @return ZoneSession2[] */
+    /** @return ZoneSession[] */
     public function getPaceZoneSessions(): array
     {
         $entries = $this->zoneEntries->getPaceZoneEntries();
 
-        /** @var ZoneSession2[] $result */
+        /** @var ZoneSession[] $result */
         $result = array_reduce($entries, self::reduce(...), []);
 
-        if (!empty($result)) {
-            $last = array_key_last($result);
-            $result[$last] = $result[$last]->close($this->endTime);
-        }
-
-        return $result;
+        return self::finalize($result, $this->endTime);
     }
 
-    /** @return ZoneSession2[] */
+    /** @return ZoneSession[] */
     public function getHeartRateSessions(): array
     {
         $entries = $this->zoneEntries->getHeartRateZoneEntries();
 
-        /** @var ZoneSession2[] $result */
+        /** @var ZoneSession[] $result */
         $result = array_reduce($entries, self::reduce(...), []);
 
-        if (!empty($result)) {
-            $last = array_key_last($result);
-            $result[$last] = $result[$last]->close($this->endTime);
-        }
-
-        return $result;
+        return self::finalize($result, $this->endTime);
     }
 
     /**
-     * @param ZoneSession2[] $carry
+     * @param ZoneSession[] $carry
      *
-     * @return ZoneSession2[]
+     * @return ZoneSession[]
      */
     private static function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $entry): array
     {
@@ -60,6 +50,23 @@ final readonly class ZoneSessions
             $carry[] = $previous->close($entry->entered);
         }
 
-        return [...$carry, ZoneSession2::open($entry)];
+        return [...$carry, ZoneSession::open($entry)];
+    }
+
+    /**
+     * @param ZoneSession[] $sessions
+     *
+     * @return ZoneSession[]
+     */
+    private static function finalize(array $sessions, \DateTimeImmutable $endTime): array
+    {
+        if (empty($sessions)) {
+            return [];
+        }
+
+        $last = array_key_last($sessions);
+        $sessions[$last] = $sessions[$last]->close($endTime);
+
+        return $sessions;
     }
 }

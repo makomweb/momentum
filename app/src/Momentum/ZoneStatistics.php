@@ -21,8 +21,8 @@ final readonly class ZoneStatistics
         $statistics = array_map(
             static fn (PaceZone|HeartRateZone $zone) => array_reduce(
                 $sessions,
-                static fn (ZoneDuration $carry, ZoneSession $session) => $carry->add($session),
-                new ZoneDuration($zone, 0, $totalSeconds)
+                static fn (ZoneDuration $duration, ZoneSession $session) => $duration->add($session),
+                ZoneDuration::initial($zone, $totalSeconds)
             ),
             $zones
         );

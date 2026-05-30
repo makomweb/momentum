@@ -6,15 +6,28 @@ namespace App\Momentum;
 
 final readonly class ZoneSession
 {
+    // TODO: Make ctor private!
     public function __construct(
         public PaceZone|HeartRateZone $zone,
         public \DateTimeImmutable $start,
-        public \DateTimeImmutable $end,
+        public ?\DateTimeImmutable $end = null,
     ) {
+    }
+
+    public static function open(PaceZoneEntry|HeartRateZoneEntry $entry): self
+    {
+        return new self($entry->zone, $entry->entered);
+    }
+
+    public function close(\DateTimeImmutable $end): self
+    {
+        return new self($this->zone, $this->start, $end);
     }
 
     public function getSeconds(): int
     {
+        assert(!is_null($this->end), 'You must close this session first!');
+
         return $this->end->getTimestamp() - $this->start->getTimestamp();
     }
 

@@ -6,11 +6,16 @@ namespace App\Momentum;
 
 final readonly class ZoneDuration
 {
-    public function __construct(
+    private function __construct(
         public PaceZone|HeartRateZone $zone,
         public int $seconds,
         public int $totalSeconds,
     ) {
+    }
+
+    public static function initial(PaceZone|HeartRateZone $zone, int $totalSeconds): self
+    {
+        return new self($zone, 0, $totalSeconds);
     }
 
     public function add(ZoneSession $session): self
