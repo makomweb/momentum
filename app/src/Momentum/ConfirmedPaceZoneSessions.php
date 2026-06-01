@@ -10,10 +10,15 @@ final readonly class ConfirmedPaceZoneSessions
      * @param ZoneSession[] $paceZoneSessions
      * @param ZoneSession[] $heartRateZoneSessions
      */
-    public function __construct(
+    private function __construct(
         public array $paceZoneSessions,
         public array $heartRateZoneSessions,
     ) {
+    }
+
+    public static function from(ZoneSessions $sessions): self
+    {
+        return new self($sessions->getPaceZoneSessions(), $sessions->getHeartRateSessions());
     }
 
     /**

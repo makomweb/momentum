@@ -112,9 +112,14 @@ final readonly class Activity implements \Stringable
         return \DateInterval::createFromDateString("$seconds seconds");
     }
 
+    public function getMovingTimeSeconds(): int
+    {
+        return $this->data['moving_time'];
+    }
+
     public function getMovingTime(): \DateInterval
     {
-        $seconds = $this->data['moving_time'];
+        $seconds = $this->getMovingTimeSeconds();
 
         return \DateInterval::createFromDateString("$seconds seconds");
     }

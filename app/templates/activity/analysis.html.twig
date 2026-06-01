@@ -624,136 +624,131 @@
             </div>
         </div>
 
-        {% if zoneAnalysis %}
-            {% set paceStats = zoneAnalysis.getPaceZoneStatistics() %}
-            {% set hrStats = zoneAnalysis.getHeartRateZoneStatistics() %}
-            {% set metrics = zoneAnalysis.getTrainingMetrics() %}
-            <div class="chart-container zone-analysis-panel">
-                <div class="zone-analysis-header">
-                    <div>
-                        <div class="zone-analysis-kicker">Priority insight</div>
-                        <div class="chart-title" style="margin-bottom: 0.35rem;">🎯 Training Zones</div>
-                        <p class="zone-analysis-note"><span class="zone-analysis-note-label">Zone Validation</span>Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.</p>
+    <div class="chart-container zone-analysis-panel">
+        <div class="zone-analysis-header">
+            <div>
+                <div class="zone-analysis-kicker">Priority insight</div>
+                <div class="chart-title" style="margin-bottom: 0.35rem;">🎯 Training Zones</div>
+                <p class="zone-analysis-note"><span class="zone-analysis-note-label">Zone Validation</span>Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.</p>
+            </div>
+        </div>
+
+        <div class="zone-analysis-layout">
+            <div class="zone-analysis-main">
+                <div class="zone-summary-card {% if metrics.isBalanced() %}zone-summary-card--balanced{% else %}zone-summary-card--unbalanced{% endif %}">
+                    <div class="zone-summary-header">
+                        <span class="zone-summary-badge">
+                            {% if metrics.isBalanced() %}✅ Balanced{% else %}⚠️ Unbalanced{% endif %}
+                        </span>
+                        <span class="zone-summary-hint">
+                            {% if metrics.isBalanced() %}
+                                Good balance of easy aerobic base and hard quality work.
+                            {% else %}
+                                Shift more volume into easy (Z1–2) or hard (Z4–5) zones.
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="zone-summary-body">
+                        <div class="zone-summary-grid">
+                            <div class="zone-summary-metric-inner">
+                                <div class="zone-summary-label">Easy · Z1–2</div>
+                                <div class="zone-summary-value" style="color: #2196f3;">{{ metrics.getEasyPercentage() | number_format(1, '.') }}%</div>
+                                <div class="zone-summary-bar">
+                                    <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getEasyPercentage(), 100) | number_format(1, '.') }}%; background: #2196f3;"></div>
+                                </div>
+                            </div>
+                            <div class="zone-summary-metric-inner">
+                                <div class="zone-summary-label">Medium · Z3</div>
+                                <div class="zone-summary-value" style="color: #ff9800;">{{ metrics.getMediumPercentage() | number_format(1, '.') }}%</div>
+                                <div class="zone-summary-bar">
+                                    <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getMediumPercentage(), 100) | number_format(1, '.') }}%; background: #ff9800;"></div>
+                                </div>
+                            </div>
+                            <div class="zone-summary-metric-inner">
+                                <div class="zone-summary-label">Hard · Z4–5</div>
+                                <div class="zone-summary-value" style="color: #f44336;">{{ metrics.getHardPercentage() | number_format(1, '.') }}%</div>
+                                <div class="zone-summary-bar">
+                                    <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getHardPercentage(), 100) | number_format(1, '.') }}%; background: #f44336;"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="zone-analysis-layout">
-                    <div class="zone-analysis-main">
-                        <div class="zone-summary-card {% if metrics.isBalanced() %}zone-summary-card--balanced{% else %}zone-summary-card--unbalanced{% endif %}">
-                            <div class="zone-summary-header">
-                                <span class="zone-summary-badge">
-                                    {% if metrics.isBalanced() %}✅ Balanced{% else %}⚠️ Unbalanced{% endif %}
-                                </span>
-                                <span class="zone-summary-hint">
-                                    {% if metrics.isBalanced() %}
-                                        Good balance of easy aerobic base and hard quality work.
-                                    {% else %}
-                                        Shift more volume into easy (Z1–2) or hard (Z4–5) zones.
-                                    {% endif %}
-                                </span>
-                            </div>
-                            <div class="zone-summary-body">
-                                <div class="zone-summary-grid">
-                                    <div class="zone-summary-metric-inner">
-                                        <div class="zone-summary-label">Easy · Z1–2</div>
-                                        <div class="zone-summary-value" style="color: #2196f3;">{{ metrics.getEasyPercentage() | number_format(1, '.') }}%</div>
-                                        <div class="zone-summary-bar">
-                                            <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getEasyPercentage(), 100) | number_format(1, '.') }}%; background: #2196f3;"></div>
-                                        </div>
-                                    </div>
-                                    <div class="zone-summary-metric-inner">
-                                        <div class="zone-summary-label">Medium · Z3</div>
-                                        <div class="zone-summary-value" style="color: #ff9800;">{{ metrics.getMediumPercentage() | number_format(1, '.') }}%</div>
-                                        <div class="zone-summary-bar">
-                                            <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getMediumPercentage(), 100) | number_format(1, '.') }}%; background: #ff9800;"></div>
-                                        </div>
-                                    </div>
-                                    <div class="zone-summary-metric-inner">
-                                        <div class="zone-summary-label">Hard · Z4–5</div>
-                                        <div class="zone-summary-value" style="color: #f44336;">{{ metrics.getHardPercentage() | number_format(1, '.') }}%</div>
-                                        <div class="zone-summary-bar">
-                                            <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getHardPercentage(), 100) | number_format(1, '.') }}%; background: #f44336;"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="zone-columns">
+                    <div class="zone-card">
+                        <div class="zone-card-header">
+                            <h3 class="zone-card-title">⏱️ Pace Zones</h3>
                         </div>
-
-                        <div class="zone-columns">
-                            <div class="zone-card">
-                                <div class="zone-card-header">
-                                    <h3 class="zone-card-title">⏱️ Pace Zones</h3>
-                                </div>
-                                <div class="zone-card-body">
-                                    <div class="zone-list">
-                                        {% for zoneKey, stat in paceStats.statistics %}
-                                            {% set zone = stat.zone %}
-                                            {% set percentage = stat.getDurationPercentage() %}
-                                            <div class="zone-row">
-                                                <div class="zone-name">{{ zone.value }}</div>
-                                                <div class="zone-bar">
-                                                    <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
-                                                </div>
-                                                <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {% if hrStats %}
-                                <div class="zone-card">
-                                    <div class="zone-card-header">
-                                        <h3 class="zone-card-title">❤️ Heart Rate Zones</h3>
-                                    </div>
-                                    <div class="zone-card-body">
-                                        <div class="zone-list">
-                                            {% for zoneKey, stat in hrStats.statistics %}
-                                                {% set zone = stat.zone %}
-                                                {% set percentage = stat.getDurationPercentage() %}
-                                                <div class="zone-row">
-                                                    <div class="zone-name">{{ zone.value }}</div>
-                                                    <div class="zone-bar">
-                                                        <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
-                                                    </div>
-                                                    <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
-                                                </div>
-                                            {% endfor %}
+                        <div class="zone-card-body">
+                            <div class="zone-list">
+                                {% for zoneKey, stat in paceStats %}
+                                    {% set zone = stat.zone %}
+                                    {% set percentage = stat.getDurationPercentage() %}
+                                    <div class="zone-row">
+                                        <div class="zone-name">{{ zone.value }}</div>
+                                        <div class="zone-bar">
+                                            <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
                                         </div>
+                                        <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
                                     </div>
-                                </div>
-                            {% endif %}
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
 
-                    <div class="zone-analysis-side">
-                        {% if zoneAnalysis.paceZoneSessions | length > 0 %}
-                            <div class="timeline-card">
-                                <div class="timeline-card-header">
-                                    <h3 class="timeline-title">⏱ Pace Zone Transitions</h3>
-                                </div>
-                                <div class="timeline-card-body">
-                                    <div class="timeline-list">
-                                        {% for session in zoneAnalysis.paceZoneSessions %}
-                                            <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
-                                                <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
-                                                <div class="timeline-meta">
-                                                    <span>{{ session.start | local_date('H:i:s') }}</span>
-                                                    <span>→ {{ '%02d:%02d' | format((session.seconds // 60), (session.seconds % 60)) }}</span>
-                                                </div>
+                    {% if hrStats %}
+                        <div class="zone-card">
+                            <div class="zone-card-header">
+                                <h3 class="zone-card-title">❤️ Heart Rate Zones</h3>
+                            </div>
+                            <div class="zone-card-body">
+                                <div class="zone-list">
+                                    {% for zoneKey, stat in hrStats %}
+                                        {% set zone = stat.zone %}
+                                        {% set percentage = stat.getDurationPercentage() %}
+                                        <div class="zone-row">
+                                            <div class="zone-name">{{ zone.value }}</div>
+                                            <div class="zone-bar">
+                                                <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
                                             </div>
-                                        {% endfor %}
-                                    </div>
+                                            <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
-                        {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+                <div class="zone-analysis-side">
+                    {% if paceZoneSessions | length > 0 %}
+                        <div class="timeline-card">
+                            <div class="timeline-card-header">
+                                <h3 class="timeline-title">⏱ Pace Zone Transitions</h3>
+                            </div>
+                            <div class="timeline-card-body">
+                                <div class="timeline-list">
+                                    {% for session in paceZoneSessions %}
+                                        <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
+                                            <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
+                                            <div class="timeline-meta">
+                                                <span>{{ session.start | local_date('H:i:s') }}</span>
+                                                <span>→ {{ '%02d:%02d' | format((session.seconds // 60), (session.seconds % 60)) }}</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        {% elseif app.user.getFtp() is null %}
+        {% elseif app.user.getTreshold().isZero() %}
             <div class="alert-message alert-info" style="background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%); color: #856404; border-left-color: #ffc107;">
                 <span>⚙️</span>
-                <span>To see zone analysis, please configure your FTP in your profile settings.</span>
+                <span>To see zone analysis, please configure your treshold pace in your profile settings.</span>
             </div>
         {% endif %}
 

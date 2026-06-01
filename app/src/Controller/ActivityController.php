@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Momentum\ActivityDataPoint;
 use App\Momentum\AthleteInterface;
-use App\Momentum\ZoneAnalysis;
-use App\Momentum\ZoneDuration;
+use App\Momentum\ConfirmedPaceZoneSessions;
+use App\Momentum\HeartRateZone;
+use App\Momentum\HeartRateZoneStatistics;
+use App\Momentum\PaceZone;
+use App\Momentum\PaceZoneStatistics;
+use App\Momentum\TrainingMetrics;
 use App\Momentum\ZoneSessions;
-use App\Momentum\ZoneTransitionTracker;
+use App\Momentum\ZoneStatistics;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
@@ -102,11 +105,15 @@ final class ActivityController extends AbstractController
         // $paceZoneSessions = $tracker->getPaceZoneSessions();
         // $hrZoneSessions = $tracker->getHeartRateZoneSessions();
 
-        $analysis = self::createAnalysis($user, $activity, $stream);
+        $sessions = self::createZoneSessions($user, $activity, $stream);
 
-        $paceStats = $analysis->getPaceZoneStatistics();
-        $hrStats = $analysis->getHeartRateZoneStatistics();
-        $metrics = $analysis->getTrainingMetrics();
+        $paceZoneSessions = $sessions->getPaceZoneSessions();
+        $confirmed = ConfirmedPaceZoneSessions::from($sessions);
+        $heartRateZoneSessions = iterator_to_array($confirmed->yieldSessions());
+
+        $metrics = TrainingMetrics::fromSessions($paceZoneSessions, $activity->getMovingTimeSeconds());
+        $paceStats = PaceZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
+        $hrStats = HeartRateZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
         return $this->json([
             'activity' => [
@@ -114,14 +121,8 @@ final class ActivityController extends AbstractController
                 'name' => $activity->getName(),
                 'start_date' => $activity->getStartDateLocalTime()->format('c'),
             ],
-            'pace_zones' => array_map(
-                fn (ZoneDuration $zoneDuration) => $zoneDuration->toArray(),
-                $paceStats->statistics
-            ),
-            'heart_rate_zones' => array_map(
-                fn (ZoneDuration $zoneDuration) => $zoneDuration->toArray(),
-                $hrStats->statistics
-            ),
+            'pace_zones' => $paceStats->toArray($activity->getMovingTimeSeconds()),
+            'heart_rate_zones' => $hrStats->toArray($activity->getMovingTimeSeconds()),
             'polarized_training' => [
                 'easy_seconds' => $metrics->easySeconds,
                 'easy_percentage' => round($metrics->getEasyPercentage(), 2),
@@ -133,24 +134,12 @@ final class ActivityController extends AbstractController
         ]);
     }
 
-    private static function createAnalysis(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): ZoneAnalysis
+    private static function createZoneSessions(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): ZoneSessions
     {
         $startDate = $activity->getStartDateLocalTime();
+        $dataPoints = iterator_to_array($stream->yield($startDate, 50));
 
-        /** @var ActivityDataPoint[] $dataPoints */
-        $dataPoints = array_reduce(
-            iterator_to_array($stream->yield($startDate, 50)),
-            static fn (array $carry, ActivityDataPoint $p) => ($p->hasVelocity() && !$p->getVelocityAverage()->tooSlow()) ? [...$carry, $p] : $carry,
-            []
-        );
-
-        $zoneSessions = ZoneSessions::create($athlete, $activity->getEndDateLocalTime(), $dataPoints);
-
-        return new ZoneAnalysis(
-            paceZoneSessions: $zoneSessions->getPaceZoneSessions(),
-            heartRateZoneSessions: $zoneSessions->getHeartRateSessions(),
-            totalSeconds: intval($activity->getMovingTime()->format('%s'))
-        );
+        return ZoneSessions::create($athlete, $activity->getEndDateLocalTime(), $dataPoints);
     }
 
     private function analyzeActivity(User $user, int $stravaActivityId): Response
@@ -181,16 +170,24 @@ final class ActivityController extends AbstractController
         $activityData = new ActivityData($activity, $stream);
         $metaData = $activityData->getMetaData();
 
-        $analysis = null;
-        $treshold = $user->getTreshold();
-        assert(!$treshold->isZero(), 'Configure a treshold first!');
+        $sessions = self::createZoneSessions($user, $activity, $stream);
 
-        $analysis = self::createAnalysis($user, $activity, $stream);
+        $paceZoneSessions = $sessions->getPaceZoneSessions();
+        $confirmed = ConfirmedPaceZoneSessions::from($sessions);
+        $heartRateZoneSessions = iterator_to_array($confirmed->yieldSessions());
+
+        $metrics = TrainingMetrics::fromSessions($paceZoneSessions, $activity->getMovingTimeSeconds());
+        $paceStats = PaceZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
+        $hrStats = HeartRateZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
         return $this->render('activity/analysis.html.twig', [
             'activityData' => $activityData,
             'metaData' => $metaData,
-            'zoneAnalysis' => $analysis,
+            'metrics' => $metrics,
+            'paceZoneSessions' => $paceZoneSessions,
+            'heartRateZoneSessions' => $heartRateZoneSessions,
+            'paceStats' => $paceStats,
+            'hrStats' => $hrStats
         ]);
     }
 }
