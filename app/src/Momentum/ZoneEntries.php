@@ -8,11 +8,15 @@ use App\Momentum\Assert\Assert;
 
 final readonly class ZoneEntries
 {
+    private \DateInterval $gapTreshold;
+
     /** @param ActivityDataPoint[] $dataPoints */
     public function __construct(private Pace $treshold, private HeartRate $maxHeartRate, private array $dataPoints)
     {
         Assert::that(!$treshold->isZero(), 'Please configure a treshold pace!');
         Assert::that($maxHeartRate->isValid(), 'Please configure a max. heart rate!');
+
+        $this->gapTreshold = \DateInterval::createFromDateString('5 seconds');
     }
 
     /** @return PaceZoneEntry[] */
@@ -37,8 +41,6 @@ final readonly class ZoneEntries
     /** @return \Generator<PaceZoneEntry> */
     private function yieldPaceZoneEntries(): \Generator
     {
-        $gapTreshold = \DateInterval::createFromDateString('5 seconds');
-
         for ($i = 0; $i < count($this->dataPoints); ++$i) {
             $current = $this->dataPoints[$i];
             $entry = PaceZoneEntry::fromDataPoint($current, $this->treshold);
@@ -50,7 +52,7 @@ final readonly class ZoneEntries
                 $previous = $this->dataPoints[$i - 1];
 
                 if (
-                    $previous->getTimestamp()->add($gapTreshold) < $current->getTimestamp()
+                    $previous->getTimestamp()->add($this->gapTreshold) < $current->getTimestamp()
                     || $previous->getPaceZone($this->treshold) !== $current->getPaceZone($this->treshold)
                 ) {
                     yield $entry;
@@ -62,8 +64,6 @@ final readonly class ZoneEntries
     /** @return \Generator<HeartRateZoneEntry> */
     private function yieldHeartRateEntries(): \Generator
     {
-        $gapTreshold = \DateInterval::createFromDateString('5 seconds');
-
         for ($i = 0; $i < count($this->dataPoints); ++$i) {
             $current = $this->dataPoints[$i];
             $entry = HeartRateZoneEntry::fromDataPoint($current, $this->maxHeartRate);
@@ -74,7 +74,7 @@ final readonly class ZoneEntries
                 // Soley append when gap treshold is exceeded OR heart rate zones vary:
                 $previous = $this->dataPoints[$i - 1];
                 if (
-                    $previous->getTimestamp()->add($gapTreshold) < $current->getTimestamp()
+                    $previous->getTimestamp()->add($this->gapTreshold) < $current->getTimestamp()
                     || $previous->getHeartRateZone($this->maxHeartRate) !== $current->getHeartRateZone($this->maxHeartRate)
                 ) {
                     yield $entry;
@@ -88,22 +88,21 @@ final readonly class ZoneEntries
      *
      * @return array<PaceZoneEntry|HeartRateZoneEntry>
      */
-    private static function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $current): array
+    private function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $current): array
     {
         if (empty($carry)) {
             return [$current];
         }
 
         $previous = array_last($carry);
-
-        $gapTreshold = \DateInterval::createFromDateString('5 seconds');
+        assert(get_class($previous) === get_class($current), 'Should be of same type!');
 
         // Append when gap treshold exceeds:
-        if ($current->entered > $previous->entered->add($gapTreshold)) {
+        if ($current->entered > $previous->entered->add($this->gapTreshold)) {
             return [...$carry, $current];
         }
 
-        // Append when different zone:
+        // Append when zones vary:
         if ($previous->zone !== $current->zone) {
             return [...$carry, $current];
         }
