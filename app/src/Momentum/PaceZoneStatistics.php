@@ -36,12 +36,18 @@ final readonly class PaceZoneStatistics
         /** @var array<string, int> $statistics */
         $statistics = array_reduce(
             $sessions,
+            /**
+             * @param array<string, int> $carry
+             *
+             * @return array<string, int>
+             */
             static function (array $carry, ZoneSession $session): array {
                 //dump(['carry' => $carry, 'session' => $session]);
 
                 dump($session->zone->value . ': ' . implode(', ', array_keys($carry)));
 
-                $value = (int) $carry[$session->zone->value];
+                /** @var int $value */
+                $value = $carry[$session->zone->value];
                 $carry[$session->zone->value] = $value + $session->getSeconds();
 
                 return $carry;
