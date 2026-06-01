@@ -18,28 +18,7 @@ final readonly class ZoneEntries
     /** @return PaceZoneEntry[] */
     public function getPaceZoneEntries(): array
     {
-        // $entries = iterator_to_array($this->yieldPaceZoneEntries());
-
-        // var_dump(['entries' => array_map(
-        //     static fn (PaceZoneEntry $e) => (string) $e,
-        //     $entries
-        // )]);
-
-        // /** @var PaceZoneEntry[] $result */
-        // $result = array_reduce(
-        //     $entries,
-        //     self::reduce(...),
-        //     []
-        // );
-
-        $result = iterator_to_array($this->yieldPaceZoneEntries());
-
-        var_dump(['result' => array_map(
-            static fn (PaceZoneEntry $e) => (string) $e,
-            $result
-        )]);
-
-        return $result;
+        return iterator_to_array($this->yieldPaceZoneEntries());
     }
 
     /** @return HeartRateZoneEntry[] */
@@ -58,21 +37,6 @@ final readonly class ZoneEntries
     /** @return \Generator<PaceZoneEntry> */
     private function yieldPaceZoneEntries(): \Generator
     {
-        // foreach ($this->dataPoints as $dataPoint) {
-        //     // var_dump(['data_point' => (string) $dataPoint]);
-
-        // if ($dataPoint->hasVelocity()) {
-        //        yield PaceZoneEntry::fromDataPoint($dataPoint, $this->treshold);
-        // }
-        // }
-
-        // var_dump([
-        //     'data_points' => array_map(
-        //         static fn (ActivityDataPoint $p) => (string) $p,
-        //         $this->dataPoints
-        //     )
-        // ]);
-
         $gapTreshold = \DateInterval::createFromDateString('5 seconds');
 
         for ($i = 0; $i < count($this->dataPoints); ++$i) {
@@ -80,17 +44,15 @@ final readonly class ZoneEntries
             $entry = PaceZoneEntry::fromDataPoint($current, $this->treshold);
 
             if (0 == $i) {
-                // var_dump([sprintf('yield %d', $i) => $entry]);
                 yield $entry;
             } else {
-                // Soley append when gap treshold exceeds OR pace zones vary:
+                // Soley append when gap treshold is exceeded OR pace zones vary:
                 $previous = $this->dataPoints[$i - 1];
 
                 if (
                     $previous->getTimestamp()->add($gapTreshold) < $current->getTimestamp()
                     || $previous->getPaceZone($this->treshold) !== $current->getPaceZone($this->treshold)
                 ) {
-                    // var_dump([sprintf('yield %d', $i) => $entry]);
                     yield $entry;
                 }
             }
@@ -100,12 +62,6 @@ final readonly class ZoneEntries
     /** @return \Generator<HeartRateZoneEntry> */
     private function yieldHeartRateEntries(): \Generator
     {
-        // foreach ($this->dataPoints as $dataPoint) {
-        //     $zone = $dataPoint->getHeartRate()->getZone($this->maxHeartRate);
-
-        //     yield new HeartRateZoneEntry($zone, $dataPoint->getTimestamp());
-        // }
-
         $gapTreshold = \DateInterval::createFromDateString('5 seconds');
 
         for ($i = 0; $i < count($this->dataPoints); ++$i) {
@@ -113,16 +69,14 @@ final readonly class ZoneEntries
             $entry = HeartRateZoneEntry::fromDataPoint($current, $this->maxHeartRate);
 
             if (0 == $i) {
-                // var_dump([sprintf('yield %d', $i) => $entry]);
                 yield $entry;
             } else {
-                // Soley append when gap treshold exceeds OR pace zones vary:
+                // Soley append when gap treshold is exceeded OR heart rate zones vary:
                 $previous = $this->dataPoints[$i - 1];
                 if (
                     $previous->getTimestamp()->add($gapTreshold) < $current->getTimestamp()
                     || $previous->getHeartRateZone($this->maxHeartRate) !== $current->getHeartRateZone($this->maxHeartRate)
                 ) {
-                    // var_dump([sprintf('yield %d', $i) => $entry]);
                     yield $entry;
                 }
             }
@@ -136,8 +90,6 @@ final readonly class ZoneEntries
      */
     private static function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $current): array
     {
-        // var_dump(['current' => (string) $current]);
-
         if (empty($carry)) {
             return [$current];
         }
