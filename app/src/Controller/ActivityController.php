@@ -13,7 +13,6 @@ use App\Momentum\PaceZone;
 use App\Momentum\PaceZoneStatistics;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\ZoneSessions;
-use App\Momentum\ZoneStatistics;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
@@ -107,9 +106,9 @@ final class ActivityController extends AbstractController
 
         $sessions = self::createZoneSessions($user, $activity, $stream);
 
-        $paceZoneSessions = $sessions->getPaceZoneSessions();
+        $heartRateZoneSessions = $sessions->getHeartRateSessions();
         $confirmed = ConfirmedPaceZoneSessions::from($sessions);
-        $heartRateZoneSessions = iterator_to_array($confirmed->yieldSessions());
+        $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions, $activity->getMovingTimeSeconds());
         $paceStats = PaceZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
@@ -172,9 +171,9 @@ final class ActivityController extends AbstractController
 
         $sessions = self::createZoneSessions($user, $activity, $stream);
 
-        $paceZoneSessions = $sessions->getPaceZoneSessions();
+        $heartRateZoneSessions = $sessions->getHeartRateSessions();
         $confirmed = ConfirmedPaceZoneSessions::from($sessions);
-        $heartRateZoneSessions = iterator_to_array($confirmed->yieldSessions());
+        $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions, $activity->getMovingTimeSeconds());
         $paceStats = PaceZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
@@ -186,8 +185,8 @@ final class ActivityController extends AbstractController
             'metrics' => $metrics,
             'paceZoneSessions' => $paceZoneSessions,
             'heartRateZoneSessions' => $heartRateZoneSessions,
-            'paceStats' => $paceStats,
-            'hrStats' => $hrStats
+            'paceStats' => $paceStats->toArray($activity->getMovingTimeSeconds()),
+            'hrStats' => $hrStats->toArray($activity->getMovingTimeSeconds()),
         ]);
     }
 }

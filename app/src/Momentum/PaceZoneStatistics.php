@@ -13,7 +13,7 @@ final readonly class PaceZoneStatistics
 
     /**
      * @param ZoneSession[] $sessions
-     * @param PaceZone[] $zones
+     * @param PaceZone[]    $zones
      */
     public static function fromSessions(array $sessions, array $zones): self
     {
@@ -42,9 +42,9 @@ final readonly class PaceZoneStatistics
              * @return array<string, int>
              */
             static function (array $carry, ZoneSession $session): array {
-                //dump(['carry' => $carry, 'session' => $session]);
+                // dump(['carry' => $carry, 'session' => $session]);
 
-                dump($session->zone->value . ': ' . implode(', ', array_keys($carry)));
+                // dump($session->zone->value . ': ' . implode(', ', array_keys($carry)));
 
                 /** @var int $value */
                 $value = $carry[$session->zone->value];
@@ -59,11 +59,7 @@ final readonly class PaceZoneStatistics
     }
 
     /**
-     * @return array{
-     *  zone: string,
-     *  duration_seconds: int,
-     *  duration_percentage: float
-     * }[]
+     * @return ZoneStat[]
      */
     public function toArray(int $total): array
     {
@@ -71,20 +67,16 @@ final readonly class PaceZoneStatistics
     }
 
     /**
-     * @return \Generator<array{
-     *  zone: string,
-     *  duration_seconds: int,
-     *  duration_percentage: float
-     * }>
+     * @return \Generator<ZoneStat>
      */
     private function yieldStatistics(int $total): \Generator
     {
-        foreach ($this->statistics as $zone => $duration) {
-            yield [
-                'zone' => $zone,
-                'duration_seconds' => $duration,
-                'duration_percentage' => round($total > 0 ? ($duration / $total) * 100 : 0.0, 2),
-            ];
+        foreach ($this->statistics as $zoneValue => $duration) {
+            yield new ZoneStat(
+                PaceZone::from($zoneValue),
+                $duration,
+                round($total > 0 ? ($duration / $total) * 100 : 0.0, 2),
+            );
         }
     }
 }
