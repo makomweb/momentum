@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class PaceZoneEntry
+final readonly class PaceZoneEntry implements \Stringable
 {
     public function __construct(
         public PaceZone $zone,
@@ -25,5 +25,14 @@ final readonly class PaceZoneEntry
     public function isEqual(PaceZone $zone): bool
     {
         return $this->zone === $zone;
+    }
+    
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s · %s',
+            $this->entered->format('D M d, y · H:i:s'),
+            $this->zone->value
+        );
     }
 }

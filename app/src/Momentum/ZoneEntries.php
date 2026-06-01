@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Momentum;
 
 use App\Momentum\Assert\Assert;
+use DateInterval;
 
 final readonly class ZoneEntries
 {
@@ -18,12 +19,24 @@ final readonly class ZoneEntries
     /** @return PaceZoneEntry[] */
     public function getPaceZoneEntries(): array
     {
+        $entries = iterator_to_array($this->yieldPaceZoneEntries());
+
+        var_dump(['entries' => array_map(
+            static fn (PaceZoneEntry $e) => (string) $e,
+            $entries
+        )]);
+
         /** @var PaceZoneEntry[] $result */
         $result = array_reduce(
-            iterator_to_array($this->yieldPaceZoneEntries()),
+            $entries,
             self::reduce(...),
             []
         );
+
+        var_dump(['result' => array_map(
+            static fn (PaceZoneEntry $e) => (string) $e,
+            $result
+        )]);
 
         return $result;
     }
@@ -45,7 +58,11 @@ final readonly class ZoneEntries
     private function yieldPaceZoneEntries(): \Generator
     {
         foreach ($this->dataPoints as $dataPoint) {
-            if ($dataPoint->hasVelocity()) {
+
+            // var_dump(['data_point' => (string) $dataPoint]);
+            
+            //if ($dataPoint->hasVelocity())
+            {
                 $zone = $dataPoint->getVelocityAverage()->asPace()->getZone($this->treshold);
                 yield new PaceZoneEntry($zone, $dataPoint->getTimestamp());
             }
@@ -69,12 +86,29 @@ final readonly class ZoneEntries
      */
     private static function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $current): array
     {
+        //var_dump(['current' => (string) $current]);
+
         if (empty($carry)) {
             return [$current];
         }
 
         $previous = array_last($carry);
 
-        return $previous->zone !== $current->zone ? [...$carry, $current] : $carry;
+        $gapTreshold = DateInterval::createFromDateString('5 seconds');
+
+        // Append when gap treshold exceeds:
+        if ($current->entered > $previous->entered->add($gapTreshold))
+        {
+            return [...$carry, $current];
+        }
+
+        // Append when different zone:
+        if ($previous->zone !== $current->zone)
+        {
+            return [...$carry, $current];
+        }
+        
+        // Don't append:
+        return $carry;
     }
 }

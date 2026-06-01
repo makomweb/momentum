@@ -13,6 +13,11 @@ final readonly class ZoneSessions
     /** @param ActivityDataPoint[] $dataPoints */
     public static function create(AthleteInterface $athlete, \DateTimeImmutable $endTime, array $dataPoints): self
     {
+        // var_dump(['data_points' => array_map(
+        //     static fn (ActivityDataPoint $p) => (string) $p,
+        //     $dataPoints
+        // )]);
+
         return new self($endTime, new ZoneEntries($athlete->getTreshold(), $athlete->getMaxHeartRate(), $dataPoints));
     }
 
@@ -20,6 +25,11 @@ final readonly class ZoneSessions
     public function getPaceZoneSessions(): array
     {
         $entries = $this->zoneEntries->getPaceZoneEntries();
+
+        // var_dump(['entries' => array_map(
+        //     static fn (PaceZoneEntry $e) => (string) $e,
+        //     $entries
+        // )]);
 
         /** @var ZoneSession[] $result */
         $result = array_reduce($entries, self::reduce(...), []);

@@ -324,10 +324,10 @@ final class ZoneTransitionTrackerTest extends TestCase
         self::assertTrue($hrSessions[0]->isEqual(HeartRateZone::ZONE_4));
     }
 
-    public function test_no_heart_rate_data(): void
+    public function test_no_heart_rate_data_results_in_zone_1_exclusively(): void
     {
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
-        $velocity = new Velocity(2.381); // Zone 2 pace
+        $velocity = new Velocity(2.381); // Zone 2 pace (TODO: Pace to Velocity conversion!?)
 
         $dataPoints = [];
         for ($i = 0; $i < 50; ++$i) {
@@ -361,7 +361,10 @@ final class ZoneTransitionTrackerTest extends TestCase
         $hrSessions = $zoneSessions->getHeartRateSessions();
 
         self::assertCount(1, $paceSessions);
-        self::assertCount(0, $hrSessions);
+        self::assertCount(1, $hrSessions);
+        foreach ($hrSessions as $hrSession) {
+            self::assertEquals(HeartRateZone::ZONE_1, $hrSession->zone);
+        }
     }
 
     public function test_zone_session_timestamps(): void

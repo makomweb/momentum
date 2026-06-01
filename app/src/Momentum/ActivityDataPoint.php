@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class ActivityDataPoint
+final readonly class ActivityDataPoint implements \Stringable
 {
     /**
      * @param array{
@@ -62,5 +62,15 @@ final readonly class ActivityDataPoint
         $velocity = $this->data['velocity_avg'];
 
         return $velocity ?? Velocity::ZERO();
+    }
+    
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s · %s · %s', 
+            $this->getTimestamp()->format('D M d, y · H:i:s'),
+            $this->getVelocity()->asPace(),
+            $this->getHeartRate()
+        );
     }
 }
