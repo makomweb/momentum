@@ -6,12 +6,20 @@ namespace App\Momentum;
 
 final readonly class HeartRateZoneEntry implements \Stringable
 {
-    public function __construct(
-        public HeartRateZone $zone,
+    private function __construct(
         public \DateTimeImmutable $entered,
+        public HeartRateZone $zone,
     ) {
     }
-    
+
+    public static function fromDataPoint(ActivityDataPoint $point, HeartRate $maxHeartRate): self
+    {
+        return new self(
+            $point->getTimestamp(),
+            $point->getHeartRateZone($maxHeartRate)
+        );
+    }
+
     public function __toString(): string
     {
         return sprintf(

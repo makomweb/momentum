@@ -4,30 +4,36 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class ZoneSession
+final readonly class ZoneSession implements \Stringable
 {
     // TODO: Make ctor private!
     public function __construct(
         public PaceZone|HeartRateZone $zone,
         public \DateTimeImmutable $start,
-        public ?\DateTimeImmutable $end = null,
+        public \DateTimeImmutable $end,
     ) {
     }
 
     public static function open(PaceZoneEntry|HeartRateZoneEntry $entry): self
     {
-        return new self($entry->zone, $entry->entered);
+        return new self(
+            $entry->zone,
+            $entry->entered,
+            $entry->entered->add(\DateInterval::createFromDateString('1 seconds'))
+        );
     }
 
     public function close(\DateTimeImmutable $end): self
     {
-        return new self($this->zone, $this->start, $end);
+        return new self($this->zone, $this->start,
+            $this->start < $end
+                ? $end
+                : $this->start->add(\DateInterval::createFromDateString('1 seconds'))
+        );
     }
 
     public function getSeconds(): int
     {
-        assert(!is_null($this->end), 'You must close this session first!');
-
         return $this->end->getTimestamp() - $this->start->getTimestamp();
     }
 
@@ -72,5 +78,15 @@ final readonly class ZoneSession
     public function isEqual(PaceZone|HeartRateZone $zone): bool
     {
         return $this->zone === $zone;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s · %s · %d second(s)',
+            $this->zone->value,
+            $this->start->format('D M d, y · H:i:s'),
+            $this->getSeconds()
+        );
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Momentum;
 
 use App\Momentum\Assert\Assert;
-use DateInterval;
 
 final readonly class ZoneEntries
 {
@@ -19,19 +18,21 @@ final readonly class ZoneEntries
     /** @return PaceZoneEntry[] */
     public function getPaceZoneEntries(): array
     {
-        $entries = iterator_to_array($this->yieldPaceZoneEntries());
+        // $entries = iterator_to_array($this->yieldPaceZoneEntries());
 
-        var_dump(['entries' => array_map(
-            static fn (PaceZoneEntry $e) => (string) $e,
-            $entries
-        )]);
+        // var_dump(['entries' => array_map(
+        //     static fn (PaceZoneEntry $e) => (string) $e,
+        //     $entries
+        // )]);
 
-        /** @var PaceZoneEntry[] $result */
-        $result = array_reduce(
-            $entries,
-            self::reduce(...),
-            []
-        );
+        // /** @var PaceZoneEntry[] $result */
+        // $result = array_reduce(
+        //     $entries,
+        //     self::reduce(...),
+        //     []
+        // );
+
+        $result = iterator_to_array($this->yieldPaceZoneEntries());
 
         var_dump(['result' => array_map(
             static fn (PaceZoneEntry $e) => (string) $e,
@@ -57,14 +58,41 @@ final readonly class ZoneEntries
     /** @return \Generator<PaceZoneEntry> */
     private function yieldPaceZoneEntries(): \Generator
     {
-        foreach ($this->dataPoints as $dataPoint) {
+        // foreach ($this->dataPoints as $dataPoint) {
+        //     // var_dump(['data_point' => (string) $dataPoint]);
 
-            // var_dump(['data_point' => (string) $dataPoint]);
-            
-            //if ($dataPoint->hasVelocity())
-            {
-                $zone = $dataPoint->getVelocityAverage()->asPace()->getZone($this->treshold);
-                yield new PaceZoneEntry($zone, $dataPoint->getTimestamp());
+        // if ($dataPoint->hasVelocity()) {
+        //        yield PaceZoneEntry::fromDataPoint($dataPoint, $this->treshold);
+        // }
+        // }
+
+        // var_dump([
+        //     'data_points' => array_map(
+        //         static fn (ActivityDataPoint $p) => (string) $p,
+        //         $this->dataPoints
+        //     )
+        // ]);
+
+        $gapTreshold = \DateInterval::createFromDateString('5 seconds');
+
+        for ($i = 0; $i < count($this->dataPoints); ++$i) {
+            $current = $this->dataPoints[$i];
+            $entry = PaceZoneEntry::fromDataPoint($current, $this->treshold);
+
+            if (0 == $i) {
+                // var_dump([sprintf('yield %d', $i) => $entry]);
+                yield $entry;
+            } else {
+                // Soley append when gap treshold exceeds OR pace zones vary:
+                $previous = $this->dataPoints[$i - 1];
+
+                if (
+                    $previous->getTimestamp()->add($gapTreshold) < $current->getTimestamp()
+                    || $previous->getPaceZone($this->treshold) !== $current->getPaceZone($this->treshold)
+                ) {
+                    // var_dump([sprintf('yield %d', $i) => $entry]);
+                    yield $entry;
+                }
             }
         }
     }
@@ -72,10 +100,32 @@ final readonly class ZoneEntries
     /** @return \Generator<HeartRateZoneEntry> */
     private function yieldHeartRateEntries(): \Generator
     {
-        foreach ($this->dataPoints as $dataPoint) {
-            $zone = $dataPoint->getHeartRate()->getZone($this->maxHeartRate);
+        // foreach ($this->dataPoints as $dataPoint) {
+        //     $zone = $dataPoint->getHeartRate()->getZone($this->maxHeartRate);
 
-            yield new HeartRateZoneEntry($zone, $dataPoint->getTimestamp());
+        //     yield new HeartRateZoneEntry($zone, $dataPoint->getTimestamp());
+        // }
+
+        $gapTreshold = \DateInterval::createFromDateString('5 seconds');
+
+        for ($i = 0; $i < count($this->dataPoints); ++$i) {
+            $current = $this->dataPoints[$i];
+            $entry = HeartRateZoneEntry::fromDataPoint($current, $this->maxHeartRate);
+
+            if (0 == $i) {
+                // var_dump([sprintf('yield %d', $i) => $entry]);
+                yield $entry;
+            } else {
+                // Soley append when gap treshold exceeds OR pace zones vary:
+                $previous = $this->dataPoints[$i - 1];
+                if (
+                    $previous->getTimestamp()->add($gapTreshold) < $current->getTimestamp()
+                    || $previous->getHeartRateZone($this->maxHeartRate) !== $current->getHeartRateZone($this->maxHeartRate)
+                ) {
+                    // var_dump([sprintf('yield %d', $i) => $entry]);
+                    yield $entry;
+                }
+            }
         }
     }
 
@@ -86,7 +136,7 @@ final readonly class ZoneEntries
      */
     private static function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $current): array
     {
-        //var_dump(['current' => (string) $current]);
+        // var_dump(['current' => (string) $current]);
 
         if (empty($carry)) {
             return [$current];
@@ -94,20 +144,18 @@ final readonly class ZoneEntries
 
         $previous = array_last($carry);
 
-        $gapTreshold = DateInterval::createFromDateString('5 seconds');
+        $gapTreshold = \DateInterval::createFromDateString('5 seconds');
 
         // Append when gap treshold exceeds:
-        if ($current->entered > $previous->entered->add($gapTreshold))
-        {
+        if ($current->entered > $previous->entered->add($gapTreshold)) {
             return [...$carry, $current];
         }
 
         // Append when different zone:
-        if ($previous->zone !== $current->zone)
-        {
+        if ($previous->zone !== $current->zone) {
             return [...$carry, $current];
         }
-        
+
         // Don't append:
         return $carry;
     }

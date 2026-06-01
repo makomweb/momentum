@@ -63,11 +63,21 @@ final readonly class ActivityDataPoint implements \Stringable
 
         return $velocity ?? Velocity::ZERO();
     }
-    
+
+    public function getPaceZone(Pace $treshold): PaceZone
+    {
+        return $this->getVelocityAverage()->asPace()->getZone($treshold);
+    }
+
+    public function getHeartRateZone(HeartRate $maxHeartRate): HeartRateZone
+    {
+        return $this->getHeartRate()->getZone($maxHeartRate);
+    }
+
     public function __toString(): string
     {
         return sprintf(
-            '%s · %s · %s', 
+            '%s · %s · %s',
             $this->getTimestamp()->format('D M d, y · H:i:s'),
             $this->getVelocity()->asPace(),
             $this->getHeartRate()

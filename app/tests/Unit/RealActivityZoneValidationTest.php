@@ -42,11 +42,11 @@ final class RealActivityZoneValidationTest extends TestCase
         self::assertNotEmpty($hrData, 'No heart rate data found');
 
         // User config
-        $ftp = new Pace(6.0); // 6:00 min/km FTP
+        $treshold = new Pace(6.0); // 6:00 min/km
         $maxHeartRate = new HeartRate(190);
 
         // Process zones
-        // $tracker = ZoneTransitionTracker::for(self::createAthlete($ftp, $maxHeartRate));
+        // $tracker = ZoneTransitionTracker::for(self::createAthlete($treshold, $maxHeartRate));
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 
         $dataPoints = [];
@@ -75,7 +75,7 @@ final class RealActivityZoneValidationTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) $timeData[-1]).'S'));
-        $zoneZessions = ZoneSessions::create(self::createAthlete($ftp, $maxHeartRate), $endTime, $dataPoints);
+        $zoneZessions = ZoneSessions::create(self::createAthlete($treshold, $maxHeartRate), $endTime, $dataPoints);
 
         // $tracker->finalize($endTime);
 
@@ -95,7 +95,6 @@ final class RealActivityZoneValidationTest extends TestCase
 
                 // Check HR during this session
                 $sessionStart = $session->start->getTimestamp();
-                assert(!is_null($session->end), 'Session must be closed first!');
                 $sessionEnd = $session->end->getTimestamp();
                 $sessionHRs = [];
 
@@ -143,10 +142,10 @@ final class RealActivityZoneValidationTest extends TestCase
         // This test documents the desired behavior:
         // A pace zone should only be confirmed if HR zone matches
 
-        $ftp = new Pace(6.0);
+        $treshold = new Pace(6.0);
         $maxHeartRate = new HeartRate(190);
 
-        // $tracker = ZoneTransitionTracker::for(self::createAthlete($ftp, $maxHeartRate));
+        // $tracker = ZoneTransitionTracker::for(self::createAthlete($treshold, $maxHeartRate));
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 
         $dataPoints = [];
@@ -155,7 +154,7 @@ final class RealActivityZoneValidationTest extends TestCase
         for ($i = 0; $i < 60; ++$i) {
             $timestamp = $startTime->add(new \DateInterval("PT{$i}S"));
 
-            // High velocity: 5:00 pace = 3.33 m/s (100% of 6:00 FTP → Zone 5)
+            // High velocity: 5:00 pace = 3.33 m/s (100% of 6:00 treshold → Zone 5)
             $velocity = new Velocity(3.33);
 
             // But low HR: 95 bpm (50% of 190 = Zone 1 recovery)
@@ -183,7 +182,7 @@ final class RealActivityZoneValidationTest extends TestCase
         // $tracker->finalize($startTime->add(new \DateInterval('PT60S')));
 
         $endTime = $startTime->add(new \DateInterval('PT60S'));
-        $zoneZessions = ZoneSessions::create(self::createAthlete($ftp, $maxHeartRate), $endTime, $dataPoints);
+        $zoneZessions = ZoneSessions::create(self::createAthlete($treshold, $maxHeartRate), $endTime, $dataPoints);
 
         // $paceSessions = $tracker->getPaceZoneSessions();
         // $hrSessions = $tracker->getHeartRateZoneSessions();

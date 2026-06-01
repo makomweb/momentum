@@ -20,8 +20,6 @@ final readonly class ExtractHeartRateZones
      */
     public function for(ZoneSession $paceSession): array
     {
-        assert(!is_null($paceSession->end));
-
         return array_reduce(
             $this->heartRateSessions,
             new class($paceSession->start, $paceSession->end) {
