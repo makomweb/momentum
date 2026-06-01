@@ -126,7 +126,7 @@ final readonly class Activity implements \Stringable
 
     public function getEndDateLocalTime(): \DateTimeImmutable
     {
-        return $this->getStartDateLocalTime()->add($this->getMovingTime());
+        return $this->getStartDateLocalTime()->add($this->getElapsedTime());
     }
 
     public function getDistance(): Distance
