@@ -106,8 +106,9 @@ final class ActivityController extends AbstractController
         $sessions = self::createZoneSessions($user, $activity, $stream);
 
         $heartRateZoneSessions = $sessions->getHeartRateSessions();
-        $confirmed = ConfirmedPaceZoneSessions::from($sessions);
-        $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
+        // $confirmed = ConfirmedPaceZoneSessions::from($sessions);
+        // $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
+        $paceZoneSessions = $sessions->getPaceZoneSessions();
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
         $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
@@ -171,8 +172,9 @@ final class ActivityController extends AbstractController
         $sessions = self::createZoneSessions($user, $activity, $stream);
 
         $heartRateZoneSessions = $sessions->getHeartRateSessions();
-        $confirmed = ConfirmedPaceZoneSessions::from($sessions);
-        $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
+        // $confirmed = ConfirmedPaceZoneSessions::from($sessions);
+        // $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
+        $paceZoneSessions = $sessions->getPaceZoneSessions();
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
         $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
