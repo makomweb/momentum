@@ -152,7 +152,7 @@ final class Activity
         return match ($type) {
             'Run', 'Walk', 'Hike' => $this->getAverageVelocity()->asPace(),
             'Swim' => $this->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
-            'Ride' => $this->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR),
+            'Ride' => $this->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
         };
     }

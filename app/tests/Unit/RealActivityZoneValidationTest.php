@@ -8,6 +8,7 @@ use App\Momentum\ActivityDataPoint;
 use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
+use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
 use App\Momentum\Velocity;
 use App\Momentum\ZoneSessions;
@@ -41,7 +42,7 @@ final class RealActivityZoneValidationTest extends TestCase
         self::assertNotEmpty($hrData, 'No heart rate data found');
 
         // User config
-        $treshold = new Pace(6.0); // 6:00 min/km
+        $treshold = new Pace(6.0, PaceUnit::MINUTES_PER_KILOMETER); // 6:00 min/km
         $maxHeartRate = new HeartRate(190);
 
         // Process zones
@@ -128,7 +129,7 @@ final class RealActivityZoneValidationTest extends TestCase
         // This test documents the desired behavior:
         // A pace zone should only be confirmed if HR zone matches
 
-        $treshold = new Pace(6.0);
+        $treshold = new Pace(6.0, PaceUnit::MINUTES_PER_KILOMETER);
         $maxHeartRate = new HeartRate(190);
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 

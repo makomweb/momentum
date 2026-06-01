@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
+use App\Momentum\PaceUnit;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,12 +53,12 @@ final class ProfileSettingsController extends AbstractController
             $tresholdRaw = trim((string) $request->request->get('$treshold_minutes_per_kilometer', ''));
             $maxHeartRateRaw = trim((string) $request->request->get('max_heart_rate', ''));
 
-            $treshold = new Pace(0.0);
+            $treshold = Pace::ZERO();
             if ('' !== $tresholdRaw) {
                 if (!is_numeric($tresholdRaw) || (float) $tresholdRaw <= 0) {
                     $errors[] = '$treshold must be a positive number.';
                 } else {
-                    $treshold = new Pace((float) $tresholdRaw);
+                    $treshold = new Pace((float) $tresholdRaw, PaceUnit::MINUTES_PER_KILOMETER);
                 }
             }
 

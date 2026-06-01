@@ -10,6 +10,18 @@ final readonly class Speed
     {
     }
 
+    public static function fromMetersPerSecond(float $metersPerSecond): self
+    {
+        return $metersPerSecond < 0.1
+            ? self::ZERO()
+            : new self($metersPerSecond, SpeedUnit::METERS_PER_SECOND);
+    }
+
+    public static function ZERO(): self
+    {
+        return new self(0.0, SpeedUnit::METERS_PER_SECOND);
+    }
+
     public function as(SpeedUnit $target): self
     {
         if ($this->unit === $target) {
@@ -21,8 +33,8 @@ final readonly class Speed
         }
 
         return match ($target) {
-            SpeedUnit::METER_PER_SECOND => new Speed($this->value / 3.6, SpeedUnit::METER_PER_SECOND),
-            SpeedUnit::KILOMETER_PER_HOUR => new Speed($this->value * 3.6, SpeedUnit::KILOMETER_PER_HOUR),
+            SpeedUnit::METERS_PER_SECOND => new self($this->value / 3.6, SpeedUnit::METERS_PER_SECOND),
+            SpeedUnit::KILOMETERS_PER_HOUR => new self($this->value * 3.6, SpeedUnit::KILOMETERS_PER_HOUR),
         };
     }
 

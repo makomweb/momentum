@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
+use App\Momentum\PaceUnit;
 use App\Strava\API\Athlete;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -123,7 +124,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, A
 
     public function getTreshold(): Pace
     {
-        return new Pace($this->treshold);
+        return new Pace($this->treshold, PaceUnit::MINUTES_PER_KILOMETER);
     }
 
     public function setTreshold(Pace $treshold): void

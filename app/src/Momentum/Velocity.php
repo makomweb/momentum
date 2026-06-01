@@ -18,41 +18,30 @@ final readonly class Velocity
     /** @param float[] $velocities */
     public static function max(array $velocities): self
     {
-        $max = !empty($velocities) ? max($velocities) : 0;
-
-        return new self($max);
+        return empty($velocities)
+            ? self::ZERO()
+            : new self(max($velocities));
     }
 
     public static function create(Pace $pace): self
     {
-        if ($pace->isZero()) {
-            return new self(0.0);
-        }
-
-        return new self(16.667 / $pace->value);
+        return $pace->isZero()
+            ? self::ZERO()
+            : new self(16.667 / $pace->value);
     }
 
     public function isZero(): bool
     {
-        return $this->asPace()->isZero();
-    }
-
-    public function tooSlow(): bool
-    {
-        return $this->asPace()->value > 60.0; // > 60 min/km
+        return 0.0 == $this->metersPerSecond;
     }
 
     public function asSpeed(): Speed
     {
-        return new Speed($this->metersPerSecond, SpeedUnit::METER_PER_SECOND);
+        return Speed::fromMetersPerSecond($this->metersPerSecond);
     }
 
     public function asPace(): Pace
     {
-        if (0.0 == $this->metersPerSecond) {
-            return new Pace(0.0);
-        }
-
-        return new Pace(16.667 / $this->metersPerSecond);
+        return Pace::fromMetersPerSecond($this->metersPerSecond);
     }
 }

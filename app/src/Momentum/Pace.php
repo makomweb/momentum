@@ -8,8 +8,20 @@ final readonly class Pace implements \Stringable
 {
     public function __construct(
         public float $value,
-        public PaceUnit $unit = PaceUnit::MINUTES_PER_KILOMETER,
+        public PaceUnit $unit,
     ) {
+    }
+
+    public static function fromMetersPerSecond(float $metersPerSecond): self
+    {
+        return $metersPerSecond < 0.1
+            ? self::ZERO()
+            : new self(16.667 / $metersPerSecond, PaceUnit::MINUTES_PER_KILOMETER);
+    }
+
+    public static function ZERO(): self
+    {
+        return new self(0.0, PaceUnit::MINUTES_PER_KILOMETER);
     }
 
     public function getZone(Pace $treshold): PaceZone

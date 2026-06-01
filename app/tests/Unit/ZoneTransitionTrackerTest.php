@@ -8,6 +8,7 @@ use App\Momentum\ActivityDataPoint;
 use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
+use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
 use App\Momentum\Velocity;
 use App\Momentum\ZoneSessions;
@@ -23,7 +24,7 @@ final class ZoneTransitionTrackerTest extends TestCase
     protected function setUp(): void
     {
         // 6:00 min/km = 360 seconds per km
-        $this->treshold = new Pace(6.0);
+        $this->treshold = new Pace(6.0, PaceUnit::MINUTES_PER_KILOMETER);
         $this->maxHeartRate = new HeartRate(200);
     }
 
@@ -214,7 +215,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         $dataPoints = [];
         // Slow pace (Zone 2) with high HR (Zone 4)
         for ($i = 0; $i < 30; ++$i) {
-            $velocity = Velocity::create(new Pace(7.0));
+            $velocity = Velocity::create(new Pace(7.0, PaceUnit::MINUTES_PER_KILOMETER));
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
                 'distance' => null,

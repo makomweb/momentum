@@ -6,6 +6,6 @@ namespace App\Momentum;
 
 enum SpeedUnit: string
 {
-    case METER_PER_SECOND = 'm/s';
-    case KILOMETER_PER_HOUR = 'km/h';
+    case METERS_PER_SECOND = 'm/s';
+    case KILOMETERS_PER_HOUR = 'km/h';
 }

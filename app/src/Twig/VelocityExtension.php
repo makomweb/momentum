@@ -25,7 +25,7 @@ final class VelocityExtension extends AbstractExtension
     {
         return match ($activityType) {
             'Run', 'Walk', 'Hike', 'Swim' => (string) $velocity->asPace(),
-            'Ride' => (string) $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR),
+            'Ride' => (string) $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => '',
         };
     }

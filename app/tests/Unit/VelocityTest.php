@@ -16,9 +16,9 @@ class VelocityTest extends TestCase
     {
         $velocity = new Velocity(metersPerSecond: 10.0);
 
-        $speed = $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR);
+        $speed = $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR);
 
-        self::assertEquals(SpeedUnit::KILOMETER_PER_HOUR, $speed->unit);
+        self::assertEquals(SpeedUnit::KILOMETERS_PER_HOUR, $speed->unit);
         self::assertEquals(36.0, $speed->value);
     }
 
@@ -36,11 +36,11 @@ class VelocityTest extends TestCase
     #[Test]
     public function convert_to_ms(): void
     {
-        $speed = new Speed(100.0, SpeedUnit::KILOMETER_PER_HOUR);
+        $speed = new Speed(100.0, SpeedUnit::KILOMETERS_PER_HOUR);
 
-        $ms = $speed->as(SpeedUnit::METER_PER_SECOND);
+        $ms = $speed->as(SpeedUnit::METERS_PER_SECOND);
 
-        self::assertEquals(SpeedUnit::METER_PER_SECOND, $ms->unit);
+        self::assertEquals(SpeedUnit::METERS_PER_SECOND, $ms->unit);
         self::assertEqualsWithDelta(27.77, $ms->value, 0.01);
     }
 

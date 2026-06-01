@@ -7,16 +7,16 @@ namespace App\Momentum;
 final readonly class PaceZoneEntry implements \Stringable
 {
     private function __construct(
-        public \DateTimeImmutable $entered,
         public PaceZone $zone,
+        public \DateTimeImmutable $entered,
     ) {
     }
 
     public static function fromDataPoint(ActivityDataPoint $point, Pace $treshold): self
     {
         return new self(
-            $point->getTimestamp(),
-            $point->getPaceZone($treshold)
+            $point->getPaceZone($treshold),
+            $point->getTimestamp()
         );
     }
 
