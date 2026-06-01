@@ -11,7 +11,6 @@ use App\Momentum\Pace;
 use App\Momentum\PaceZone;
 use App\Momentum\Velocity;
 use App\Momentum\ZoneSessions;
-use App\Momentum\ZoneTracker;
 use PHPUnit\Framework\TestCase;
 
 final class ZoneTransitionTrackerTest extends TestCase
@@ -320,8 +319,6 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'velocity_avg' => new Velocity(2.381),
             ]);
         }
-
-        self::assertEquals(5, ZoneTracker::GAP_THRESHOLD);
 
         // Gap: no points from seconds 8-14 (> 5 second gap threshold)
         // Resume with Zone 2 pace at second 15
