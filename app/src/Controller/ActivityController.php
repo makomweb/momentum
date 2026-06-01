@@ -109,7 +109,7 @@ final class ActivityController extends AbstractController
         $confirmed = ConfirmedPaceZoneSessions::from($sessions);
         $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
 
-        $metrics = TrainingMetrics::fromSessions($paceZoneSessions, $activity->getMovingTimeSeconds());
+        $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
         $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
         $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
@@ -124,7 +124,7 @@ final class ActivityController extends AbstractController
             'polarized_training' => [
                 'easy_seconds' => $metrics->easySeconds,
                 'easy_percentage' => round($metrics->getEasyPercentage(), 2),
-                'medium_seconds' => $metrics->getMediumSeconds(),
+                'medium_seconds' => $metrics->mediumSeconds,
                 'medium_percentage' => round($metrics->getMediumPercentage(), 2),
                 'hard_seconds' => $metrics->hardSeconds,
                 'hard_percentage' => round($metrics->getHardPercentage(), 2),
@@ -174,7 +174,7 @@ final class ActivityController extends AbstractController
         $confirmed = ConfirmedPaceZoneSessions::from($sessions);
         $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
 
-        $metrics = TrainingMetrics::fromSessions($paceZoneSessions, $activity->getMovingTimeSeconds());
+        $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
         $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
         $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 

@@ -7,43 +7,42 @@ namespace App\Momentum;
 final readonly class TrainingMetrics
 {
     private function __construct(
-        public int $easySeconds,
-        public int $mediumSeconds,
-        public int $hardSeconds,
-        public int $totalSeconds,
+        public int $easySeconds = 0,
+        public int $mediumSeconds = 0,
+        public int $hardSeconds = 0,
     ) {
     }
 
     /**
      * @param ZoneSession[] $zoneSessions
      */
-    public static function fromSessions(array $zoneSessions, int $totalSeconds): self
+    public static function fromSessions(array $zoneSessions): self
     {
         return array_reduce(
             $zoneSessions,
             static fn (self $metrics, ZoneSession $session) => $metrics->with($session),
-            new self(0, 0, 0, $totalSeconds)
+            new self()
         );
     }
 
     public function getEasyPercentage(): float
     {
-        return $this->totalSeconds > 0 ? ($this->easySeconds / $this->totalSeconds) * 100 : 0.0;
+        return $this->getTotalSeconds() > 0 ? $this->easySeconds / $this->getTotalSeconds() * 100 : 0.0;
     }
 
     public function getHardPercentage(): float
     {
-        return $this->totalSeconds > 0 ? ($this->hardSeconds / $this->totalSeconds) * 100 : 0.0;
-    }
-
-    public function getMediumSeconds(): int
-    {
-        return $this->mediumSeconds;
+        return $this->getTotalSeconds() > 0 ? $this->hardSeconds / $this->getTotalSeconds() * 100 : 0.0;
     }
 
     public function getMediumPercentage(): float
     {
-        return $this->totalSeconds > 0 ? ($this->mediumSeconds / $this->totalSeconds) * 100 : 0.0;
+        return $this->getTotalSeconds() > 0 ? $this->mediumSeconds / $this->getTotalSeconds() * 100 : 0.0;
+    }
+
+    private function getTotalSeconds(): int
+    {
+        return $this->easySeconds + $this->mediumSeconds + $this->hardSeconds;
     }
 
     /**
@@ -67,29 +66,26 @@ final readonly class TrainingMetrics
 
     private function with(ZoneSession $session): self
     {
-        if ($session->isEasy()) {
-            return new self(
-                $this->easySeconds + $session->getSeconds(),
-                $this->mediumSeconds,
-                $this->hardSeconds,
-                $this->totalSeconds
-            );
-        }
-
         if ($session->isHard()) {
             return new self(
                 $this->easySeconds,
                 $this->mediumSeconds,
-                $this->hardSeconds + $session->getSeconds(),
-                $this->totalSeconds
+                $this->hardSeconds + $session->getSeconds()
+            );
+        }
+
+        if ($session->isEasy()) {
+            return new self(
+                $this->easySeconds + $session->getSeconds(),
+                $this->mediumSeconds,
+                $this->hardSeconds
             );
         }
 
         return new self(
             $this->easySeconds,
             $this->mediumSeconds + $session->getSeconds(),
-            $this->hardSeconds,
-            $this->totalSeconds
+            $this->hardSeconds
         );
     }
 }
