@@ -32,9 +32,9 @@ final class ZoneTransitionTrackerTest extends TestCase
     {
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 
-        // Start in Zone 2 (Basis: 114-129% of FTP)
-        // 6:00 FTP = 6.0 min/km
-        // 7:00 pace = 7.0 min/km = 116% of FTP → Zone 2
+        // Start in Zone 2 (Basis: 114-129% of $treshold)
+        // 6:00 $treshold = 6.0 min/km
+        // 7:00 pace = 7.0 min/km = 116% of $treshold → Zone 2
         // velocity = 16.667 / 7.0 = 2.381 m/s
         $baseVelocity = new Velocity(2.381);
 
@@ -52,7 +52,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         // Transition to Zone 5 (VO2max: < 99%)
-        // 5:30 pace = 5.5 min/km = 92% of FTP → Zone 5
+        // 5:30 pace = 5.5 min/km = 92% of $treshold → Zone 5
         // velocity = 16.667 / 5.5 = 3.03 m/s
         $fasterVelocity = new Velocity(3.03);
 
@@ -130,9 +130,9 @@ final class ZoneTransitionTrackerTest extends TestCase
     {
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 
-        // Zone 2: 7:00 pace = 2.381 m/s (116% of 6:00 FTP)
-        // Zone 3: 6:18 pace = 2.62 m/s (106% of 6:00 FTP)  -- Need >= 106%
-        // Zone 5: 5:30 pace = 3.03 m/s (92% of 6:00 FTP)
+        // Zone 2: 7:00 pace = 2.381 m/s (116% of 6:00 $treshold)
+        // Zone 3: 6:18 pace = 2.62 m/s (106% of 6:00 $treshold)  -- Need >= 106%
+        // Zone 5: 5:30 pace = 3.03 m/s (92% of 6:00 $treshold)
         $zones = [
             ['velocity' => new Velocity(2.381), 'duration' => 30, 'expectedZone' => PaceZone::ZONE_2],
             ['velocity' => new Velocity(2.62), 'duration' => 40, 'expectedZone' => PaceZone::ZONE_3],

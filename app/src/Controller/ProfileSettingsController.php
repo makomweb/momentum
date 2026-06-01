@@ -49,15 +49,15 @@ final class ProfileSettingsController extends AbstractController
                 return $this->redirectToRoute('profile_settings');
             }
 
-            $ftpRaw = trim((string) $request->request->get('ftp_minutes_per_kilometer', ''));
+            $tresholdRaw = trim((string) $request->request->get('$treshold_minutes_per_kilometer', ''));
             $maxHeartRateRaw = trim((string) $request->request->get('max_heart_rate', ''));
 
-            $ftp = new Pace(0.0);
-            if ('' !== $ftpRaw) {
-                if (!is_numeric($ftpRaw) || (float) $ftpRaw <= 0) {
-                    $errors[] = 'FTP must be a positive number.';
+            $treshold = new Pace(0.0);
+            if ('' !== $tresholdRaw) {
+                if (!is_numeric($tresholdRaw) || (float) $tresholdRaw <= 0) {
+                    $errors[] = '$treshold must be a positive number.';
                 } else {
-                    $ftp = new Pace((float) $ftpRaw);
+                    $treshold = new Pace((float) $tresholdRaw);
                 }
             }
 
@@ -71,7 +71,7 @@ final class ProfileSettingsController extends AbstractController
             }
 
             if (empty($errors)) {
-                $user->setFtp($ftp);
+                $user->setTreshold($treshold);
                 $user->setMaxHeartRate($maxHeartRate);
 
                 $this->entityManager->flush();

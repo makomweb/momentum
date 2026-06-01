@@ -126,7 +126,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, A
         return new Pace($this->treshold);
     }
 
-    public function setFtp(Pace $treshold): void
+    public function setTreshold(Pace $treshold): void
     {
         $this->treshold = $treshold->value;
     }
