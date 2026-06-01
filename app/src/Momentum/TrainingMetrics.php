@@ -8,6 +8,7 @@ final readonly class TrainingMetrics
 {
     private function __construct(
         public int $easySeconds,
+        public int $mediumSeconds,
         public int $hardSeconds,
         public int $totalSeconds,
     ) {
@@ -21,7 +22,7 @@ final readonly class TrainingMetrics
         return array_reduce(
             $zoneSessions,
             static fn (self $metrics, ZoneSession $session) => $metrics->with($session),
-            new self(0, 0, $totalSeconds)
+            new self(0, 0, 0, $totalSeconds)
         );
     }
 
@@ -37,12 +38,12 @@ final readonly class TrainingMetrics
 
     public function getMediumSeconds(): int
     {
-        return $this->totalSeconds - $this->easySeconds - $this->hardSeconds;
+        return $this->mediumSeconds;
     }
 
     public function getMediumPercentage(): float
     {
-        return $this->totalSeconds > 0 ? ($this->getMediumSeconds() / $this->totalSeconds) * 100 : 0.0;
+        return $this->totalSeconds > 0 ? ($this->mediumSeconds / $this->totalSeconds) * 100 : 0.0;
     }
 
     /**
@@ -69,17 +70,26 @@ final readonly class TrainingMetrics
         if ($session->isEasy()) {
             return new self(
                 $this->easySeconds + $session->getSeconds(),
+                $this->mediumSeconds,
                 $this->hardSeconds,
                 $this->totalSeconds
             );
-        } elseif ($session->isHard()) {
+        }
+
+        if ($session->isHard()) {
             return new self(
                 $this->easySeconds,
+                $this->mediumSeconds,
                 $this->hardSeconds + $session->getSeconds(),
                 $this->totalSeconds
             );
         }
 
-        return $this;
+        return new self(
+            $this->easySeconds,
+            $this->mediumSeconds + $session->getSeconds(),
+            $this->hardSeconds,
+            $this->totalSeconds
+        );
     }
 }
