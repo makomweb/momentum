@@ -14,7 +14,9 @@ final readonly class Pace implements \Stringable
 
     public function getZone(Pace $treshold): PaceZone
     {
-        return PaceZone::calculate($this, $treshold);
+        return $this->isZero()
+            ? PaceZone::ZONE_1
+            : PaceZone::calculate($this, $treshold);
     }
 
     public function isZero(): bool

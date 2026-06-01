@@ -138,7 +138,7 @@ final class RealActivityZoneValidationTest extends TestCase
         for ($i = 0; $i < 60; ++$i) {
             $timestamp = $startTime->add(new \DateInterval("PT{$i}S"));
 
-            // High velocity: 5:00 pace = 3.33 m/s (100% of 6:00 treshold → Zone 5)
+            // High velocity: 5:00 pace = 3.33 m/s (83% of 6:00 treshold → Zone 5)
             $velocity = new Velocity(3.33);
 
             // But low HR: 95 bpm (50% of 190 = Zone 1 recovery)
@@ -150,7 +150,7 @@ final class RealActivityZoneValidationTest extends TestCase
                 'heart_rate' => $hr,
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
-                'velocity_avg' => null,
+                'velocity_avg' => $velocity,
             ]);
         }
 
@@ -160,12 +160,11 @@ final class RealActivityZoneValidationTest extends TestCase
         $paceSessions = $zoneZessions->getPaceZoneSessions();
         $hrSessions = $zoneZessions->getHeartRateSessions();
 
-        // CURRENT BEHAVIOR (wrong):
-        // This will be classified as ZONE_5 (VO2max) because only pace is considered
+        // Pace zone is ZONE_5 (VO2max) because velocity is high
         self::assertCount(1, $paceSessions);
-        self::assertTrue(PaceZone::ZONE_5 === $paceSessions[0]->zone, 'Currently classified as VO2max based on pace alone');
+        self::assertTrue(PaceZone::ZONE_5 === $paceSessions[0]->zone, 'Classified as VO2max based on pace');
 
-        // HR zone is actually Zone 1 (recovery)
+        // HR zone is actually Zone 1 (recovery) — a mismatch that ConfirmedPaceZoneSessions should filter
         self::assertCount(1, $hrSessions);
         self::assertTrue(HeartRateZone::ZONE_1 === $hrSessions[0]->zone, 'HR zone is recovery');
 
