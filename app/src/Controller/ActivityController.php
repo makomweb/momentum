@@ -8,11 +8,10 @@ use App\Entity\User;
 use App\Momentum\AthleteInterface;
 use App\Momentum\ConfirmedPaceZoneSessions;
 use App\Momentum\HeartRateZone;
-use App\Momentum\HeartRateZoneStatistics;
 use App\Momentum\PaceZone;
-use App\Momentum\PaceZoneStatistics;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\ZoneSessions;
+use App\Momentum\ZoneStatistics;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
@@ -111,8 +110,8 @@ final class ActivityController extends AbstractController
         $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions, $activity->getMovingTimeSeconds());
-        $paceStats = PaceZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
-        $hrStats = HeartRateZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
+        $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
+        $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
         return $this->json([
             'activity' => [
@@ -176,8 +175,8 @@ final class ActivityController extends AbstractController
         $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions, $activity->getMovingTimeSeconds());
-        $paceStats = PaceZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
-        $hrStats = HeartRateZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
+        $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
+        $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
         return $this->render('activity/analysis.html.twig', [
             'activityData' => $activityData,

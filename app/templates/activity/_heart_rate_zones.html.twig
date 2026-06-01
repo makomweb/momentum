@@ -6,11 +6,11 @@
         <div class="zone-list">
             {% for stat in hrStats %}
                 {% set zone = stat.zone %}
-                {% set percentage = stat.getDurationPercentage() %}
+                {% set percentage = stat.duration_percentage %}
                 <div class="zone-row">
-                    <div class="zone-name">{{ zone.value }}</div>
+                    <div class="zone-name">{{ zone }}</div>
                     <div class="zone-bar">
-                        <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone.getColor() }};"></div>
+                        <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone | zone_color('hr') }};"></div>
                     </div>
                     <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
                 </div>

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class HeartRateZoneStatistics
+final readonly class ZoneStatistics
 {
     /** @param array<string, int> $statistics */
     private function __construct(public array $statistics = [])
@@ -12,8 +12,8 @@ final readonly class HeartRateZoneStatistics
     }
 
     /**
-     * @param ZoneSession[]   $sessions
-     * @param HeartRateZone[] $zones
+     * @param ZoneSession[]                 $sessions
+     * @param array<HeartRateZone|PaceZone> $zones
      */
     public static function fromSessions(array $sessions, array $zones): self
     {
@@ -25,7 +25,7 @@ final readonly class HeartRateZoneStatistics
              *
              * @return array<string, int>
              */
-            static function (array $carry, HeartRateZone $zone): array {
+            static function (array $carry, HeartRateZone|PaceZone $zone): array {
                 $carry[$zone->value] = 0;
 
                 return $carry;
@@ -44,7 +44,7 @@ final readonly class HeartRateZoneStatistics
             static function (array $carry, ZoneSession $session): array {
                 // dump(['carry' => $carry, 'session' => $session]);
 
-                dump($session->zone->value.': '.implode(', ', array_keys($carry)));
+                // dump($session->zone->value . ': ' . implode(', ', array_keys($carry)));
 
                 /** @var int $value */
                 $value = $carry[$session->zone->value];
@@ -59,7 +59,11 @@ final readonly class HeartRateZoneStatistics
     }
 
     /**
-     * @return ZoneStat[]
+     * @return array{
+     *  zone: string,
+     *  duration_seconds: int,
+     *  duration_percentage: float
+     * }[]
      */
     public function toArray(int $total): array
     {
@@ -67,16 +71,20 @@ final readonly class HeartRateZoneStatistics
     }
 
     /**
-     * @return \Generator<ZoneStat>
+     * @return \Generator<array{
+     *  zone: string,
+     *  duration_seconds: int,
+     *  duration_percentage: float
+     * }>
      */
     private function yieldStatistics(int $total): \Generator
     {
-        foreach ($this->statistics as $zoneValue => $duration) {
-            yield new ZoneStat(
-                HeartRateZone::from($zoneValue),
-                $duration,
-                round($total > 0 ? ($duration / $total) * 100 : 0.0, 2),
-            );
+        foreach ($this->statistics as $zone => $duration) {
+            yield [
+                'zone' => $zone,
+                'duration_seconds' => $duration,
+                'duration_percentage' => round($total > 0 ? ($duration / $total) * 100 : 0.0, 2),
+            ];
         }
     }
 }
