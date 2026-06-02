@@ -81,9 +81,8 @@ final class ProfileSettingsController extends AbstractController
                 $this->addFlash('success', 'Profile settings updated.');
 
                 return $this->redirectToRoute('profile_settings');
-            } else {
-                dump('Errors:', $errors);
             }
+            dump('Errors:', $errors);
 
             $maxHeartRate = '' === $maxHeartRateRaw ? null : (int) $maxHeartRateRaw;
 
