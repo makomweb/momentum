@@ -51,6 +51,6 @@ final class ReportProgressAdapter implements ReportProgressInterface
     {
         $this->table->render();
 
-        $this->io->success(sprintf('Synchronized %d activitie(s) ✅', $this->count));
+        $this->io->success(sprintf('✅ Synchronized %d activitie(s)', $this->count));
     }
 }
