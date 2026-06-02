@@ -1,0 +1,34 @@
+replicaCount: 1
+
+app:
+  image: makomweb/momentum:latest
+  pullPolicy: IfNotPresent
+  port: 8080
+  secret: "" # set via CI/helm --set (symfony APP_SECRET)
+  
+mysql:
+  image: mysql:8.4
+  port: 3306
+  rootPassword: secret
+  database: app
+  user: root
+  password: secret
+  
+persistence:
+  enabled: true
+  size: 4Gi
+  storageClass: "" # Use default
+
+environment:
+  APP_ENV: prod
+
+# Can be overriden via:
+#
+# helm upgrade --install momentum ./helm/momentum \
+#   --set app.pullPolicy=Always \
+#   --set strava.redirectUri=http://178.105.184.24:31228/exchange-token
+strava:
+  clientId: "225747"
+  clientSecret: "" # set via CI/helm --set
+  redirectUri: ""   # set via CI/helm --set
+

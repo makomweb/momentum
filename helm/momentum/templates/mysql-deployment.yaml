@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "momentum.fullname" . }}-mysql
+  labels:
+    {{- include "momentum.labels" . | nindent 4 }}
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "momentum.selectorLabels" . | nindent 6 }}
+      app: mysql
+  template:
+    metadata:
+      labels:
+        {{- include "momentum.selectorLabels" . | nindent 8 }}
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: {{ .Values.mysql.image }}
+        ports:
+        - containerPort: {{ .Values.mysql.port }}
+        envFrom:
+        - secretRef:
+            name: {{ include "momentum.fullname" . }}-secret
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - mysqladmin ping -h localhost
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: {{ include "momentum.fullname" . }}-mysql-pvc

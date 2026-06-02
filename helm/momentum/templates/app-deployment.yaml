@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "momentum.fullname" . }}-app
+  labels:
+    {{- include "momentum.labels" . | nindent 4 }}
+    app: app
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "momentum.selectorLabels" . | nindent 6 }}
+      app: app
+  template:
+    metadata:
+      labels:
+        {{- include "momentum.selectorLabels" . | nindent 8 }}
+        app: app
+    spec:
+      initContainers:
+      - name: wait-for-mysql
+        image: mysql:8.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for MySQL..."
+          until mysqladmin ping -h {{ include "momentum.fullname" . }}-mysql -u root -p$MYSQL_ROOT_PASSWORD; do
+            sleep 2
+          done
+          echo "MySQL is ready!"
+      - name: db-init
+        image: "{{ .Values.app.image }}"
+        imagePullPolicy: {{ .Values.app.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "momentum.fullname" . }}-config
+        - secretRef:
+            name: {{ include "momentum.fullname" . }}-secret
+        command:
+        - sh
+        - -c
+        - |
+          echo "Creating database..."
+          bin/console doctrine:database:create --if-not-exists
+          echo "Updating schema..."
+          bin/console doctrine:schema:update --force
+          # Note: Add --no-interaction flag and uncomment when migrations are needed in production
+          # echo "Running migrations..."
+          # bin/console doctrine:migrations:migrate --no-interaction
+          echo "Database setup complete!"
+      containers:
+      - name: app
+        image: "{{ .Values.app.image }}"
+        imagePullPolicy: {{ .Values.app.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.app.port }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "momentum.fullname" . }}-config
+        - secretRef:
+            name: {{ include "momentum.fullname" . }}-secret
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.app.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.app.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
