@@ -6,10 +6,10 @@ namespace App\Strava;
 
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
+use App\Momentum\Speed;
+use App\Momentum\SpeedUnit;
 use App\Strava\API\Activity;
 use App\Strava\API\Distance;
-use App\Strava\API\Speed;
-use App\Strava\API\SpeedUnit;
 
 final readonly class ActivityMetaData
 {
@@ -48,8 +48,9 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         $averageVelocity = match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => $this->activity->getAverageVelocity()->asPace(),
-            'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR),
+            'Run', 'Walk', 'Hike', => $this->activity->getAverageVelocity()->asPace(),
+            'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
+            'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => null,
         };
 
@@ -71,7 +72,7 @@ final readonly class ActivityMetaData
         };
     }
 
-    public function getChartTitle(): string
+    public function getVelocityChartTitle(): string
     {
         $type = $this->getActivityType();
 
@@ -112,7 +113,8 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Swim' => 3,
+            'Run' => 2,
+            'Swim' => 1,
             'Walk', 'Hike' => 5,
             default => 0,
         };
@@ -135,8 +137,9 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
-            default /* , Ride */ => sprintf('Speed (%s)', SpeedUnit::KILOMETER_PER_HOUR->value),
+            'Run', 'Walk', 'Hike' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
+            'Swim' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_100_METERS->value),
+            default /* , Ride */ => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
         };
     }
 

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Momentum\ActivityDataPoint;
+use App\Momentum\HeartRate;
 use App\Momentum\MovingAverage;
+use App\Momentum\Velocity;
 
 final readonly class ActivityStream
 {
@@ -85,33 +88,25 @@ final readonly class ActivityStream
     }
 
     /**
-     * @return \Generator<array{
-     *  timestamp: \DateTimeImmutable,
-     *  distance: float|null,
-     *  heart_rate: HeartRate|null,
-     *  heart_rate_avg: HeartRate|null,
-     *  velocity: Velocity|null,
-     *  velocity_avg: Velocity|null,
-     * }>
+     * @return \Generator<ActivityDataPoint>
      */
-    public function yield(\DateTimeImmutable $start, int $period): \Generator
+    public function yield(\DateTimeImmutable $start, int $movingAveragePeriod): \Generator
     {
         assert($this->hasTimeData());
         assert(!is_null($this->time));
 
-        $velocityAvg = $this->hasVelocityData() ? MovingAverage::create('velocity_avg', $start, $period) : null;
-        $heartRateAvg = $this->hasHeartRateData() ? MovingAverage::create('heart_rate_avg', $start, $period) : null;
+        $velocityAvg = $this->hasVelocityData() ? MovingAverage::create('velocity_avg', $start, $movingAveragePeriod) : null;
+        $heartRateAvg = $this->hasHeartRateData() ? MovingAverage::create('heart_rate_avg', $start, $movingAveragePeriod) : null;
 
         $count = $this->time->getCount();
 
         for ($i = 0; $i < $count; ++$i) {
             $offset = $this->time->getDataPoint($i);
-
             assert(is_int($offset));
-            $offset = \DateInterval::createFromDateString("$offset seconds");
-            assert($offset instanceof \DateInterval);
 
-            $timestamp = $start->add($offset);
+            $timestamp = $start->add(
+                \DateInterval::createFromDateString("$offset seconds")
+            );
 
             $distance = null;
             if ($this->hasDistanceData() && null !== $this->distance) {
@@ -140,14 +135,14 @@ final readonly class ActivityStream
                 $heartRateAvgValue = new HeartRate((int) $heartRateAvg->getValue());
             }
 
-            yield [
+            yield new ActivityDataPoint([
                 'timestamp' => $timestamp,
                 'distance' => $distance,
                 'heart_rate' => $heartRate,
                 'heart_rate_avg' => $heartRateAvgValue,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocityAvgValue,
-            ];
+            ]);
         }
     }
 }

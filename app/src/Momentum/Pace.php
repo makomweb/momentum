@@ -6,8 +6,43 @@ namespace App\Momentum;
 
 final readonly class Pace implements \Stringable
 {
-    public function __construct(public float $value, public PaceUnit $unit = PaceUnit::MINUTES_PER_KILOMETER)
+    public function __construct(
+        public float $value,
+        public PaceUnit $unit,
+    ) {
+    }
+
+    public static function fromMetersPerSecond(float $metersPerSecond): self
     {
+        return $metersPerSecond < 0.1
+            ? self::ZERO()
+            : new self(16.667 / $metersPerSecond, PaceUnit::MINUTES_PER_KILOMETER);
+    }
+
+    public static function ZERO(): self
+    {
+        return new self(0.0, PaceUnit::MINUTES_PER_KILOMETER);
+    }
+
+    public function getZone(Pace $treshold): PaceZone
+    {
+        return $this->isZero()
+            ? PaceZone::ZONE_1
+            : PaceZone::calculate($this, $treshold);
+    }
+
+    public function isZero(): bool
+    {
+        return $this->value < 0.1;
+    }
+
+    public function as(PaceUnit $unit): self
+    {
+        return match (true) {
+            ($this->unit == $unit) => $this,
+            PaceUnit::MINUTES_PER_100_METERS == $unit => new self($this->value / 10, $unit),
+            PaceUnit::MINUTES_PER_KILOMETER == $unit => new self($this->value * 10, $unit),
+        };
     }
 
     public function __toString(): string

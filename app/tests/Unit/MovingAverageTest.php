@@ -29,20 +29,19 @@ class MovingAverageTest extends TestCase
     {
         $start = new \DateTimeImmutable();
 
-        $items = array_values(iterator_to_array($this->stream->yield($start, period: 10)));
+        $items = array_values(iterator_to_array($this->stream->yield($start, movingAveragePeriod: 10)));
         assert(!empty($items));
 
         $last = array_last($items);
-        $velocity = $last['velocity_avg'];
+        $velocity = $last->getVelocityAverage();
 
-        self::assertNotNull($velocity);
         self::assertGreaterThan(1, $velocity->metersPerSecond);
         self::assertLessThan(15, $velocity->metersPerSecond);
         self::assertEquals(
             0,
             date_diff(
                 $start,
-                $last['timestamp']
+                $last->getTimestamp()
             )->days
         );
     }
@@ -52,20 +51,19 @@ class MovingAverageTest extends TestCase
     {
         $start = new \DateTimeImmutable();
 
-        $items = array_values(iterator_to_array($this->stream->yield($start, period: 10)));
+        $items = array_values(iterator_to_array($this->stream->yield($start, movingAveragePeriod: 10)));
         assert(!empty($items));
 
         $last = array_last($items);
-        $heartRateAvg = $last['heart_rate_avg'];
+        $heartRateAvg = $last->getHeartRateAverage();
 
-        self::assertNotNull($heartRateAvg);
-        self::assertGreaterThan(60.0, $heartRateAvg->value);
-        self::assertLessThan(180.0, $heartRateAvg->value);
+        self::assertGreaterThan(60.0, $heartRateAvg->bpm);
+        self::assertLessThan(180.0, $heartRateAvg->bpm);
         self::assertEquals(
             0,
             date_diff(
                 $start,
-                $last['timestamp']
+                $last->getTimestamp()
             )->days
         );
     }
@@ -81,34 +79,29 @@ class MovingAverageTest extends TestCase
         self::assertCount(7887, $series);
 
         foreach ($series as $data) {
-            $timestamp = $data['timestamp'];
+            $timestamp = $data->getTimestamp();
             self::assertEquals(
                 0,
                 date_diff($start, $timestamp)->days
             );
             self::assertGreaterThanOrEqual($start, $timestamp);
 
-            $distance = $data['distance'];
-            self::assertNotNull($distance);
+            $distance = $data->getDistance();
             self::assertGreaterThanOrEqual(0.0, $distance);
 
-            $heartRate = $data['heart_rate'];
-            self::assertNotNull($heartRate);
-            self::assertGreaterThan(60.0, $heartRate->value);
-            self::assertLessThan(180.0, $heartRate->value);
+            $heartRate = $data->getHeartRate();
+            self::assertGreaterThan(60.0, $heartRate->bpm);
+            self::assertLessThan(180.0, $heartRate->bpm);
 
-            $heartRateAvg = $data['heart_rate_avg'];
-            self::assertNotNull($heartRateAvg);
-            self::assertGreaterThanOrEqual(0.0, $heartRateAvg->value);
-            self::assertLessThan(180.0, $heartRateAvg->value);
+            $heartRateAvg = $data->getHeartRateAverage();
+            self::assertGreaterThanOrEqual(0.0, $heartRateAvg->bpm);
+            self::assertLessThan(180.0, $heartRateAvg->bpm);
 
-            $velocity = $data['velocity'];
-            self::assertNotNull($velocity);
+            $velocity = $data->getVelocity();
             self::assertGreaterThanOrEqual(0.0, $velocity->metersPerSecond);
             self::assertLessThan(50.0, $velocity->metersPerSecond);
 
-            $velocityAvg = $data['velocity_avg'];
-            self::assertNotNull($velocityAvg);
+            $velocityAvg = $data->getVelocityAverage();
             self::assertGreaterThanOrEqual(0.0, $velocityAvg->metersPerSecond);
             self::assertLessThan(50.0, $velocityAvg->metersPerSecond);
         }

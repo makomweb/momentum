@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Strava\Configuration;
+use App\Strava\API\Configuration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +21,7 @@ final class AuthController extends AbstractController
     public function login(): Response
     {
         if ($this->getUser()) {
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('activities');
         }
 
         return $this->render('auth/login.html.twig', [

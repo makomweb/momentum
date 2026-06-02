@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Strava\API;
 
-use App\Assert\Assert;
-use App\Strava\API\Token;
+use App\Momentum\Assert\Assert;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class Client
@@ -13,7 +12,7 @@ final readonly class Client
     public function __construct(
         private Configuration $config,
         private HttpClientInterface $httpClient,
-        private TokenCache $cache,
+        private TokenCacheInterface $cache,
     ) {
     }
 

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
-use App\Assert\Assert;
+use App\Momentum\Assert\Assert;
+use App\Momentum\Velocity;
 
 final readonly class Activity implements \Stringable
 {
@@ -81,15 +82,22 @@ final readonly class Activity implements \Stringable
         return $dateTime->setTimezone(new \DateTimeZone('UTC'));
     }
 
-    public function getStartDateLocalTime(): \DateTimeImmutable
+    public function getTimezone(): \DateTimeZone
     {
         $result = preg_match('/\)\s(.+)$/', $this->data['timezone'], $matches);
         Assert::that(1 === $result, 'There should be time zone information!');
         assert(1 === $result, 'There should be time zone information!');
 
-        $tz = new \DateTimeZone($matches[1]); // e.g. "Europe/Berlin"
+        return new \DateTimeZone($matches[1]); // e.g. "Europe/Berlin"
+    }
 
-        return $this->getStartDateUniversalTime()->setTimezone($tz);
+    public function getStartDateLocalTime(): \DateTimeImmutable
+    {
+        return $this
+            ->getStartDateUniversalTime()
+            ->setTimezone(
+                $this->getTimeZone()
+            );
     }
 
     public function getStartDateLocalTimeFormatted(): string
@@ -100,19 +108,25 @@ final readonly class Activity implements \Stringable
     public function getElapsedTime(): \DateInterval
     {
         $seconds = $this->data['elapsed_time'];
-        $interval = \DateInterval::createFromDateString("$seconds seconds");
-        assert($interval instanceof \DateInterval);
 
-        return $interval;
+        return \DateInterval::createFromDateString("$seconds seconds");
+    }
+
+    public function getMovingTimeSeconds(): int
+    {
+        return $this->data['moving_time'];
     }
 
     public function getMovingTime(): \DateInterval
     {
-        $seconds = $this->data['moving_time'];
-        $interval = \DateInterval::createFromDateString("$seconds seconds");
-        assert($interval instanceof \DateInterval);
+        $seconds = $this->getMovingTimeSeconds();
 
-        return $interval;
+        return \DateInterval::createFromDateString("$seconds seconds");
+    }
+
+    public function getEndDateLocalTime(): \DateTimeImmutable
+    {
+        return $this->getStartDateLocalTime()->add($this->getElapsedTime());
     }
 
     public function getDistance(): Distance

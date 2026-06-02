@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Momentum\PaceUnit;
+use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use App\Strava\API\Activity as StravaApiActivity;
-use App\Strava\API\SpeedUnit;
-use App\Strava\API\Velocity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -27,6 +28,9 @@ final class Activity
 
     #[ORM\Column]
     private readonly \DateTimeImmutable $startDate;
+
+    #[ORM\Column(type: 'string')]
+    private readonly string $timezone;
 
     /**
      * @var array{
@@ -65,11 +69,13 @@ final class Activity
         int $stravaUserId,
         int $stravaActivityId,
         \DateTimeImmutable $startDate,
+        string $timezone,
         array $data,
     ) {
         $this->stravaUserId = $stravaUserId;
         $this->stravaActivityId = $stravaActivityId;
         $this->startDate = $startDate;
+        $this->timezone = $timezone;
         $this->data = $data;
     }
 
@@ -78,7 +84,8 @@ final class Activity
         return new self(
             $stravaUserId,
             $activity->getId(),
-            $activity->getStartDateLocalTime(),
+            $activity->getStartDateUniversalTime(),
+            $activity->getTimezone()->getName(),
             $activity->data
         );
     }
@@ -128,9 +135,14 @@ final class Activity
         return $this->startDate;
     }
 
+    public function getStartDateLocalTime(): \DateTimeImmutable
+    {
+        return $this->startDate->setTimezone(new \DateTimeZone($this->timezone));
+    }
+
     public function getStartDateFormatted(): string
     {
-        return $this->startDate->format('D M d, y · H:i');
+        return $this->getStartDateLocalTime()->format('D M d, y · H:i');
     }
 
     public function getAverageVelocityAsStringable(): \Stringable
@@ -138,8 +150,9 @@ final class Activity
         $type = $this->data['type'];
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => $this->getAverageVelocity()->asPace(),
-            'Ride' => $this->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR),
+            'Run', 'Walk', 'Hike' => $this->getAverageVelocity()->asPace(),
+            'Swim' => $this->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
+            'Ride' => $this->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
         };
     }

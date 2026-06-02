@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\ActivityDataPoint;
+use App\Momentum\PaceUnit;
+use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
-use App\Strava\API\HeartRate;
-use App\Strava\API\SpeedUnit;
-use App\Strava\API\Velocity;
 
 final class ActivityData
 {
@@ -24,16 +25,7 @@ final class ActivityData
     }
 
     /**
-     * @return array<
-     *  array{
-     *   timestamp: non-falsy-string,
-     *   distance: float|null,
-     *   heart_rate: HeartRate|null,
-     *   heart_rate_avg: HeartRate|null,
-     *   velocity: Velocity|null,
-     *   velocity_avg: Velocity|null,
-     *  }
-     * >
+     * @return ActivityDataPoint[]
      */
     public function getDataPoints(): array
     {
@@ -41,27 +33,11 @@ final class ActivityData
     }
 
     /**
-     * @return \Generator<array{
-     *  timestamp: non-falsy-string,
-     *  distance: float|null,
-     *  heart_rate: HeartRate|null,
-     *  heart_rate_avg: HeartRate|null,
-     *  velocity: Velocity|null,
-     *  velocity_avg: Velocity|null,
-     * }>
+     * @return \Generator<ActivityDataPoint>
      */
     private function yieldDataPoints(): \Generator
     {
-        foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
-            yield [
-                'timestamp' => $point['timestamp']->format('H:i:s'),
-                'distance' => $point['distance'],
-                'heart_rate' => $point['heart_rate'],
-                'heart_rate_avg' => $point['heart_rate_avg'],
-                'velocity' => $point['velocity'],
-                'velocity_avg' => $point['velocity_avg'],
-            ];
-        }
+        yield from $this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD);
     }
 
     /**
@@ -69,32 +45,22 @@ final class ActivityData
      */
     public function getVelocityRawPoints(): array
     {
-        $type = $this->activity->data['type'];
+        return iterator_to_array($this->yieldVelocityRawPoints());
+    }
 
-        $points = [];
-        foreach ($this->getDataPoints() as $point) {
-            if (null === $point['velocity']) {
-                continue;
-            }
-            $velocity = $point['velocity'];
-
-            $value = match ($type) {
-                'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
-                'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
-                default => null,
-            };
-
-            if (null === $value) {
-                continue;
-            }
-
-            $points[] = [
-                'timestamp' => $point['timestamp'],
-                'value' => $value,
+    /**
+     * @return \Generator<array{timestamp: string, value: float}>
+     */
+    private function yieldVelocityRawPoints(): \Generator
+    {
+        foreach ($this->yieldDataPoints() as $point) {
+            yield [
+                'timestamp' => $point->getTimestamp()->format('H:i:s'),
+                'value' => $point->hasVelocity()
+                    ? $this->convertVelocity($point->getVelocity())
+                    : 0.0,
             ];
         }
-
-        return $points;
     }
 
     /**
@@ -102,32 +68,22 @@ final class ActivityData
      */
     public function getVelocityAveragePoints(): array
     {
-        $type = $this->activity->data['type'];
+        return iterator_to_array($this->yieldVelocityAveragePoints());
+    }
 
-        $points = [];
-        foreach ($this->getDataPoints() as $point) {
-            if (null === $point['velocity_avg']) {
-                continue;
-            }
-            $velocity = $point['velocity_avg'];
-
-            $value = match ($type) {
-                'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
-                'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
-                default => null,
-            };
-
-            if (null === $value) {
-                continue;
-            }
-
-            $points[] = [
-                'timestamp' => $point['timestamp'],
-                'value' => $value,
+    /**
+     * @return \Generator<array{timestamp: string, value: float}>
+     */
+    private function yieldVelocityAveragePoints(): \Generator
+    {
+        foreach ($this->yieldDataPoints() as $point) {
+            yield [
+                'timestamp' => $point->getTimestamp()->format('H:i:s'),
+                'value' => $point->hasVelocity()
+                    ? $this->convertVelocity($point->getVelocityAverage())
+                    : 0.0,
             ];
         }
-
-        return $points;
     }
 
     /**
@@ -135,20 +91,20 @@ final class ActivityData
      */
     public function getHeartRatePoints(): array
     {
-        $points = [];
-        foreach ($this->getDataPoints() as $point) {
-            if (null === $point['heart_rate']) {
-                continue;
-            }
-            $heartRate = $point['heart_rate'];
+        return iterator_to_array($this->yieldHeartRatePoints());
+    }
 
-            $points[] = [
-                'timestamp' => $point['timestamp'],
-                'value' => $heartRate->value,
+    /**
+     * @return \Generator<array{timestamp: string, value: int}>
+     */
+    private function yieldHeartRatePoints(): \Generator
+    {
+        foreach ($this->yieldDataPoints() as $point) {
+            yield [
+                'timestamp' => $point->getTimestamp()->format('H:i:s'),
+                'value' => $point->getHeartRate()->bpm,
             ];
         }
-
-        return $points;
     }
 
     public function hasVelocityData(): bool
@@ -177,7 +133,7 @@ final class ActivityData
         if (empty($points)) {
             return 0;
         }
-        $sum = array_sum(array_map(fn ($p) => $p['value'], $points));
+        $sum = array_sum(array_map(fn ($point) => $point['value'], $points));
 
         return (int) round($sum / count($points));
     }
@@ -189,7 +145,7 @@ final class ActivityData
             return 0;
         }
 
-        return max(array_map(fn ($p) => $p['value'], $points));
+        return max(array_map(fn ($point) => $point['value'], $points));
     }
 
     public function getVelocityAverage(): Velocity
@@ -201,10 +157,12 @@ final class ActivityData
         $sum = 0;
         $count = 0;
         foreach ($points as $point) {
-            if (null === $point['velocity_avg']) {
+            $velocity = $point->getVelocityAverage();
+            if ($velocity->isZero()) {
                 continue;
             }
-            $sum += $point['velocity_avg']->metersPerSecond;
+
+            $sum += $velocity->metersPerSecond;
             ++$count;
         }
         $average = $count > 0 ? $sum / $count : 0;
@@ -220,12 +178,24 @@ final class ActivityData
         }
         $velocities = [];
         foreach ($points as $point) {
-            if (null !== $point['velocity']) {
-                $velocities[] = $point['velocity']->metersPerSecond;
+            $velocity = $point->getVelocityAverage();
+            if (!$velocity->isZero()) {
+                $velocities[] = $velocity->metersPerSecond;
             }
         }
-        $max = !empty($velocities) ? max($velocities) : 0;
 
-        return new Velocity($max);
+        return Velocity::max($velocities);
+    }
+
+    private function convertVelocity(Velocity $velocity): float
+    {
+        $type = $this->activity->data['type'];
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike' => $velocity->asPace()->value,
+            'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->value,
+            'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR)->value,
+            default => 0.0,
+        };
     }
 }

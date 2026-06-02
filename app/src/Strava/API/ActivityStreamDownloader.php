@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
-use App\Assert\Assert;
+use App\Momentum\Assert\Assert;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class ActivityStreamDownloader
 {
     public function __construct(
         private HttpClientInterface $httpClient,
-        private TokenProviderInterface $tokenProvider,
+        private TokenCacheInterface $tokenCache,
     ) {
     }
 
     public function download(int $stravaUserId, int $activityId): ActivityStream
     {
-        $token = $this->tokenProvider->getToken($stravaUserId);
+        $token = $this->tokenCache->getToken($stravaUserId);
 
-        Assert::that(!$token->isExpired(), 'Token is expired!');
+        Assert::that(!$token->isExpired(), new TokenExpiredException($stravaUserId));
 
         $response = $this->httpClient->request('GET', sprintf(
             'https://www.strava.com/api/v3/activities/%d/streams',

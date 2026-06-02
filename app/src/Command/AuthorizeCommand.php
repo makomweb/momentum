@@ -2,9 +2,9 @@
 
 namespace App\Command;
 
+use App\Strava\API\Client;
+use App\Strava\API\Configuration;
 use App\Strava\API\Token;
-use App\Strava\Client;
-use App\Strava\Configuration;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;

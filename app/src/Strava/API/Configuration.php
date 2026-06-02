@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Strava\API;
 
-use App\Assert\Assert;
+use App\Momentum\Assert\Assert;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class Configuration

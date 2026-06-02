@@ -1,0 +1,437 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit;
+
+use App\Momentum\ActivityDataPoint;
+use App\Momentum\HeartRate;
+use App\Momentum\HeartRateZone;
+use App\Momentum\Pace;
+use App\Momentum\PaceUnit;
+use App\Momentum\PaceZone;
+use App\Momentum\Velocity;
+use App\Momentum\ZoneSessions;
+use PHPUnit\Framework\TestCase;
+
+final class ZoneTransitionTrackerTest extends TestCase
+{
+    use AthleteFactory;
+
+    private Pace $treshold;
+    private HeartRate $maxHeartRate;
+
+    protected function setUp(): void
+    {
+        // 6:00 min/km = 360 seconds per km
+        $this->treshold = new Pace(6.0, PaceUnit::MINUTES_PER_KILOMETER);
+        $this->maxHeartRate = new HeartRate(200);
+    }
+
+    public function test_single_pace_zone_transition(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        // Start in Zone 2 (Basis: 114-129% of $treshold)
+        // 6:00 $treshold = 6.0 min/km
+        // 7:00 pace = 7.0 min/km = 116% of $treshold → Zone 2
+        // velocity = 16.667 / 7.0 = 2.381 m/s
+        $baseVelocity = new Velocity(2.381);
+
+        $dataPoints = [];
+
+        for ($i = 0; $i < 60; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => null,
+                'heart_rate_avg' => null,
+                'velocity' => $baseVelocity,
+                'velocity_avg' => $baseVelocity,
+            ]);
+        }
+
+        // Transition to Zone 5 (VO2max: < 99%)
+        // 5:30 pace = 5.5 min/km = 92% of $treshold → Zone 5
+        // velocity = 16.667 / 5.5 = 3.03 m/s
+        $fasterVelocity = new Velocity(3.03);
+
+        for ($i = 60; $i < 120; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => null,
+                'heart_rate_avg' => null,
+                'velocity' => $fasterVelocity,
+                'velocity_avg' => $fasterVelocity,
+            ]);
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT120S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $zoneSessions->getPaceZoneSessions();
+
+        self::assertCount(2, $sessions, 'Should have 2 pace zone sessions');
+        self::assertTrue($sessions[0]->isEqual(PaceZone::ZONE_2));
+        self::assertEquals(60, $sessions[0]->getSeconds());
+        self::assertTrue($sessions[1]->isEqual(PaceZone::ZONE_5));
+        self::assertEquals(60, $sessions[1]->getSeconds());
+    }
+
+    public function test_heart_rate_zone_transition(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        // Dummy velocity (not used for HR zone test)
+        $velocity = new Velocity(2.5);
+
+        $dataPoints = [];
+
+        // Zone 2 (Easy/Recovery: 60-70% HR)
+        // 60% of 200 = 120 bpm, 70% of 200 = 140 bpm
+        // Use 130 bpm (in zone)
+        for ($i = 0; $i < 50; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => new HeartRate(130),
+                'heart_rate_avg' => null,
+                'velocity' => $velocity,
+                'velocity_avg' => $velocity,
+            ]);
+        }
+
+        // Transition to Zone 4 (Threshold/Hard: 80-90%)
+        // 80% of 200 = 160 bpm, 90% of 200 = 180 bpm
+        // Use 170 bpm (in zone)
+        for ($i = 50; $i < 100; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => new HeartRate(170),
+                'heart_rate_avg' => null,
+                'velocity' => $velocity,
+                'velocity_avg' => $velocity,
+            ]);
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT100S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $zoneSessions->getHeartRateSessions();
+
+        self::assertCount(2, $sessions, 'Should have 2 heart rate zone sessions');
+        self::assertTrue($sessions[0]->isEqual(HeartRateZone::ZONE_2));
+        self::assertEquals(50, $sessions[0]->getSeconds());
+        self::assertTrue($sessions[1]->isEqual(HeartRateZone::ZONE_4));
+        self::assertEquals(50, $sessions[1]->getSeconds());
+    }
+
+    public function test_multiple_transitions(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        // Zone 2: 7:00 pace = 2.381 m/s (116% of 6:00 $treshold)
+        // Zone 3: 6:18 pace = 2.62 m/s (106% of 6:00 $treshold)  -- Need >= 106%
+        // Zone 5: 5:30 pace = 3.03 m/s (92% of 6:00 $treshold)
+        $zones = [
+            ['velocity' => new Velocity(2.381), 'duration' => 30, 'expectedZone' => PaceZone::ZONE_2],
+            ['velocity' => new Velocity(2.62), 'duration' => 40, 'expectedZone' => PaceZone::ZONE_3],
+            ['velocity' => new Velocity(3.03), 'duration' => 20, 'expectedZone' => PaceZone::ZONE_5],
+            ['velocity' => new Velocity(2.381), 'duration' => 35, 'expectedZone' => PaceZone::ZONE_2],
+        ];
+
+        $dataPoints = [];
+        $timestamp = 0;
+        foreach ($zones as $zone) {
+            for ($i = 0; $i < $zone['duration']; ++$i) {
+                $dataPoints[] = new ActivityDataPoint([
+                    'timestamp' => $startTime->add(new \DateInterval("PT{$timestamp}S")),
+                    'distance' => null,
+                    'heart_rate' => null,
+                    'heart_rate_avg' => null,
+                    'velocity' => $zone['velocity'],
+                    'velocity_avg' => $zone['velocity'],
+                ]);
+                ++$timestamp;
+            }
+        }
+
+        $endTime = $startTime->add(new \DateInterval("PT{$timestamp}S"));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $zoneSessions->getPaceZoneSessions();
+
+        self::assertCount(4, $sessions, 'Should have 4 pace zone sessions');
+        self::assertTrue($sessions[0]->isEqual(PaceZone::ZONE_2));
+        self::assertEquals(30, $sessions[0]->getSeconds());
+        self::assertTrue($sessions[1]->isEqual(PaceZone::ZONE_3));
+        self::assertEquals(40, $sessions[1]->getSeconds());
+        self::assertTrue($sessions[2]->isEqual(PaceZone::ZONE_5));
+        self::assertEquals(20, $sessions[2]->getSeconds());
+        self::assertTrue($sessions[3]->isEqual(PaceZone::ZONE_2));
+        self::assertEquals(35, $sessions[3]->getSeconds());
+    }
+
+    public function test_zone_session_duration_percentage(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+        $velocity = new Velocity(2.381); // Zone 2 pace
+
+        $dataPoints = [];
+        for ($i = 0; $i < 100; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => null,
+                'heart_rate_avg' => null,
+                'velocity' => $velocity,
+                'velocity_avg' => $velocity,
+            ]);
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT100S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $zoneSessions->getPaceZoneSessions();
+
+        self::assertCount(1, $sessions);
+
+        $percentage = $sessions[0]->getPercentage(100);
+        self::assertEqualsWithDelta(100.0, $percentage, 0.01, 'Should be 100% of total time');
+    }
+
+    public function test_empty_activity(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+        $endTime = $startTime->add(new \DateInterval('PT100S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, [/* Nothing */]);
+
+        self::assertCount(0, $zoneSessions->getPaceZoneSessions());
+        self::assertCount(0, $zoneSessions->getHeartRateSessions());
+    }
+
+    public function test_mixed_pace_and_heart_rate_zones(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        $dataPoints = [];
+        // Slow pace (Zone 2) with high HR (Zone 4)
+        for ($i = 0; $i < 30; ++$i) {
+            $velocity = Velocity::create(new Pace(7.0, PaceUnit::MINUTES_PER_KILOMETER));
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => new HeartRate(170),
+                'heart_rate_avg' => null,
+                'velocity' => $velocity,
+                'velocity_avg' => $velocity,
+            ]);
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT30S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $paceSessions = $zoneSessions->getPaceZoneSessions();
+        $hrSessions = $zoneSessions->getHeartRateSessions();
+
+        self::assertCount(1, $paceSessions);
+        self::assertCount(1, $hrSessions);
+        self::assertTrue($paceSessions[0]->isEqual(PaceZone::ZONE_2));
+        self::assertTrue($hrSessions[0]->isEqual(HeartRateZone::ZONE_4));
+    }
+
+    public function test_no_heart_rate_data_results_in_zone_1_exclusively(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+        $velocity = new Velocity(2.381); // Zone 2 pace (TODO: Pace to Velocity conversion!?)
+
+        $dataPoints = [];
+        for ($i = 0; $i < 50; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => null,
+                'heart_rate_avg' => null,
+                'velocity' => $velocity,
+                'velocity_avg' => $velocity,
+            ]);
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT50S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $paceSessions = $zoneSessions->getPaceZoneSessions();
+        $hrSessions = $zoneSessions->getHeartRateSessions();
+
+        self::assertCount(1, $paceSessions);
+        self::assertCount(1, $hrSessions);
+        foreach ($hrSessions as $hrSession) {
+            self::assertEquals(HeartRateZone::ZONE_1, $hrSession->zone);
+        }
+    }
+
+    public function test_zone_session_timestamps(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        $dataPoints = [];
+        for ($i = 0; $i < 50; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => null,
+                'heart_rate_avg' => null,
+                'velocity' => new Velocity(2.381), // Zone 2 pace
+                'velocity_avg' => new Velocity(2.381),
+            ]);
+        }
+
+        for ($i = 50; $i < 100; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => null,
+                'heart_rate_avg' => null,
+                'velocity' => new Velocity(3.03), // Zone 5 pace
+                'velocity_avg' => new Velocity(3.03),
+            ]);
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT100S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $zoneSessions->getPaceZoneSessions();
+
+        self::assertEquals($startTime, $sessions[0]->start);
+        self::assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[0]->end);
+        self::assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[1]->start);
+        self::assertEquals($endTime, $sessions[1]->end);
+    }
+
+    public function test_gap_in_data_prevents_zone_extension(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        $dataPoints = [];
+
+        // Zone 2 pace for first 8 seconds (0-7)
+        for ($i = 0; $i <= 7; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => null,
+                'heart_rate_avg' => null,
+                'velocity' => new Velocity(2.381), // Zone 2 pace
+                'velocity_avg' => new Velocity(2.381),
+            ]);
+        }
+
+        // Gap: no points from seconds 8-14 (> 5 second gap threshold)
+        // Resume with Zone 2 pace at second 15
+        for ($i = 15; $i <= 30; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => null,
+                'heart_rate_avg' => null,
+                'velocity' => new Velocity(2.381), // Zone 2 pace (same zone!)
+                'velocity_avg' => new Velocity(2.381),
+            ]);
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT31S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $zoneSessions->getPaceZoneSessions();
+
+        // Should have 2 sessions due to gap, not 1 extended session
+        self::assertCount(2, $sessions);
+        self::assertEquals(15, $sessions[0]->getSeconds(), 'First session lasts \'til gap plus gap treshold');
+        self::assertEquals(16, $sessions[1]->getSeconds());
+    }
+
+    public function test_finalize_does_not_create_negative_duration_when_end_time_precedes_last_point(): void
+    {
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        $dataPoints = [];
+
+        for ($i = 0; $i < 10; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => new HeartRate(150),
+                'heart_rate_avg' => null,
+                'velocity' => new Velocity(2.381),
+                'velocity_avg' => new Velocity(2.381),
+            ]);
+        }
+
+        for ($i = 20; $i < 30; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => new HeartRate(150),
+                'heart_rate_avg' => null,
+                'velocity' => new Velocity(2.381),
+                'velocity_avg' => new Velocity(2.381),
+            ]);
+        }
+
+        $endTime = $startTime->add(new \DateInterval('PT15S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $paceSessions = $zoneSessions->getPaceZoneSessions();
+
+        $heartRateSessions = $zoneSessions->getHeartRateSessions();
+
+        self::assertSame(2, count($paceSessions));
+        self::assertSame(2, count($heartRateSessions));
+        self::assertSame(20, $paceSessions[0]->getSeconds());
+        self::assertSame(1, $paceSessions[1]->getSeconds());
+        self::assertSame(20, $heartRateSessions[0]->getSeconds());
+        self::assertSame(1, $heartRateSessions[1]->getSeconds());
+    }
+
+    public function test_last_zone_session_uses_elapsed_end_time_not_moving_time(): void
+    {
+        // Simulate the bug scenario:
+        // - Activity has a pause that starts after moving_time (50s) but within elapsed_time (100s)
+        // - Stream data: T+0..T+49, then a gap (>5s), then T+60..T+99
+        // - A new zone session starts at T+60 (due to the gap)
+        // - Old endTime (moving_time=55s → T+55) causes close(T+55) with start=T+60 → 1 second
+        // - New endTime (elapsed_time=100s → T+100) causes close(T+100) with start=T+60 → 40 seconds
+        $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
+
+        $dataPoints = [];
+
+        // Continuous running T+0 to T+49
+        for ($i = 0; $i < 50; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => new HeartRate(150),
+                'heart_rate_avg' => null,
+                'velocity' => new Velocity(2.381),
+                'velocity_avg' => new Velocity(2.381),
+            ]);
+        }
+
+        // Gap T+50..T+59 (>5s triggers new zone entry)
+        // Then resume T+60 to T+99
+        for ($i = 60; $i < 100; ++$i) {
+            $dataPoints[] = new ActivityDataPoint([
+                'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
+                'distance' => null,
+                'heart_rate' => new HeartRate(150),
+                'heart_rate_avg' => null,
+                'velocity' => new Velocity(2.381),
+                'velocity_avg' => new Velocity(2.381),
+            ]);
+        }
+
+        // Correct endTime: start + elapsed_time (100s)
+        // The last zone session starts at T+60; close(T+100) → 40 seconds
+        $endTime = $startTime->add(new \DateInterval('PT100S'));
+        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, $this->maxHeartRate), $endTime, $dataPoints);
+        $paceSessions = $zoneSessions->getPaceZoneSessions();
+
+        self::assertNotEmpty($paceSessions);
+        $lastSession = $paceSessions[count($paceSessions) - 1];
+        self::assertGreaterThan(1, $lastSession->getSeconds(), 'Last zone session must have proper duration when endTime is start + elapsed_time');
+        self::assertSame(40, $lastSession->getSeconds());
+    }
+}

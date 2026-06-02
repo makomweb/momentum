@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Twig;
 
-use App\Strava\API\SpeedUnit;
-use App\Strava\API\Velocity;
+use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -17,15 +17,15 @@ final class VelocityExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('format_velocity', $this->formatVelocity(...)),
+            new TwigFilter('format_velocity', self::formatVelocity(...)),
         ];
     }
 
-    public function formatVelocity(Velocity $velocity, string $activityType): string
+    public static function formatVelocity(Velocity $velocity, string $activityType): string
     {
         return match ($activityType) {
             'Run', 'Walk', 'Hike', 'Swim' => (string) $velocity->asPace(),
-            'Ride' => (string) $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR),
+            'Ride' => (string) $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => '',
         };
     }
