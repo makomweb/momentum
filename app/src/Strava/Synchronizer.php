@@ -34,7 +34,9 @@ final readonly class Synchronizer
                 page: ++$page,
                 perPage: $pageSize,
                 // after: new \DateTimeImmutable('2026-01-01 00:00:01Z')->getTimestamp(),
-                after: $last ? $last->getStartDateUniversalTime()->getTimestamp() : null
+                after: $last 
+                    ? $last->getStartDateUniversalTime()->getTimestamp() 
+                    : new \DateTimeImmutable('2026-01-01 00:00:01Z')->getTimestamp()
                 // after: new \DateTimeImmutable('2022-03-08 00:00:01Z')->getTimestamp(),
                 // before: new \DateTimeImmutable('2023-01-01 00:00:01Z')->getTimestamp()
             );
