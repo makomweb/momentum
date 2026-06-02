@@ -4,7 +4,9 @@ stages:
   - deploy
 
 variables:
-  DOCKER_TLS_CERTDIR: "/certs"
+  # Use plain TCP to docker:dind in GitLab SaaS runners (buildx otherwise fails with TLS env context)
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
   IMAGE_NAME: "makomweb/momentum"
   IMAGE_PLATFORMS: "linux/amd64"
