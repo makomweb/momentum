@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "momentum.fullname" . }}-worker
+  labels:
+    {{- include "momentum.labels" . | nindent 4 }}
+    app: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "momentum.selectorLabels" . | nindent 6 }}
+      app: worker
+  template:
+    metadata:
+      labels:
+        {{- include "momentum.selectorLabels" . | nindent 8 }}
+        app: worker
+    spec:
+      terminationGracePeriodSeconds: 600
+      containers:
+      - name: worker
+        image: "{{ .Values.app.image }}"
+        imagePullPolicy: {{ .Values.app.pullPolicy }}
+        resources:
+          limits:
+            cpu: "250m"
+            memory: "512Mi"
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sh", "-c", "touch /tmp/kill_me"]
+        command:
+        - /bin/sh
+        - -c
+        - >
+          while ! [ -f /tmp/kill_me ];
+            do
+            bin/console messenger:consume async --limit=1 --time-limit=300 -vv
+          done;
+        envFrom:
+        - configMapRef:
+            name: {{ include "momentum.fullname" . }}-config
+        - secretRef:
+            name: {{ include "momentum.fullname" . }}-secret

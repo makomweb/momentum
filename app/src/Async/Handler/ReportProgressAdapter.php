@@ -34,6 +34,6 @@ final class ReportProgressAdapter implements ReportProgressInterface
 
     public function onFinish(): void
     {
-        $this->logger->info(sprintf('Synchronized %d activitie(s) ✅', $this->count));
+        $this->logger->info(sprintf('✅ Synchronized %d activitie(s)', $this->count));
     }
 }

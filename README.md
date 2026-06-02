@@ -8,7 +8,7 @@
 
 ### Strava Account Setup
 
-Momentum requires Strava API credentials to fetch and analyze your running activities.
+Momentum requires Strava API credentials to fetch and analyze your running activities 🏃‍♂️.
 
 1. Get credentials from [Strava API Settings](https://www.strava.com/settings/api)
 2. Copy `.env.local.example` to `.env.local` 

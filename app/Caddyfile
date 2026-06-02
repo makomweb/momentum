@@ -1,7 +1,7 @@
-http://localhost:8080
+:8080
 
+# Listen on all hosts (Kubernetes/NodePort uses server IP as Host header; localhost-only breaks routing)
 root * /app/public
 encode gzip
 
-php_server {
-}
+php_server

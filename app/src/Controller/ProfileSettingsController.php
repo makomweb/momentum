@@ -39,7 +39,7 @@ final class ProfileSettingsController extends AbstractController
 
         dump('Logged in user:', [
             'Name' => $user->getName(), 'Strava ID' => $user->getStravaId(),
-            'Treshold' => $treshold, 'max HR' => $maxHeartRate]
+            'Treshold' => (string) $treshold, 'max HR' => (string) $maxHeartRate]
         );
 
         if ('POST' === $request->getMethod()) {
@@ -50,7 +50,7 @@ final class ProfileSettingsController extends AbstractController
                 return $this->redirectToRoute('profile_settings');
             }
 
-            $tresholdRaw = trim((string) $request->request->get('$treshold_minutes_per_kilometer', ''));
+            $tresholdRaw = trim((string) $request->request->get('treshold_minutes_per_kilometer', ''));
             $maxHeartRateRaw = trim((string) $request->request->get('max_heart_rate', ''));
 
             $treshold = Pace::ZERO();
@@ -72,6 +72,7 @@ final class ProfileSettingsController extends AbstractController
             }
 
             if (empty($errors)) {
+                dump('New values:', ['Treshold' => (string) $treshold, 'max HR' => (string) $maxHeartRate]);
                 $user->setTreshold($treshold);
                 $user->setMaxHeartRate($maxHeartRate);
 
@@ -81,6 +82,7 @@ final class ProfileSettingsController extends AbstractController
 
                 return $this->redirectToRoute('profile_settings');
             }
+            dump('Errors:', $errors);
 
             $maxHeartRate = '' === $maxHeartRateRaw ? null : (int) $maxHeartRateRaw;
 

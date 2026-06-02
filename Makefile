@@ -1,4 +1,4 @@
-.PHONY: help build init symfony laravel up hint shell down composer-install maintain composer-update composer-require caddyfile logs open
+.PHONY: help build init symfony laravel up hint shell down composer-install maintain composer-update composer-require caddyfile logs open docker-push
 
 
 help:
@@ -56,6 +56,8 @@ composer-require:
 	@test -n "$(PKG)" || (echo "Error: specify package with PKG=vendor/package"; exit 1)
 	@echo "Adding package $(PKG)..."
 	docker compose run --rm composer require $(PKG)
+
+db: create-database create-schema
 
 create-database:
 	@echo "Create database"
@@ -119,3 +121,9 @@ open:
 		echo "❌ Could not detect browser launcher."; \
 		echo "📍 Please open http://localhost:8000 manually"; \
 	fi
+
+docker-push:
+	@echo "Building multi-arch image (amd64 + arm64)..."
+	@echo "Note: M-Series Mac builds arm64-only images. Buildx creates both architectures for x86 server compatibility."
+	docker buildx build --platform linux/amd64,linux/arm64 -f build/Dockerfile.app -t makomweb/momentum:latest . --push
+	@echo "✓ Multi-arch image pushed to Docker Hub"

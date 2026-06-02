@@ -1,0 +1,72 @@
+stages:
+  - qa
+  - build
+  - deploy
+
+variables:
+  # Use plain TCP to docker:dind in GitLab SaaS runners (buildx otherwise fails with TLS env context)
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: "makomweb/momentum"
+  IMAGE_PLATFORMS: "linux/amd64"
+
+qa:
+  stage: qa
+  image: docker:27
+  services:
+    - name: docker:27-dind
+  script:
+    - docker version
+    - docker compose version
+    - docker compose build composer
+    # Install dependencies so vendor/bin/phpstan exists (exit code 127 = command not found)
+    - docker compose run --rm composer install --no-interaction --prefer-dist
+    - docker compose run --rm composer qa
+
+build-image:
+  stage: build
+  image: docker:27
+  services:
+    - name: docker:27-dind
+  rules:
+    # Run only after merge (push pipeline) to master
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+  script:
+    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    - docker buildx create --use
+    - docker buildx build --platform "$IMAGE_PLATFORMS" -f build/Dockerfile.app -t "$IMAGE_NAME:$CI_COMMIT_SHA" . --push
+    - docker buildx build --platform "$IMAGE_PLATFORMS" -f build/Dockerfile.app -t "$IMAGE_NAME:latest" . --push
+
+deploy:
+  stage: deploy
+  image: alpine:3.20
+  rules:
+    # Deploy only after merge (push pipeline) to master
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+  before_script:
+    - apk add --no-cache openssh-client bash curl tar
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+  script:
+    - tar -czf /tmp/helm-chart.tgz helm/momentum
+    - |
+      scp /tmp/helm-chart.tgz "$DEPLOY_USER@$DEPLOY_HOST:/tmp/helm-chart.tgz"
+    - |
+      ssh "$DEPLOY_USER@$DEPLOY_HOST" "bash -lc 'set -euo pipefail
+      tar -xzf /tmp/helm-chart.tgz -C /tmp
+      if ! command -v helm >/dev/null 2>&1; then
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      fi
+      export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+      helm upgrade --install momentum /tmp/helm/momentum \
+        --set-string app.image=makomweb/momentum:$CI_COMMIT_SHA \
+        --set-string app.pullPolicy=Always \
+        --set-string strava.clientId=$STRAVA_CLIENT_ID \
+        --set-string strava.clientSecret=$STRAVA_CLIENT_SECRET \
+        --set-string strava.redirectUri=$STRAVA_REDIRECT_URI \
+        --set-string app.secret=$APP_SECRET
+      '"
