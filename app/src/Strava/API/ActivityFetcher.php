@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Assert\Assert;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class ActivityFetcher
@@ -24,6 +25,7 @@ final readonly class ActivityFetcher
         int $page = 1,
         int $perPage = 200,
         ?int $after = null,
+        ?int $before = null,
     ): array {
         $token = $this->tokenProvider->getToken($stravaUserId);
 
@@ -36,6 +38,10 @@ final readonly class ActivityFetcher
 
         if ($after) {
             $query['after'] = $after;
+        }
+
+        if ($before) {
+            $query['before'] = $before;
         }
 
         $response = $this->httpClient->request('GET', 'https://www.strava.com/api/v3/athlete/activities', [

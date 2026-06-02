@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Assert\Assert;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class ActivityStreamDownloader

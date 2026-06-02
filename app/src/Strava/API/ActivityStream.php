@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Momentum\MovingAverage;
+
 final readonly class ActivityStream
 {
     public function __construct(
@@ -47,7 +49,9 @@ final readonly class ActivityStream
         return new self(
             time: isset($data['time']) ? Series::fromArray($data['time']) : null,
             distance: isset($data['distance']) ? Series::fromArray($data['distance']) : null,
-            velocity: isset($data['velocity_smooth']) ? Series::fromArray($data['velocity_smooth']) : null,
+            velocity: isset($data['velocity_smooth'])
+                ? Series::fromArray($data['velocity_smooth'])
+                : (isset($data['velocity']) ? Series::fromArray($data['velocity']) : null),
             heartrate: isset($data['heartrate']) ? Series::fromArray($data['heartrate']) : null,
         );
     }
@@ -78,5 +82,72 @@ final readonly class ActivityStream
             || $this->hasTimeData()
             || $this->hasDistanceData()
             || $this->hasVelocityData();
+    }
+
+    /**
+     * @return \Generator<array{
+     *  timestamp: \DateTimeImmutable,
+     *  distance: float|null,
+     *  heart_rate: HeartRate|null,
+     *  heart_rate_avg: HeartRate|null,
+     *  velocity: Velocity|null,
+     *  velocity_avg: Velocity|null,
+     * }>
+     */
+    public function yield(\DateTimeImmutable $start, int $period): \Generator
+    {
+        assert($this->hasTimeData());
+        assert(!is_null($this->time));
+
+        $velocityAvg = $this->hasVelocityData() ? MovingAverage::create('velocity_avg', $start, $period) : null;
+        $heartRateAvg = $this->hasHeartRateData() ? MovingAverage::create('heart_rate_avg', $start, $period) : null;
+
+        $count = $this->time->getCount();
+
+        for ($i = 0; $i < $count; ++$i) {
+            $offset = $this->time->getDataPoint($i);
+
+            assert(is_int($offset));
+            $offset = \DateInterval::createFromDateString("$offset seconds");
+            assert($offset instanceof \DateInterval);
+
+            $timestamp = $start->add($offset);
+
+            $distance = null;
+            if ($this->hasDistanceData() && null !== $this->distance) {
+                $distanceValue = $this->distance->getDataPoint($i);
+                assert(is_numeric($distanceValue));
+                $distance = $distanceValue;
+            }
+
+            $velocity = null;
+            $velocityAvgValue = null;
+            if ($this->hasVelocityData() && null !== $this->velocity && null !== $velocityAvg) {
+                $velocityValue = $this->velocity->getDataPoint($i);
+                assert(is_numeric($velocityValue));
+                $velocity = new Velocity($velocityValue);
+                $velocityAvg = $velocityAvg->with($velocityValue, $timestamp);
+                $velocityAvgValue = new Velocity($velocityAvg->getValue());
+            }
+
+            $heartRate = null;
+            $heartRateAvgValue = null;
+            if ($this->hasHeartRateData() && null !== $this->heartrate && null !== $heartRateAvg) {
+                $heartRateValue = $this->heartrate->getDataPoint($i);
+                assert(is_int($heartRateValue));
+                $heartRate = new HeartRate($heartRateValue);
+                $heartRateAvg = $heartRateAvg->with($heartRateValue, $timestamp);
+                $heartRateAvgValue = new HeartRate((int) $heartRateAvg->getValue());
+            }
+
+            yield [
+                'timestamp' => $timestamp,
+                'distance' => $distance,
+                'heart_rate' => $heartRate,
+                'heart_rate_avg' => $heartRateAvgValue,
+                'velocity' => $velocity,
+                'velocity_avg' => $velocityAvgValue,
+            ];
+        }
     }
 }

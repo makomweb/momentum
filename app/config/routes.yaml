@@ -9,3 +9,11 @@
 
 controllers:
     resource: routing.controllers
+
+# Root redirect to default route (for unauthenticated users)
+# Attribute-based routes (controllers) have priority and will be checked first
+root_shortcut:
+    path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+    defaults:
+        route: 'activities'

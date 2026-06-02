@@ -1,0 +1,16 @@
+FROM php:8.5
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-install \
+    intl \
+    mysqli \
+    pdo_mysql
+
+COPY app /app
+
+CMD ["php", "bin/console", "messenger:consume", "async", "--time-limit=3600", "--memory-limit=512M", "-vv"]

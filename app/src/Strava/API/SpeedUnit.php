@@ -8,5 +8,4 @@ enum SpeedUnit: string
 {
     case METER_PER_SECOND = 'm/s';
     case KILOMETER_PER_HOUR = 'km/h';
-    case MINUTES_PER_KILOMETER = 'min/km';
 }

@@ -1,0 +1,231 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Strava;
+
+use App\Strava\API\Activity;
+use App\Strava\API\ActivityStream;
+use App\Strava\API\HeartRate;
+use App\Strava\API\SpeedUnit;
+use App\Strava\API\Velocity;
+
+final class ActivityData
+{
+    private const MOVING_AVERAGE_PERIOD = 50;
+
+    public function __construct(private Activity $activity, private ActivityStream $stream)
+    {
+    }
+
+    public function getMetaData(): ActivityMetaData
+    {
+        return new ActivityMetaData($this->activity);
+    }
+
+    /**
+     * @return array<
+     *  array{
+     *   timestamp: non-falsy-string,
+     *   distance: float|null,
+     *   heart_rate: HeartRate|null,
+     *   heart_rate_avg: HeartRate|null,
+     *   velocity: Velocity|null,
+     *   velocity_avg: Velocity|null,
+     *  }
+     * >
+     */
+    public function getDataPoints(): array
+    {
+        return iterator_to_array($this->yieldDataPoints());
+    }
+
+    /**
+     * @return \Generator<array{
+     *  timestamp: non-falsy-string,
+     *  distance: float|null,
+     *  heart_rate: HeartRate|null,
+     *  heart_rate_avg: HeartRate|null,
+     *  velocity: Velocity|null,
+     *  velocity_avg: Velocity|null,
+     * }>
+     */
+    private function yieldDataPoints(): \Generator
+    {
+        foreach ($this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD) as $point) {
+            yield [
+                'timestamp' => $point['timestamp']->format('H:i:s'),
+                'distance' => $point['distance'],
+                'heart_rate' => $point['heart_rate'],
+                'heart_rate_avg' => $point['heart_rate_avg'],
+                'velocity' => $point['velocity'],
+                'velocity_avg' => $point['velocity_avg'],
+            ];
+        }
+    }
+
+    /**
+     * @return array<array{timestamp: string, value: float}>
+     */
+    public function getVelocityRawPoints(): array
+    {
+        $type = $this->activity->data['type'];
+
+        $points = [];
+        foreach ($this->getDataPoints() as $point) {
+            if (null === $point['velocity']) {
+                continue;
+            }
+            $velocity = $point['velocity'];
+
+            $value = match ($type) {
+                'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
+                'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
+                default => null,
+            };
+
+            if (null === $value) {
+                continue;
+            }
+
+            $points[] = [
+                'timestamp' => $point['timestamp'],
+                'value' => $value,
+            ];
+        }
+
+        return $points;
+    }
+
+    /**
+     * @return array<array{timestamp: string, value: float}>
+     */
+    public function getVelocityAveragePoints(): array
+    {
+        $type = $this->activity->data['type'];
+
+        $points = [];
+        foreach ($this->getDataPoints() as $point) {
+            if (null === $point['velocity_avg']) {
+                continue;
+            }
+            $velocity = $point['velocity_avg'];
+
+            $value = match ($type) {
+                'Run', 'Walk', 'Hike', 'Swim' => $velocity->asPace()->value,
+                'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETER_PER_HOUR)->value,
+                default => null,
+            };
+
+            if (null === $value) {
+                continue;
+            }
+
+            $points[] = [
+                'timestamp' => $point['timestamp'],
+                'value' => $value,
+            ];
+        }
+
+        return $points;
+    }
+
+    /**
+     * @return array<array{timestamp: string, value: int}>
+     */
+    public function getHeartRatePoints(): array
+    {
+        $points = [];
+        foreach ($this->getDataPoints() as $point) {
+            if (null === $point['heart_rate']) {
+                continue;
+            }
+            $heartRate = $point['heart_rate'];
+
+            $points[] = [
+                'timestamp' => $point['timestamp'],
+                'value' => $heartRate->value,
+            ];
+        }
+
+        return $points;
+    }
+
+    public function hasVelocityData(): bool
+    {
+        return !empty($this->getVelocityRawPoints());
+    }
+
+    public function hasHeartRateData(): bool
+    {
+        return !empty($this->getHeartRatePoints());
+    }
+
+    public function hasAnyData(): bool
+    {
+        return $this->hasVelocityData() || $this->hasHeartRateData();
+    }
+
+    public function getMovingAveragePeriod(): int
+    {
+        return self::MOVING_AVERAGE_PERIOD;
+    }
+
+    public function getHeartRateAverage(): int
+    {
+        $points = $this->getHeartRatePoints();
+        if (empty($points)) {
+            return 0;
+        }
+        $sum = array_sum(array_map(fn ($p) => $p['value'], $points));
+
+        return (int) round($sum / count($points));
+    }
+
+    public function getHeartRateMax(): int
+    {
+        $points = $this->getHeartRatePoints();
+        if (empty($points)) {
+            return 0;
+        }
+
+        return max(array_map(fn ($p) => $p['value'], $points));
+    }
+
+    public function getVelocityAverage(): Velocity
+    {
+        $points = $this->getDataPoints();
+        if (empty($points)) {
+            return new Velocity(0.0);
+        }
+        $sum = 0;
+        $count = 0;
+        foreach ($points as $point) {
+            if (null === $point['velocity_avg']) {
+                continue;
+            }
+            $sum += $point['velocity_avg']->metersPerSecond;
+            ++$count;
+        }
+        $average = $count > 0 ? $sum / $count : 0;
+
+        return new Velocity($average);
+    }
+
+    public function getVelocityMax(): Velocity
+    {
+        $points = $this->getDataPoints();
+        if (empty($points)) {
+            return new Velocity(0.0);
+        }
+        $velocities = [];
+        foreach ($points as $point) {
+            if (null !== $point['velocity']) {
+                $velocities[] = $point['velocity']->metersPerSecond;
+            }
+        }
+        $max = !empty($velocities) ? max($velocities) : 0;
+
+        return new Velocity($max);
+    }
+}

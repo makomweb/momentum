@@ -4,17 +4,24 @@ namespace App\Command;
 
 use App\Strava\API\Activity;
 use App\Strava\ReportProgressInterface;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 final class ReportProgressAdapter implements ReportProgressInterface
 {
+    private Table $table;
+
     public function __construct(
+        OutputInterface $output,
         private readonly SymfonyStyle $io,
         public int $count = 0,
     ) {
+        $this->table = new Table($output);
+        $this->table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
     }
 
-    public function reportStart(?Activity $resumeAfter): void
+    public function onStart(?Activity $resumeAfter): void
     {
         if ($resumeAfter) {
             $this->io->info(sprintf('🚀 Resume after "%s"', $resumeAfter));
@@ -23,14 +30,27 @@ final class ReportProgressAdapter implements ReportProgressInterface
         }
     }
 
-    public function report(Activity $current): void
+    public function onSkip(Activity $activity): void
     {
-        $this->io->writeln($current);
+    }
+
+    public function onSuccess(Activity $activity): void
+    {
+        $this->table->addRow([
+            $activity->getId(),
+            $activity->getStartDateLocalTime()->format(\DateTimeImmutable::RFC2822),
+            $activity->getName(),
+            $activity->getDistance(),
+            $activity->getAverageVelocity(),
+        ]);
+
         ++$this->count;
     }
 
-    public function reportFinish(): void
+    public function onFinish(): void
     {
+        $this->table->render();
+
         $this->io->success(sprintf('Synchronized %d activitie(s) ✅', $this->count));
     }
 }

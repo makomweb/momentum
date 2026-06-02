@@ -3,8 +3,9 @@ FROM dunglas/frankenphp:latest
 WORKDIR /app
 
 RUN install-php-extensions \
-    pdo_mysql \
-    mysqli
+    intl \
+    mysqli \
+    pdo_mysql
 
 COPY app /app
 

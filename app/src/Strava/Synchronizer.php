@@ -25,7 +25,7 @@ final readonly class Synchronizer
         $last = $this->repository->findLastOrNull($stravaUserId);
 
         if ($last) {
-            $progress->reportStart($last);
+            $progress->onStart($last);
         }
 
         do {
@@ -33,22 +33,25 @@ final readonly class Synchronizer
                 stravaUserId: $stravaUserId,
                 page: ++$page,
                 perPage: $pageSize,
+                // after: new \DateTimeImmutable('2026-04-01 00:00:01Z')->getTimestamp(),
                 after: $last ? $last->getStartDateUniversalTime()->getTimestamp() : null
-                // after: new \DateTimeImmutable('2026-01-01 00:00:01Z')->getTimestamp()
+                // after: new \DateTimeImmutable('2022-03-08 00:00:01Z')->getTimestamp(),
+                // before: new \DateTimeImmutable('2023-01-01 00:00:01Z')->getTimestamp()
             );
 
             foreach ($activities as $activity) {
                 $existing = $this->repository->findOrNull($stravaUserId, $activity->getId());
                 if ($existing instanceof Activity) {
+                    $progress->onSkip($activity);
                     continue;
                 }
 
                 $this->repository->persist($stravaUserId, $activity);
 
-                $progress->report($activity);
+                $progress->onSuccess($activity);
             }
         } while (!empty($activities));
 
-        $progress->reportFinish();
+        $progress->onFinish();
     }
 }

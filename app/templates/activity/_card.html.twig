@@ -1,0 +1,59 @@
+{# Activity card for display in activity stream #}
+<a href="{{ path('activity_analysis_by_id', { id: activity.stravaActivityId }) }}" class="activity-link">
+    <div class="activity-card" data-activity-type="{{ activity.data.type | lower }}">
+        <div class="activity-header">
+            <span class="activity-type-icon">
+                {% set type_lower = activity.data.type | lower %}
+                {% if type_lower == 'run' %}
+                    🏃
+                {% elseif type_lower == 'ride' %}
+                    🚴
+                {% elseif type_lower == 'swim' %}
+                    🏊
+                {% elseif type_lower == 'walk' %}
+                    🚶
+                {% elseif type_lower == 'hike' %}
+                    🥾
+                {% else %}
+                    🏅
+                {% endif %}
+            </span>
+            <div class="activity-info-basic">
+                <h3 class="activity-name">{{ activity.data.name }}</h3>
+                <p class="activity-date">{{ activity.getStartDateFormatted() }}</p>
+            </div>
+        </div>
+
+        <div class="activity-stats">
+            {%- set type_lower = activity.data.type | lower -%}
+            
+            {# Row 1: Labels #}
+            {%- if activity.data.distance > 0 -%}
+            <span class="stat-label">Distance</span>
+            {%- endif -%}
+            <span class="stat-label">Duration</span>
+            {%- if activity.data.distance > 0 -%}
+            <span class="stat-label">
+                {%- if type_lower == 'ride' -%}
+                    Speed
+                {%- else -%}
+                    Pace
+                {%- endif -%}
+            </span>
+            {%- endif -%}
+            
+            {# Row 2: Values #}
+            {%- if activity.data.distance > 0 -%}
+            <span class="stat-value">{{ (activity.data.distance / 1000) | round(1) }} km</span>
+            {%- endif -%}
+            <span class="stat-value">{{ (activity.data.moving_time / 60) | round(0) }} min</span>
+            {%- if activity.data.distance > 0 -%}
+            <span class="stat-value">{{ activity.getAverageVelocityAsStringable() }}</span>
+            {%- endif -%}
+        </div>
+
+        <div class="activity-card-hover-indicator">
+            View details →
+        </div>
+    </div>
+</a>

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Assert\Assert;
+
 final readonly class Activity implements \Stringable
 {
     /**
@@ -28,7 +30,7 @@ final readonly class Activity implements \Stringable
     /**
      * @param array{
      *  id: int,
-     *  device_name: string,
+     *  device_name: string|bool,
      *  name: string,
      *  start_date: string,
      *  timezone: string,
@@ -44,7 +46,7 @@ final readonly class Activity implements \Stringable
     {
         return new self([
             'id' => $data['id'],
-            'device_name' => $data['device_name'],
+            'device_name' => is_string($data['device_name']) ? $data['device_name'] : '<unknown>',
             'name' => $data['name'],
             'start_date' => $data['start_date'],
             'timezone' => $data['timezone'],
@@ -74,7 +76,9 @@ final readonly class Activity implements \Stringable
 
     public function getStartDateUniversalTime(): \DateTimeImmutable
     {
-        return new \DateTimeImmutable($this->data['start_date']);
+        $dateTime = new \DateTimeImmutable($this->data['start_date']);
+
+        return $dateTime->setTimezone(new \DateTimeZone('UTC'));
     }
 
     public function getStartDateLocalTime(): \DateTimeImmutable
@@ -86,6 +90,11 @@ final readonly class Activity implements \Stringable
         $tz = new \DateTimeZone($matches[1]); // e.g. "Europe/Berlin"
 
         return $this->getStartDateUniversalTime()->setTimezone($tz);
+    }
+
+    public function getStartDateLocalTimeFormatted(): string
+    {
+        return $this->getStartDateLocalTime()->format('D M d, y · H:i');
     }
 
     public function getElapsedTime(): \DateInterval
@@ -111,14 +120,14 @@ final readonly class Activity implements \Stringable
         return new Distance($this->data['distance']);
     }
 
-    public function getMaxSpeed(): Speed
+    public function getMaxVelocity(): Velocity
     {
-        return Speed::fromStrava($this->data['max_speed'], $this->data['type' /* or: sport_type */]);
+        return new Velocity($this->data['max_speed']);
     }
 
-    public function getAverageSpeed(): Speed
+    public function getAverageVelocity(): Velocity
     {
-        return Speed::fromStrava($this->data['average_speed'], $this->data['type' /* or: sport_type */]);
+        return new Velocity($this->data['average_speed']);
     }
 
     public function __toString(): string

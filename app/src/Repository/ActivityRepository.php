@@ -62,9 +62,28 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
     public function findByStravaUser(int $stravaUserId): array
     {
         /** @var ActivityEntity[] $entities */
-        $entities = $this->findBy(['stravaUserId' => $stravaUserId], ['createdAt' => 'DESC']);
+        $entities = $this->findBy(['stravaUserId' => $stravaUserId], ['startDate' => 'DESC']);
 
         return array_map(self::fromEntity(...), $entities);
+    }
+
+    /**
+     * Get recent activities for dashboard display.
+     *
+     * @return ActivityEntity[] Recent activities sorted by start date
+     */
+    public function findRecentByStravaUser(int $stravaUserId, int $limit = 20): array
+    {
+        /** @var ActivityEntity[] $entities */
+        $entities = $this->createQueryBuilder('a')
+            ->where('a.stravaUserId = :userId')
+            ->setParameter('userId', $stravaUserId)
+            ->orderBy('a.startDate', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return $entities;
     }
 
     private static function fromEntity(ActivityEntity $entity): Activity

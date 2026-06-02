@@ -31,7 +31,7 @@ up:
 
 hint:
 	@echo "App at http://localhost:8080"
-	@echo "Adminer at http://localhost:8085"
+	@echo "Dashboard at http://localhost:8000 (links to all services)"
 	@echo "To view logs: make logs"
 
 shell:
@@ -88,16 +88,34 @@ qa:
 	@echo "Run QA scripts..."
 	docker compose run --rm composer qa
 
+cc: clear
+clear: cache-clear cache-pool-clear
+	@echo "All caches cleared (app + pool)"
+
+cache-clear:
+	@echo "Clearing Symfony application cache..."
+	docker compose exec -it app bin/console cache:clear
+
+cache-pool-clear:
+	@echo "Clearing cache pools..."
+	docker compose exec -it app bin/console cache:pool:clear --all
+
+reset: restart
+restart:
+	@echo "Restarting app, worker containers..."
+	docker compose restart app
+	docker compose restart worker
+
 open:
 	@if command -v xdg-open > /dev/null 2>&1; then \
-		xdg-open http://localhost:8080 2>/dev/null & \
+		xdg-open http://localhost:8000 2>/dev/null & \
 	elif command -v open > /dev/null 2>&1; then \
-		open http://localhost:8080; \
+		open http://localhost:8000; \
 	elif command -v wslview > /dev/null 2>&1; then \
-		wslview http://localhost:8080; \
+		wslview http://localhost:8000; \
 	elif command -v cmd.exe > /dev/null 2>&1; then \
-		cmd.exe /c start http://localhost:8080; \
+		cmd.exe /c start http://localhost:8000; \
 	else \
 		echo "❌ Could not detect browser launcher."; \
-		echo "📍 Please open http://localhost:8080 manually"; \
+		echo "📍 Please open http://localhost:8000 manually"; \
 	fi

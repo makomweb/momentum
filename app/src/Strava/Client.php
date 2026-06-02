@@ -2,30 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Strava;
 
-use App\Strava\API\Assert;
+use App\Assert\Assert;
 use App\Strava\API\Token;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final readonly class StravaClient
+final readonly class Client
 {
     public function __construct(
-        private StravaDetails $apiDetails,
+        private Configuration $config,
         private HttpClientInterface $httpClient,
-        private StravaTokenCache $cache,
-        private string $redirectUri = 'http://localhost/exchange-token',
+        private TokenCache $cache,
     ) {
-    }
-
-    /** Get the address to perform authorization */
-    public function getAuthorizationAddress(): string
-    {
-        return sprintf(
-            'https://www.strava.com/oauth/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=activity:read_all',
-            $this->apiDetails->clientId,
-            urlencode($this->redirectUri)
-        );
     }
 
     /** Request a token (OAuth 2.0: exchange code with token) */
@@ -33,8 +22,8 @@ final readonly class StravaClient
     {
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
             'body' => [
-                'client_id' => $this->apiDetails->clientId,
-                'client_secret' => $this->apiDetails->clientSecret,
+                'client_id' => $this->config->clientId,
+                'client_secret' => $this->config->clientSecret,
                 'code' => $code,
                 'grant_type' => 'authorization_code',
             ],
@@ -79,8 +68,8 @@ final readonly class StravaClient
 
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
             'body' => [
-                'client_id' => $this->apiDetails->clientId,
-                'client_secret' => $this->apiDetails->clientSecret,
+                'client_id' => $this->config->clientId,
+                'client_secret' => $this->config->clientSecret,
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $refreshToken,
             ],
