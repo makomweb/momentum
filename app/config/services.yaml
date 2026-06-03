@@ -24,5 +24,10 @@ services:
     App\:
         resource: '../src/'
 
+    # Inject the dedicated Strava token cache pool into TokenCache
+    App\Strava\TokenCache:
+        arguments:
+            $pool: '@cache.strava_token'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
