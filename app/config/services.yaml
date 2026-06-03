@@ -29,5 +29,19 @@ services:
         arguments:
             $pool: '@cache.strava_token'
 
+    # FlySystem local filesystem adapter for activity stream cache
+    activity_stream.filesystem:
+        class: League\Flysystem\Filesystem
+        arguments:
+            - !service
+              class: League\Flysystem\Local\LocalFilesystemAdapter
+              arguments:
+                - '%activity_stream_cache_dir%'
+
+    # Inject FlySystem filesystem into ActivityStreamCache
+    App\Strava\ActivityStreamCache:
+        arguments:
+            $filesystem: '@activity_stream.filesystem'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

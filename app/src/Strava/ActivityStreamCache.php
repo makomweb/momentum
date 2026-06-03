@@ -7,22 +7,29 @@ namespace App\Strava;
 use App\Momentum\Assert\Assert;
 use App\Strava\API\ActivityStream;
 use App\Strava\API\ActivityStreamDownloader;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemException;
 
 final readonly class ActivityStreamCache
 {
     public function __construct(
         private ActivityStreamDownloader $downloader,
-        #[Autowire('%activity_stream_cache_dir%')]
-        private string $cacheDir,
+        private Filesystem $filesystem,
     ) {
     }
 
     public function get(int $stravaUserId, int $activityId): ActivityStream
     {
-        $filePath = $this->getCacheFilePath($stravaUserId, $activityId);
-        if (file_exists($filePath)) {
-            return ActivityStream::fromJsonFile($filePath);
+        $path = $this->getCachePath($stravaUserId, $activityId);
+
+        try {
+            if ($this->filesystem->has($path)) {
+                $contents = $this->filesystem->read($path);
+
+                return ActivityStream::fromJsonString($contents);
+            }
+        } catch (FilesystemException $e) {
+            throw new \RuntimeException(sprintf('Failed to read activity stream from cache: %s', $e->getMessage()), 0, $e);
         }
 
         $stream = $this->downloader->download($stravaUserId, $activityId);
@@ -33,9 +40,12 @@ final readonly class ActivityStreamCache
 
     private function set(int $stravaUserId, int $activityId, ActivityStream $stream): void
     {
-        $filePath = $this->getCacheFilePath($stravaUserId, $activityId);
+        $path = $this->getCachePath($stravaUserId, $activityId);
 
-        Assert::that(!file_exists($filePath), sprintf('ActivityStream "%s" already exists!', $filePath));
+        Assert::that(
+            !$this->filesystem->has($path),
+            sprintf('ActivityStream "%s" already exists!', $path)
+        );
 
         $data = [
             'time' => $stream->time ? [
@@ -69,31 +79,34 @@ final readonly class ActivityStreamCache
             throw new \RuntimeException('Failed to encode activity stream data to JSON');
         }
 
-        $written = file_put_contents($filePath, $json);
-        if (false === $written) {
-            throw new \RuntimeException(sprintf('Failed to write to cache file: %s', $filePath));
+        try {
+            $this->filesystem->write($path, $json);
+        } catch (FilesystemException $e) {
+            throw new \RuntimeException(sprintf('Failed to write activity stream to cache: %s', $e->getMessage()), 0, $e);
         }
     }
 
     public function clear(int $stravaUserId, int $activityId): void
     {
-        $filePath = $this->getCacheFilePath($stravaUserId, $activityId);
+        $path = $this->getCachePath($stravaUserId, $activityId);
 
         Assert::that(
-            file_exists($filePath),
+            $this->filesystem->has($path),
             sprintf(
                 'ActivityStream "%s" does not exist. Call ActivityStreamCache::isCached() first!',
-                $filePath
+                $path
             )
         );
 
-        if (!unlink($filePath)) {
-            throw new \RuntimeException(sprintf('Failed to delete cache file: %s', $filePath));
+        try {
+            $this->filesystem->delete($path);
+        } catch (FilesystemException $e) {
+            throw new \RuntimeException(sprintf('Failed to delete activity stream cache: %s', $e->getMessage()), 0, $e);
         }
     }
 
-    private function getCacheFilePath(int $stravaUserId, int $activityId): string
+    private function getCachePath(int $stravaUserId, int $activityId): string
     {
-        return $this->cacheDir.sprintf('/activity_stream_%d_%d.json', $stravaUserId, $activityId);
+        return sprintf('activity_stream_%d_%d.json', $stravaUserId, $activityId);
     }
 }

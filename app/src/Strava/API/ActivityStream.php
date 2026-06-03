@@ -26,6 +26,11 @@ final readonly class ActivityStream
             throw new \RuntimeException(sprintf('Failed to read file: %s', $filePath));
         }
 
+        return self::fromJsonString($content);
+    }
+
+    public static function fromJsonString(string $json): self
+    {
         /**
          * @var array<string, array{
          *     data: (int|float)[],
@@ -34,7 +39,7 @@ final readonly class ActivityStream
          *     original_size: int
          * }> $data
          */
-        $data = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
+        $data = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
 
         return ActivityStream::fromArray($data);
     }

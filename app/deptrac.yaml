@@ -17,6 +17,8 @@ deptrac:
           value: .*Psr\\.*
         - type: classLike
           value: .*Symfony\\.*
+        - type: classLike
+          value: .*League\\Flysystem\\.*
     - name: Supporting
       collectors:
         - type: classLike
