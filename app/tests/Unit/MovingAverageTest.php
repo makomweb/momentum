@@ -33,7 +33,7 @@ class MovingAverageTest extends TestCase
     {
         return new Serializer(
             [
-                new ActivityStreamDenormalizer(),
+                new ActivityStreamDenormalizer(new SeriesDenormalizer()),
                 new SeriesDenormalizer(),
             ],
             [

@@ -10,21 +10,31 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 final class SeriesDenormalizer implements DenormalizerInterface
 {
     /**
-     * @param array<string, mixed> $data
+     * @param array{
+     *  data: array<int|float>,
+     *  seriesType: string,
+     *  resolution: string,
+     *  originalSize: int
+     * }[] $data
      */
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Series
     {
-        /** @var array<string, mixed> $data */
+        /** @var array<int|float> $arrayData */
         $arrayData = $data['data'] ?? [];
         $seriesType = $data['series_type'] ?? '';
+        assert(is_string($seriesType));
+
         $resolution = $data['resolution'] ?? '';
+        assert(is_string($resolution));
+
         $originalSize = $data['original_size'] ?? 0;
+        assert(is_int($originalSize));
 
         return new Series(
-            data: (array) $arrayData,
-            seriesType: (string) $seriesType,
-            resolution: (string) $resolution,
-            originalSize: (int) $originalSize,
+            data: $arrayData,
+            seriesType: $seriesType,
+            resolution: $resolution,
+            originalSize: $originalSize,
         );
     }
 

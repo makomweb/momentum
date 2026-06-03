@@ -44,7 +44,7 @@ class ActivityDataTest extends TestCase
         $factory = new ActivityStreamFactory(
             new Serializer(
                 [
-                    new ActivityStreamDenormalizer(),
+                    new ActivityStreamDenormalizer(new SeriesDenormalizer()),
                     new SeriesDenormalizer(),
                 ],
                 [
