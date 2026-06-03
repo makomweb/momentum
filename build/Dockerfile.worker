@@ -9,7 +9,9 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-install \
     intl \
     mysqli \
-    pdo_mysql
+    pdo_mysql && \
+    pecl install redis && \
+    docker-php-ext-enable redis
 
 COPY app /app
 

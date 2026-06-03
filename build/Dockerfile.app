@@ -5,7 +5,8 @@ WORKDIR /app
 RUN install-php-extensions \
     intl \
     mysqli \
-    pdo_mysql
+    pdo_mysql \
+    redis
 
 COPY app /app
 
