@@ -36,16 +36,6 @@ final readonly class ActivityStreamDownloader
             ],
         ]);
 
-        /**
-         * @var array<string, array{
-         *   data: (int|float)[],
-         *   series_type: string,
-         *   resolution: string,
-         *   original_size: int
-         * }> $data
-         */
-        $data = $response->toArray();
-
-        return $this->factory->fromArray($data);
+        return $this->factory->fromJsonString($response->getContent());
     }
 }

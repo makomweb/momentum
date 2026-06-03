@@ -28,12 +28,4 @@ final readonly class ActivityStreamFactory
     {
         return $this->serializer->deserialize($json, ActivityStream::class, 'json');
     }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    public function fromArray(array $data): ActivityStream
-    {
-        return $this->serializer->deserialize($data, ActivityStream::class, 'array');
-    }
 }
