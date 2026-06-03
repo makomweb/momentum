@@ -39,7 +39,7 @@ final readonly class Athlete implements \Stringable
 
     public function getGender(): Gender
     {
-        return Gender::tryFrom($this->data['sex']) ?? Gender::DIVERSE;
+        return Gender::tryFrom($this->data['sex']) ?? Gender::UNKNOWN;
     }
 
     public function getProfile(): string
