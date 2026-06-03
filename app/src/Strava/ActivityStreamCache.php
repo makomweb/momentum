@@ -21,15 +21,12 @@ final readonly class ActivityStreamCache
 
     public function get(int $stravaUserId, int $activityId): ActivityStream
     {
-        $path = $this->getCachePath($stravaUserId, $activityId);
+        $fileName = self::getFileName($stravaUserId, $activityId);
 
-        if ($this->filesystem->has($path)) {
-            $json = $this->filesystem->read($path);
+        if ($this->filesystem->has($fileName)) {
+            $json = $this->filesystem->read($fileName);
 
-            /** @var ActivityStream $object */
-            $object = $this->serializer->deserialize($json, ActivityStream::class, 'json');
-
-            return $object;
+            return $this->serializer->deserialize($json, ActivityStream::class, 'json');
         }
 
         $stream = $this->downloader->download($stravaUserId, $activityId);
@@ -40,33 +37,33 @@ final readonly class ActivityStreamCache
 
     private function set(int $stravaUserId, int $activityId, ActivityStream $stream): void
     {
-        $path = $this->getCachePath($stravaUserId, $activityId);
+        $fileName = self::getFileName($stravaUserId, $activityId);
 
         Assert::that(
-            !$this->filesystem->has($path),
-            sprintf('ActivityStream "%s" already exists!', $path)
+            !$this->filesystem->has($fileName),
+            sprintf('ActivityStream "%s" already exists!', $fileName)
         );
 
         $json = $this->serializer->serialize($stream, 'json');
 
-        $this->filesystem->write($path, $json);
+        $this->filesystem->write($fileName, $json);
     }
 
     public function clear(int $stravaUserId, int $activityId): void
     {
-        $path = $this->getCachePath($stravaUserId, $activityId);
+        $fileName = self::getFileName($stravaUserId, $activityId);
 
-        Assert::that($this->filesystem->has($path),
+        Assert::that($this->filesystem->has($fileName),
             sprintf(
                 'ActivityStream "%s" does not exist. Check via ActivityStreamCache::isCached() first!',
-                $path
+                $fileName
             )
         );
 
-        $this->filesystem->delete($path);
+        $this->filesystem->delete($fileName);
     }
 
-    private function getCachePath(int $stravaUserId, int $activityId): string
+    private static function getFileName(int $stravaUserId, int $activityId): string
     {
         return sprintf('activity_stream_%d_%d.json', $stravaUserId, $activityId);
     }
