@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "momentum.fullname" . }}-valkey
+  labels:
+    {{- include "momentum.labels" . | nindent 4 }}
+    app: valkey
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "momentum.selectorLabels" . | nindent 6 }}
+      app: valkey
+  template:
+    metadata:
+      labels:
+        {{- include "momentum.selectorLabels" . | nindent 8 }}
+        app: valkey
+    spec:
+      containers:
+      - name: valkey
+        image: "{{ .Values.valkey.image }}"
+        ports:
+        - containerPort: {{ .Values.valkey.port }}
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.valkey.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.valkey.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+          requests:
+            memory: "128Mi"
+            cpu: "50m"

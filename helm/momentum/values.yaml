@@ -13,6 +13,10 @@ mysql:
   database: app
   user: root
   password: secret
+
+valkey:
+  image: eqalpha/keydb:latest
+  port: 6379
   
 persistence:
   enabled: true
@@ -31,4 +35,3 @@ strava:
   clientId: "225747"
   clientSecret: "" # set via CI/helm --set
   redirectUri: ""   # set via CI/helm --set
-

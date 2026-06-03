@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "momentum.fullname" . }}-valkey
+  labels:
+    {{- include "momentum.labels" . | nindent 4 }}
+    app: valkey
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.valkey.port }}
+    targetPort: {{ .Values.valkey.port }}
+    protocol: TCP
+    name: valkey
+  selector:
+    {{- include "momentum.selectorLabels" . | nindent 4 }}
+    app: valkey

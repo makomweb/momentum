@@ -18,6 +18,17 @@ spec:
         app: app
     spec:
       initContainers:
+      - name: wait-for-valkey
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for Valkey..."
+          until nc -z {{ include "momentum.fullname" . }}-valkey {{ .Values.valkey.port }}; do
+            sleep 2
+          done
+          echo "Valkey is ready!"
       - name: wait-for-mysql
         image: mysql:8.4
         command:
@@ -72,3 +83,4 @@ spec:
             port: {{ .Values.app.port }}
           initialDelaySeconds: 10
           periodSeconds: 5
+
