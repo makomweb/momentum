@@ -5,3 +5,33 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: public/index.php
+			
+		-
+			message: '#^Method App\\Converter\\Converter\:\:toArray\(\) should return array\<string, mixed\> but returns array\|ArrayObject\|bool\|float\|int\|string\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Converter/Converter.php
+
+		-
+			message: '#^Parameter \#1 \$seriesData of method App\\Strava\\Serializer\\ActivityStreamDenormalizer\:\:denormalizeSeries\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 4
+			path: src/Strava/Serializer/ActivityStreamDenormalizer.php
+
+		-
+			message: '#^Parameter \$data of class App\\Strava\\API\\Series constructor expects array\<float\|int\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Strava/Serializer/SeriesDenormalizer.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Strava/Serializer/SeriesDenormalizer.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/Strava/Serializer/SeriesDenormalizer.php

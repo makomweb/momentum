@@ -41,7 +41,7 @@ final readonly class ActivityStream
          */
         $data = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
 
-        return ActivityStream::fromArray($data);
+        return self::fromArray($data);
     }
 
     /**
