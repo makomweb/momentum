@@ -19,51 +19,6 @@ final readonly class ActivityStream
     ) {
     }
 
-    public static function fromJsonFile(string $filePath): self
-    {
-        $content = file_get_contents($filePath);
-        if (false === $content) {
-            throw new \RuntimeException(sprintf('Failed to read file: %s', $filePath));
-        }
-
-        return self::fromJsonString($content);
-    }
-
-    public static function fromJsonString(string $json): self
-    {
-        /**
-         * @var array<string, array{
-         *     data: (int|float)[],
-         *     series_type: string,
-         *     resolution: string,
-         *     original_size: int
-         * }> $data
-         */
-        $data = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
-
-        return self::fromArray($data);
-    }
-
-    /**
-     * @param array<string, array{
-     *     data: (int|float)[],
-     *     series_type: string,
-     *     resolution: string,
-     *     original_size: int
-     * }> $data
-     */
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            time: isset($data['time']) ? Series::fromArray($data['time']) : null,
-            distance: isset($data['distance']) ? Series::fromArray($data['distance']) : null,
-            velocity: isset($data['velocity_smooth'])
-                ? Series::fromArray($data['velocity_smooth'])
-                : (isset($data['velocity']) ? Series::fromArray($data['velocity']) : null),
-            heartrate: isset($data['heartrate']) ? Series::fromArray($data['heartrate']) : null,
-        );
-    }
-
     public function hasHeartRateData(): bool
     {
         return null !== $this->heartrate && $this->heartrate->getCount() > 0;

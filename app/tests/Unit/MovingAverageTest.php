@@ -2,9 +2,13 @@
 
 namespace App\Tests\Unit;
 
+use App\Strava\ActivityStreamFactory;
 use App\Strava\API\ActivityStream;
+use App\Strava\Serializer\ActivityStreamDenormalizer;
+use App\Strava\Serializer\SeriesDenormalizer;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Serializer\Serializer;
 
 class MovingAverageTest extends TestCase
 {
@@ -14,7 +18,8 @@ class MovingAverageTest extends TestCase
     {
         $filePath = __DIR__.'/../data/activity_stream_14417573_18155703383.json';
 
-        $stream = ActivityStream::fromJsonFile($filePath);
+        $factory = new ActivityStreamFactory($this->getSerializer());
+        $stream = $factory->fromJsonFile($filePath);
 
         self::assertTrue($stream->hasVelocityData());
         self::assertNotNull($stream->velocity);
@@ -22,6 +27,19 @@ class MovingAverageTest extends TestCase
         self::assertEquals(7887, $stream->velocity->getCount());
 
         $this->stream = $stream;
+    }
+
+    private function getSerializer(): Serializer
+    {
+        return new Serializer(
+            [
+                new ActivityStreamDenormalizer(),
+                new SeriesDenormalizer(),
+            ],
+            [
+                new \Symfony\Component\Serializer\Encoder\JsonEncoder(),
+            ]
+        );
     }
 
     #[Test]

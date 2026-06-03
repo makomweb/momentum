@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Strava\API;
 
 use App\Momentum\Assert\Assert;
+use App\Strava\ActivityStreamFactory;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class ActivityStreamDownloader
@@ -12,6 +13,7 @@ final readonly class ActivityStreamDownloader
     public function __construct(
         private HttpClientInterface $httpClient,
         private TokenCacheInterface $tokenCache,
+        private ActivityStreamFactory $factory,
     ) {
     }
 
@@ -44,6 +46,6 @@ final readonly class ActivityStreamDownloader
          */
         $data = $response->toArray();
 
-        return ActivityStream::fromArray($data);
+        return $this->factory->fromArray($data);
     }
 }

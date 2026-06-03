@@ -3,10 +3,13 @@
 namespace App\Tests\Unit;
 
 use App\Strava\ActivityData;
+use App\Strava\ActivityStreamFactory;
 use App\Strava\API\Activity;
-use App\Strava\API\ActivityStream;
+use App\Strava\Serializer\ActivityStreamDenormalizer;
+use App\Strava\Serializer\SeriesDenormalizer;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Serializer\Serializer;
 
 class ActivityDataTest extends TestCase
 {
@@ -38,9 +41,21 @@ class ActivityDataTest extends TestCase
 
         $filePath = __DIR__.'/../data/activity_stream_14417573_18155703383.json';
 
+        $factory = new ActivityStreamFactory(
+            new Serializer(
+                [
+                    new ActivityStreamDenormalizer(),
+                    new SeriesDenormalizer(),
+                ],
+                [
+                    new \Symfony\Component\Serializer\Encoder\JsonEncoder(),
+                ]
+            )
+        );
+
         return new ActivityData(
             Activity::fromRawData($data),
-            ActivityStream::fromJsonFile($filePath)
+            $factory->fromJsonFile($filePath)
         );
     }
 }
