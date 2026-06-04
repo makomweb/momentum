@@ -35,8 +35,7 @@ build-dockerhub:
   script:
     - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
     - docker buildx create --use
-    - docker buildx build --platform "$IMAGE_PLATFORMS" -f build/Dockerfile.app -t "$IMAGE_NAME:$CI_COMMIT_SHA" . --push
-    - docker buildx build --platform "$IMAGE_PLATFORMS" -f build/Dockerfile.app -t "$IMAGE_NAME:latest" . --push
+    - docker buildx build --platform "$IMAGE_PLATFORMS" -f build/Dockerfile.app -t "$IMAGE_NAME:$CI_COMMIT_SHA" -t "$IMAGE_NAME:latest" . --push
 
 deploy-hetzner:
   stage: deploy
