@@ -17,24 +17,6 @@ final readonly class Series
     ) {
     }
 
-    /**
-     * @param array{
-     *     data: array<int|float>,
-     *     series_type: string,
-     *     resolution: string,
-     *     original_size: int
-     * } $array
-     */
-    public static function fromArray(array $array): self
-    {
-        return new self(
-            data: $array['data'],
-            seriesType: $array['series_type'],
-            resolution: $array['resolution'],
-            originalSize: $array['original_size'],
-        );
-    }
-
     public function getDataPoint(int $index): int|float|null
     {
         return $this->data[$index] ?? null;

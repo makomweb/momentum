@@ -7,6 +7,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.version: '%env(APP_VERSION)%'
     strava_client_id: '%env(string:STRAVA_CLIENT_ID)%'
     strava_client_secret: '%env(string:STRAVA_CLIENT_SECRET)%'
     strava_redirect_uri: '%env(string:STRAVA_REDIRECT_URI)%'
@@ -23,6 +24,25 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+
+    # Inject the dedicated Strava token cache pool into TokenCache
+    App\Strava\TokenCache:
+        arguments:
+            $pool: '@cache.strava_token'
+
+    # FlySystem local filesystem adapter for activity stream cache
+    activity_stream.filesystem:
+        class: League\Flysystem\Filesystem
+        arguments:
+            - !service
+              class: League\Flysystem\Local\LocalFilesystemAdapter
+              arguments:
+                - '%activity_stream_cache_dir%'
+
+    # Inject FlySystem filesystem into ActivityStreamCache
+    App\Strava\ActivityStreamCache:
+        arguments:
+            $filesystem: '@activity_stream.filesystem'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

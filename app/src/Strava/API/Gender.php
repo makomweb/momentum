@@ -9,4 +9,5 @@ enum Gender: string
     case MALE = 'M';
     case FEMALE = 'F';
     case DIVERSE = 'D';
+    case UNKNOWN = 'U';
 }

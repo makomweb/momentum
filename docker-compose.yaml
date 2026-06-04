@@ -10,10 +10,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cache:
+        condition: service_healthy
     environment:
       APP_ENV: "dev"
       DATABASE_URL: "mysql://root:secret@db:3306/app?serverVersion=8.4&charset=utf8mb4"
       MESSENGER_TRANSPORT_DSN: "doctrine://default?table_name=messenger_messages&queue_name=default"
+      CACHE_URL: "redis://cache:6379"
     networks:
       - momentum
 
@@ -45,6 +48,18 @@ services:
     networks:
       - momentum
     
+  cache:
+    image: valkey/valkey:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - momentum
+
   db-admin:
     image: adminer:latest
     environment:
@@ -67,10 +82,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cache:
+        condition: service_healthy
     environment:
       APP_ENV: "dev"
       DATABASE_URL: "mysql://root:secret@db:3306/app?serverVersion=8.4&charset=utf8mb4"
       MESSENGER_TRANSPORT_DSN: "doctrine://default?table_name=messenger_messages&queue_name=default"
+      CACHE_URL: "redis://cache:6379"
     networks:
       - momentum
     restart: unless-stopped
