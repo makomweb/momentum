@@ -29,12 +29,16 @@ environment:
 version:
   include_revision: true
 
-# Can be overriden via:
-#
-# helm upgrade --install momentum ./helm/momentum \
-#   --set app.pullPolicy=Always \
-#   --set strava.redirectUri=http://178.105.184.24:31228/exchange-token
 strava:
-  clientId: "225747"
+  clientId: # set via CI/helm --set
   clientSecret: "" # set via CI/helm --set
   redirectUri: ""   # set via CI/helm --set
+
+# E.g. install via:
+#
+# helm install momentum ./helm/momentum \
+#   --set app.pullPolicy=Always \
+#   --set app.secret="$(openssl rand -hex 32)"
+#   --set strava.clientId=_ENTER_CLIENT_ID_HERE_ \
+#   --set strava.clientSecret=_ENTER_CLIENT_SECRET_HERE_ \
+#   --set strava.redirectUri=_ENTER_REDIRECT_URI_HERE_
