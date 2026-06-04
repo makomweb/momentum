@@ -26,6 +26,9 @@ persistence:
 environment:
   APP_ENV: prod
 
+version:
+  include_revision: true
+
 # Can be overriden via:
 #
 # helm upgrade --install momentum ./helm/momentum \

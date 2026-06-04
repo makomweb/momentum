@@ -6,6 +6,6 @@ metadata:
     {{- include "momentum.labels" . | nindent 4 }}
 data:
   APP_ENV: {{ .Values.environment.APP_ENV | quote }}
+  APP_VERSION: "{{ .Chart.AppVersion }}+{{ .Release.Revision }}"
   MESSENGER_TRANSPORT_DSN: "doctrine://default?table_name=messenger_messages&queue_name=default"
   CACHE_URL: "redis://{{ include "momentum.fullname" . }}-valkey:{{ .Values.valkey.port }}"
-
