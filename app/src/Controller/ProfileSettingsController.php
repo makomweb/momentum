@@ -37,11 +37,6 @@ final class ProfileSettingsController extends AbstractController
         $treshold = $user->getTreshold();
         $maxHeartRate = $user->getMaxHeartRate();
 
-        dump('Logged in user:', [
-            'Name' => $user->getName(), 'Strava ID' => $user->getStravaId(),
-            'Treshold' => (string) $treshold, 'max HR' => (string) $maxHeartRate]
-        );
-
         if ('POST' === $request->getMethod()) {
             $submittedToken = (string) $request->request->get('_token', '');
             if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('profile_settings', $submittedToken))) {
@@ -72,7 +67,6 @@ final class ProfileSettingsController extends AbstractController
             }
 
             if (empty($errors)) {
-                dump('New values:', ['Treshold' => (string) $treshold, 'max HR' => (string) $maxHeartRate]);
                 $user->setTreshold($treshold);
                 $user->setMaxHeartRate($maxHeartRate);
 
@@ -82,7 +76,6 @@ final class ProfileSettingsController extends AbstractController
 
                 return $this->redirectToRoute('profile_settings');
             }
-            dump('Errors:', $errors);
 
             $maxHeartRate = '' === $maxHeartRateRaw ? null : (int) $maxHeartRateRaw;
 

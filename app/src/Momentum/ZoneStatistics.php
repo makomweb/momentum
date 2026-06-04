@@ -42,10 +42,6 @@ final readonly class ZoneStatistics
              * @return array<string, int>
              */
             static function (array $carry, ZoneSession $session): array {
-                // dump(['carry' => $carry, 'session' => $session]);
-
-                // dump($session->zone->value . ': ' . implode(', ', array_keys($carry)));
-
                 /** @var int $value */
                 $value = $carry[$session->zone->value];
                 $carry[$session->zone->value] = $value + $session->getSeconds();
