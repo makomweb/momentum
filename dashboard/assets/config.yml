@@ -33,6 +33,10 @@ services:
   - name: "Reference"
     icon: "fas fa-bookmark"
     items:
+      - name: "API Settings"
+        subtitle: "Strava"
+        icon: "fa-brands fa-strava"
+        url: "https://www.strava.com/settings/api"
       - name: "Documentation"
         subtitle: "MKDocs"
         icon: "fas fa-diagram-project"
