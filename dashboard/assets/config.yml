@@ -43,3 +43,7 @@ services:
         icon: "fa-brands fa-gitlab"
         url: "https://gitlab.com/makomweb/momentum/app"
         target: "_blank"
+      - name: "Image registry"
+        subtitle: "Dockerhub"
+        icon: "fa-brands fa-docker"
+        url: "https://hub.docker.com/repository/docker/makomweb/momentum"
