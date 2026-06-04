@@ -9,7 +9,7 @@ when@dev:
                 type: stream
                 path: "php://stderr"
                 level: debug
-                channels: ["!event"]
+                channels: ["!event", "!doctrine"]
             console:
                 type: console
                 process_psr_3_messages: false
