@@ -9,7 +9,8 @@ COPY app/config /app/config
 COPY app/public /app/public
 COPY app/src /app/src
 
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+# Install without post-install scripts (cache:clear needs .env which isn't available during build)
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 FROM dunglas/frankenphp:latest
 
