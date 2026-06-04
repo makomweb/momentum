@@ -187,6 +187,19 @@ final class ActivityController extends AbstractController
         $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
         $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
+        // Calculate speed zones for bikes
+        $speedStats = $activityData->getSpeedZoneStatistics();
+        $speedStatsFormatted = [];
+        foreach ($speedStats as $stat) {
+            $speedStatsFormatted[] = [
+                'zone' => $stat['zone'],
+                'duration' => $stat['duration'],
+                'duration_percentage' => $stat['duration_percentage'],
+            ];
+        }
+
+        $speedZoneSessions = $activityData->getSpeedZoneSessions();
+
         return $this->render('activity/analysis.html.twig', [
             'activityData' => $activityData,
             'metaData' => $metaData,
@@ -195,6 +208,8 @@ final class ActivityController extends AbstractController
             'heartRateZoneSessions' => $heartRateZoneSessions,
             'paceStats' => $paceStats->toArray($activity->getMovingTimeSeconds()),
             'hrStats' => $hrStats->toArray($activity->getMovingTimeSeconds()),
+            'speedStats' => $speedStatsFormatted,
+            'speedZoneSessions' => $speedZoneSessions,
         ]);
     }
 }

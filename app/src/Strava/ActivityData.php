@@ -7,6 +7,7 @@ namespace App\Strava;
 use App\Momentum\ActivityDataPoint;
 use App\Momentum\PaceUnit;
 use App\Momentum\SpeedUnit;
+use App\Momentum\SpeedZone;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
@@ -185,6 +186,121 @@ final class ActivityData
         }
 
         return Velocity::max($velocities);
+    }
+
+    /**
+     * @return array<array{timestamp: string, value: string}>
+     */
+    public function getSpeedZonePoints(): array
+    {
+        return iterator_to_array($this->yieldSpeedZonePoints());
+    }
+
+    /**
+     * @return \Generator<array{timestamp: string, value: string}>
+     */
+    private function yieldSpeedZonePoints(): \Generator
+    {
+        $average = $this->getVelocityAverage();
+        foreach ($this->yieldDataPoints() as $point) {
+            yield [
+                'timestamp' => $point->getTimestamp()->format('H:i:s'),
+                'value' => $point->hasVelocity()
+                    ? $point->getSpeedZone($average)->value
+                    : '',
+            ];
+        }
+    }
+
+    /**
+     * Get speed zone statistics for bikes.
+     *
+     * @return array<string, array{duration: int, duration_percentage: float, zone: SpeedZone}>
+     */
+    public function getSpeedZoneStatistics(): array
+    {
+        $stats = [];
+        $average = $this->getVelocityAverage();
+        $totalPoints = 0;
+
+        foreach ($this->yieldDataPoints() as $point) {
+            if (!$point->hasVelocity()) {
+                continue;
+            }
+
+            ++$totalPoints;
+            $zone = $point->getSpeedZone($average);
+            $zoneKey = $zone->value;
+
+            if (!isset($stats[$zoneKey])) {
+                $stats[$zoneKey] = [
+                    'zone' => $zone,
+                    'duration' => 0,
+                    'duration_percentage' => 0.0,
+                ];
+            }
+
+            ++$stats[$zoneKey]['duration'];
+        }
+
+        if (0 === $totalPoints) {
+            return [];
+        }
+
+        foreach ($stats as &$stat) {
+            $stat['duration_percentage'] = ($stat['duration'] / $totalPoints) * 100;
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Get speed zone session data for chart visualization.
+     * Groups consecutive points with the same zone into sessions.
+     *
+     * @return array<array{zone: SpeedZone, start: \DateTimeImmutable, end: \DateTimeImmutable}>
+     */
+    public function getSpeedZoneSessions(): array
+    {
+        $sessions = [];
+        $average = $this->getVelocityAverage();
+        $currentZone = null;
+        $sessionStart = null;
+
+        foreach ($this->yieldDataPoints() as $point) {
+            if (!$point->hasVelocity()) {
+                continue;
+            }
+
+            $zone = $point->getSpeedZone($average);
+
+            if ($currentZone !== $zone) {
+                if (null !== $currentZone && null !== $sessionStart) {
+                    $sessions[] = [
+                        'zone' => $currentZone,
+                        'start' => $sessionStart,
+                        'end' => $point->getTimestamp(),
+                    ];
+                }
+                $currentZone = $zone;
+                $sessionStart = $point->getTimestamp();
+            }
+        }
+
+        // Don't forget the last session
+        if (null !== $currentZone && null !== $sessionStart) {
+            $lastPoint = array_key_last(iterator_to_array($this->yieldDataPoints()));
+            if (null !== $lastPoint) {
+                $lastTimestamp = iterator_to_array($this->yieldDataPoints())[$lastPoint]->getTimestamp();
+                $sessions[] = [
+                    'zone' => $currentZone,
+                    'start' => $sessionStart,
+                    'end' => $lastTimestamp,
+                ];
+            }
+        }
+
+        return $sessions;
     }
 
     private function convertVelocity(Velocity $velocity): float

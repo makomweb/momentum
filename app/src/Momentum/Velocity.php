@@ -44,4 +44,9 @@ final readonly class Velocity
     {
         return Pace::fromMetersPerSecond($this->metersPerSecond);
     }
+
+    public function getSpeedZone(Velocity $average): SpeedZone
+    {
+        return SpeedZone::calculate($this, $average);
+    }
 }

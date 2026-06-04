@@ -74,6 +74,11 @@ final readonly class ActivityDataPoint implements \Stringable
         return $this->getHeartRate()->getZone($maxHeartRate);
     }
 
+    public function getSpeedZone(Velocity $averageVelocity): SpeedZone
+    {
+        return $this->getVelocity()->getSpeedZone($averageVelocity);
+    }
+
     public function __toString(): string
     {
         return sprintf(

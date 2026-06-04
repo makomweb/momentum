@@ -639,13 +639,19 @@
                     {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
 
                     <div class="zone-columns">
-                        {% include 'activity/_pace_zones.html.twig' with { paceStats: paceStats } %}
+                        {% if metaData.useSpeedZonesForBike() %}
+                            {% include 'activity/_speed_zones.html.twig' with { speedStats: speedStats } %}
+                        {% else %}
+                            {% include 'activity/_pace_zones.html.twig' with { paceStats: paceStats } %}
+                        {% endif %}
                         {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
                     </div>
                 </div>
 
                 <div class="zone-analysis-side">
-                    {% include 'activity/_pace_zone_transitions.html.twig' with { paceZoneSessions: paceZoneSessions } %}
+                    {% if not metaData.useSpeedZonesForBike() %}
+                        {% include 'activity/_pace_zone_transitions.html.twig' with { paceZoneSessions: paceZoneSessions } %}
+                    {% endif %}
                 </div>
             </div>
         {% elseif app.user.getTreshold().isZero() %}
@@ -795,7 +801,18 @@
             ]
         };
         
-        {% if paceZoneSessions | length > 0 %}
+        {% if metaData.useSpeedZonesForBike() and speedZoneSessions | length > 0 %}
+            velocityData.zoneColors = [
+                {% for session in speedZoneSessions %}
+                    {
+                        name: '{{ session.zone.value }}',
+                        startTime: '{{ session.start.format('H:i:s') }}',
+                        endTime: '{{ session.end.format('H:i:s') }}',
+                        color: '{{ session.zone.getColor() }}'
+                    }{{ not loop.last ? ',' : '' }}
+                {% endfor %}
+            ];
+        {% elseif paceZoneSessions | length > 0 %}
             velocityData.zoneColors = [
                 {% for session in paceZoneSessions %}
                     {

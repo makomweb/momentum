@@ -72,6 +72,11 @@ final readonly class ActivityMetaData
         };
     }
 
+    public function useSpeedZonesForBike(): bool
+    {
+        return 'Ride' === $this->getActivityType();
+    }
+
     public function getVelocityChartTitle(): string
     {
         $type = $this->getActivityType();
