@@ -6,7 +6,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Momentum\AthleteInterface;
-use App\Momentum\ConfirmedPaceZoneSessions;
 use App\Momentum\HeartRateZone;
 use App\Momentum\PaceZone;
 use App\Momentum\TrainingMetrics;
@@ -19,6 +18,7 @@ use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -135,6 +135,13 @@ final class ActivityController extends AbstractController
 
     private static function createZoneSessions(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): ZoneSessions
     {
+        if ($athlete->getTreshold()->isZero()) {
+            throw new HttpException(400, 'Please configure a treshold!');
+        }
+        if (!$athlete->getMaxHeartRate()->isValid()) {
+            throw new HttpException(400, 'Please configure a max. heart rate!');
+        }
+
         $startDate = $activity->getStartDateLocalTime();
         $dataPoints = iterator_to_array($stream->yield($startDate, 50));
 
