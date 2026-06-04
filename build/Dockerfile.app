@@ -11,8 +11,6 @@ COPY app/composer.json app/composer.lock /app/
 # Install dependencies
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
----
-
 FROM dunglas/frankenphp:latest
 
 WORKDIR /app
