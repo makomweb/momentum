@@ -34,11 +34,33 @@ strava:
   clientSecret: "" # set via CI/helm --set
   redirectUri: ""   # set via CI/helm --set
 
+ingress:
+  enabled: false
+  hostname: "" # set via CI/helm --set
+  alternativeHostnames: []
+  path: /momentum
+  rewritePath: true
+  certEmail: "" # set via CI/helm --set (e.g., your@email.com)
+  tls:
+    enabled: true
+
 # E.g. install via:
 #
+# BASIC (NodePort only):
 # helm install momentum ./helm/momentum \
 #   --set app.pullPolicy=Always \
-#   --set app.secret="$(openssl rand -hex 32)"
+#   --set app.secret="$(openssl rand -hex 32)" \
 #   --set strava.clientId=_ENTER_CLIENT_ID_HERE_ \
 #   --set strava.clientSecret=_ENTER_CLIENT_SECRET_HERE_ \
-#   --set strava.redirectUri=_ENTER_REDIRECT_URI_HERE_
+#   --set strava.redirectUri=http://YOUR_IP:31228/exchange-token
+#
+# WITH INGRESS & LET'S ENCRYPT SSL:
+# helm install momentum ./helm/momentum \
+#   --set app.pullPolicy=Always \
+#   --set app.secret="$(openssl rand -hex 32)" \
+#   --set ingress.enabled=true \
+#   --set ingress.hostname=www.your-domain.com \
+#   --set ingress.certEmail=your@email.com \
+#   --set strava.clientId=_ENTER_CLIENT_ID_HERE_ \
+#   --set strava.clientSecret=_ENTER_CLIENT_SECRET_HERE_ \
+#   --set strava.redirectUri=https://www.your-domain.com/momentum/auth/callback

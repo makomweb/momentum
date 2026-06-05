@@ -1,0 +1,59 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "momentum.fullname" . }}-ingress
+  labels:
+    {{- include "momentum.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    {{- if .Values.ingress.rewritePath }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-{{ include "momentum.fullname" . }}-rewrite@kubernetescrd
+    {{- end }}
+spec:
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.hostname | quote }}
+    {{- range .Values.ingress.alternativeHostnames }}
+    - {{ . | quote }}
+    {{- end }}
+    secretName: {{ include "momentum.fullname" . }}-tls
+  {{- end }}
+  rules:
+  - host: {{ .Values.ingress.hostname | quote }}
+    http:
+      paths:
+      - path: {{ .Values.ingress.path | quote }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "momentum.fullname" . }}-app
+            port:
+              number: 80
+  {{- range .Values.ingress.alternativeHostnames }}
+  - host: {{ . | quote }}
+    http:
+      paths:
+      - path: {{ $.Values.ingress.path | quote }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "momentum.fullname" . }}-app
+            port:
+              number: 80
+  {{- end }}
+---
+{{- if .Values.ingress.rewritePath }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "momentum.fullname" . }}-rewrite
+  labels:
+    {{- include "momentum.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+    - {{ .Values.ingress.path | quote }}
+{{- end }}
+{{- end }}
