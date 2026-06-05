@@ -40,9 +40,6 @@ ingress:
   alternativeHostnames: []
   path: /momentum
   rewritePath: true
-  certEmail: "" # set via CI/helm --set (e.g., your@email.com)
-  tls:
-    enabled: true
 
 # E.g. install via:
 #
@@ -54,13 +51,16 @@ ingress:
 #   --set strava.clientSecret=_ENTER_CLIENT_SECRET_HERE_ \
 #   --set strava.redirectUri=http://YOUR_IP:31228/exchange-token
 #
-# WITH INGRESS & LET'S ENCRYPT SSL:
+# WITH INGRESS & TRAEFIK DNS-01 SSL (Let's Encrypt):
 # helm install momentum ./helm/momentum \
 #   --set app.pullPolicy=Always \
 #   --set app.secret="$(openssl rand -hex 32)" \
 #   --set ingress.enabled=true \
 #   --set ingress.hostname=www.your-domain.com \
-#   --set ingress.certEmail=your@email.com \
 #   --set strava.clientId=_ENTER_CLIENT_ID_HERE_ \
 #   --set strava.clientSecret=_ENTER_CLIENT_SECRET_HERE_ \
-#   --set strava.redirectUri=https://www.your-domain.com/momentum/auth/callback
+#   --set strava.redirectUri=https://www.your-domain.com/momentum/exchange-token
+#
+# Note: Traefik's ACME (DNS-01) must be configured via K3s HelmChartConfig:
+# kubectl patch helmchartconfig -n kube-system traefik --type merge \
+#   -p '{"spec":{"valuesContent":"[...]"}}'
