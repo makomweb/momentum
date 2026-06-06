@@ -9,3 +9,4 @@ data:
   APP_VERSION: "{{ .Chart.AppVersion }}+{{ .Release.Revision }}"
   MESSENGER_TRANSPORT_DSN: "doctrine://default?table_name=messenger_messages&queue_name=default"
   CACHE_URL: "redis://{{ include "momentum.fullname" . }}-valkey:{{ .Values.valkey.port }}"
+  SECURE_COOKIE: "true"
