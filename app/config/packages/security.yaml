@@ -23,7 +23,7 @@ security:
                 secret: '%env(APP_SECRET)%'
                 lifetime: '%remember_me_lifetime%'
                 path: /
-                secure: true
+                secure: '%env(bool:default:false:SECURE_COOKIE)%'
                 httponly: true
                 samesite: lax
             logout:
