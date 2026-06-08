@@ -23,7 +23,7 @@ security:
                 secret: '%env(APP_SECRET)%'
                 lifetime: '%remember_me_lifetime%'
                 path: /
-                secure: '%env(bool:default:false:SECURE_COOKIE)%'
+                secure: '%env(bool:SECURE_COOKIE)%'
                 httponly: true
                 samesite: lax
                 # Because users don't have a password in Momentum:
