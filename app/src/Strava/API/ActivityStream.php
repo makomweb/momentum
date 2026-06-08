@@ -48,6 +48,42 @@ final readonly class ActivityStream
     }
 
     /**
+     * Calculates the moving time window (first and last point where velocity > 0).
+     * Returns [startOffset, endOffset] in seconds, or null if no moving data.
+     *
+     * @return array{0: int, 1: int}|null
+     */
+    public function getMovingTimeWindow(): ?array
+    {
+        if (!$this->hasVelocityData() || !$this->hasTimeData() || null === $this->velocity || null === $this->time) {
+            return null;
+        }
+
+        $count = $this->time->getCount();
+        $firstMoving = null;
+        $lastMoving = null;
+
+        for ($i = 0; $i < $count; ++$i) {
+            $velocityValue = $this->velocity->getDataPoint($i);
+            if (is_numeric($velocityValue) && $velocityValue > 0) {
+                $timeOffset = $this->time->getDataPoint($i);
+                assert(is_int($timeOffset));
+
+                if (null === $firstMoving) {
+                    $firstMoving = $timeOffset;
+                }
+                $lastMoving = $timeOffset;
+            }
+        }
+
+        if (null === $firstMoving || null === $lastMoving) {
+            return null;
+        }
+
+        return [$firstMoving, $lastMoving];
+    }
+
+    /**
      * @return \Generator<ActivityDataPoint>
      */
     public function yield(\DateTimeImmutable $start, int $movingAveragePeriod): \Generator
