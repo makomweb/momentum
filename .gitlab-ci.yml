@@ -65,8 +65,8 @@ deploy-hetzner:
       helm upgrade --install momentum /tmp/helm/momentum \
         --set-string app.image=makomweb/momentum:$CI_COMMIT_SHA \
         --set-string app.pullPolicy=Always \
+        --set-string app.secret=$APP_SECRET \
         --set-string strava.clientId=$STRAVA_CLIENT_ID \
         --set-string strava.clientSecret=$STRAVA_CLIENT_SECRET \
-        --set-string strava.redirectUri=$STRAVA_REDIRECT_URI \
-        --set-string app.secret=$APP_SECRET
+        --set-string strava.redirectUri=$STRAVA_REDIRECT_URI
       '"
