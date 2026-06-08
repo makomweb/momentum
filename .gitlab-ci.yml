@@ -62,11 +62,8 @@ deploy-hetzner:
         curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       fi
       export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-      helm upgrade --install momentum /tmp/helm/momentum \
+      helm upgrade momentum /tmp/helm/momentum \
+        --reuse-values \
         --set-string app.image=makomweb/momentum:$CI_COMMIT_SHA \
-        --set-string app.pullPolicy=Always \
-        --set-string app.secret=$APP_SECRET \
-        --set-string strava.clientId=$STRAVA_CLIENT_ID \
-        --set-string strava.clientSecret=$STRAVA_CLIENT_SECRET \
-        --set-string strava.redirectUri=$STRAVA_REDIRECT_URI
+        --set-string app.pullPolicy=Always
       '"
