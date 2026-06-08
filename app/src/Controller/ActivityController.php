@@ -181,14 +181,33 @@ final class ActivityController extends AbstractController
         $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
         $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
+        $movingTime = $activity->getMovingTimeSeconds();
+        $paceStatsArray = $paceStats->toArray($movingTime);
+        $hrStatsArray = $hrStats->toArray($movingTime);
+
+        $pacePercentageSum = array_sum(array_column($paceStatsArray, 'duration_percentage'));
+        $hrPercentageSum = array_sum(array_column($hrStatsArray, 'duration_percentage'));
+
+        dump('Heart Rate Zone Percentages', [
+            'activity_moving_time' => $movingTime,
+            'stats' => $hrStatsArray,
+            'total_percentage' => $hrPercentageSum,
+        ]);
+
+        dump('Pace Zone Percentages', [
+            'activity_moving_time' => $movingTime,
+            'stats' => $paceStatsArray,
+            'total_percentage' => $pacePercentageSum,
+        ]);
+
         return [
             'activityData' => $activityData,
             'metaData' => $metaData,
             'metrics' => $metrics,
             'paceZoneSessions' => $paceZoneSessions,
-            'paceStats' => $paceStats->toArray($activity->getMovingTimeSeconds()),
+            'paceStats' => $paceStatsArray,
             'heartRateZoneSessions' => $heartRateZoneSessions,
-            'hrStats' => $hrStats->toArray($activity->getMovingTimeSeconds()),
+            'hrStats' => $hrStatsArray,
         ];
     }
 }

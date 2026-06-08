@@ -156,4 +156,9 @@ final class Activity
             default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
         };
     }
+
+    public function getMovingTimeSeconds(): int
+    {
+        return $this->data['moving_time'];
+    }
 }
