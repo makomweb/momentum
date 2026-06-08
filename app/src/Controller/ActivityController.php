@@ -128,6 +128,21 @@ final class ActivityController extends AbstractController
         return ZoneSessions::create($athlete, $activity->getEndDateLocalTime(), $dataPoints);
     }
 
+    private static function createSpeedZoneSessions(AthleteInterface $athlete, Activity $activity, ActivityStream $stream, ActivityData $activityData): ZoneSessions
+    {
+        if ($athlete->getTreshold()->isZero()) {
+            throw new HttpException(400, 'Please configure a treshold!');
+        }
+        if (!$athlete->getMaxHeartRate()->isValid()) {
+            throw new HttpException(400, 'Please configure a max. heart rate!');
+        }
+
+        $startDate = $activity->getStartDateLocalTime();
+        $dataPoints = iterator_to_array($stream->yield($startDate, 50));
+
+        return ZoneSessions::createWithSpeedZones($athlete, $activity->getEndDateLocalTime(), $dataPoints, $activityData->getVelocityAverage());
+    }
+
     private function analyzeActivity(User $user, int $stravaActivityId): Response
     {
         $activity = $this->activityRepository->findOrNull($user->getStravaId(), $stravaActivityId);
@@ -187,7 +202,8 @@ final class ActivityController extends AbstractController
         $speedStats = [];
         $speedZoneSessions = [];
         if ($metaData->useSpeedZonesForBike()) {
-            $speedZoneSessions = $activityData->getSpeedZoneSessions();
+            $speedSessions = self::createSpeedZoneSessions($user, $activity, $stream, $activityData);
+            $speedZoneSessions = $speedSessions->getSpeedZoneSessions();
             $speedZoneStats = ZoneStatistics::fromSessions($speedZoneSessions, SpeedZone::cases());
             $speedStats = $speedZoneStats->toArray($activity->getMovingTimeSeconds());
         }

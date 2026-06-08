@@ -9,7 +9,6 @@ use App\Momentum\PaceUnit;
 use App\Momentum\SpeedUnit;
 use App\Momentum\SpeedZone;
 use App\Momentum\Velocity;
-use App\Momentum\ZoneSession;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
 
@@ -255,47 +254,6 @@ final class ActivityData
         }
 
         return $stats;
-    }
-
-    /**
-     * Get speed zone session data for chart visualization.
-     * Groups consecutive points with the same zone into sessions.
-     *
-     * @return array<ZoneSession>
-     */
-    public function getSpeedZoneSessions(): array
-    {
-        $sessions = [];
-        $average = $this->getVelocityAverage();
-        $currentZone = null;
-        $sessionStart = null;
-
-        foreach ($this->yieldDataPoints() as $point) {
-            if (!$point->hasVelocity()) {
-                continue;
-            }
-
-            $zone = $point->getSpeedZone($average);
-
-            if ($currentZone !== $zone) {
-                if (null !== $currentZone && null !== $sessionStart) {
-                    $sessions[] = new ZoneSession($currentZone, $sessionStart, $point->getTimestamp());
-                }
-                $currentZone = $zone;
-                $sessionStart = $point->getTimestamp();
-            }
-        }
-
-        // Don't forget the last session
-        if (null !== $currentZone && null !== $sessionStart) {
-            $lastPoint = array_key_last(iterator_to_array($this->yieldDataPoints()));
-            if (null !== $lastPoint) {
-                $lastTimestamp = iterator_to_array($this->yieldDataPoints())[$lastPoint]->getTimestamp();
-                $sessions[] = new ZoneSession($currentZone, $sessionStart, $lastTimestamp);
-            }
-        }
-
-        return $sessions;
     }
 
     private function convertVelocity(Velocity $velocity): float

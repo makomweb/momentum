@@ -14,7 +14,7 @@ final readonly class ZoneSession implements \Stringable
     ) {
     }
 
-    public static function open(PaceZoneEntry|HeartRateZoneEntry $entry): self
+    public static function open(PaceZoneEntry|HeartRateZoneEntry|SpeedZoneEntry $entry): self
     {
         return new self(
             $entry->zone,
