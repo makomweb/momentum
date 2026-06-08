@@ -46,7 +46,7 @@ final class ActivityController extends AbstractController
             return $this->render('activity/analysis_empty.html.twig');
         }
 
-        return $this->analyzeActivity($user, $activity->getId());
+        return $this->renderResponse($user, $activity->getId());
     }
 
     #[Route('/{id}', name: 'analysis_by_id', methods: ['GET'], requirements: ['id' => '\d+'])]
@@ -56,82 +56,10 @@ final class ActivityController extends AbstractController
         $user = $this->getUser();
         assert($user instanceof User);
 
-        return $this->analyzeActivity($user, $id);
+        return $this->renderResponse($user, $id);
     }
 
-    #[Route('/{id}/zones', name: 'zones_api', methods: ['GET'], requirements: ['id' => '\d+'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function getZonesApi(int $id): Response
-    {
-        $user = $this->getUser();
-        assert($user instanceof User);
-
-        $activity = $this->activityRepository->findOrNull($user->getStravaId(), $id);
-
-        if (null === $activity) {
-            return $this->json(['error' => 'Activity not found'], 404);
-        }
-
-        try {
-            $stream = $this->streamCache->get(
-                $user->getStravaId(),
-                $activity->getId()
-            );
-        } catch (\Exception) {
-            return $this->json(['error' => 'Activity stream not available'], 404);
-        }
-
-        if (!$stream->hasData()) {
-            return $this->json(['error' => 'Activity stream has no data'], 404);
-        }
-
-        $sessions = self::createZoneSessions($user, $activity, $stream);
-        $heartRateZoneSessions = $sessions->getHeartRateSessions();
-        $paceZoneSessions = $sessions->getPaceZoneSessions();
-
-        $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
-        $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
-        $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
-
-        // Option C: Use zone session totals instead of moving_time
-        $totalPaceSeconds = array_sum(array_map(fn ($s) => $s->getSeconds(), $paceZoneSessions));
-        $totalHrSeconds = array_sum(array_map(fn ($s) => $s->getSeconds(), $heartRateZoneSessions));
-
-        return $this->json([
-            'activity' => [
-                'id' => $activity->getId(),
-                'name' => $activity->getName(),
-                'start_date' => $activity->getStartDateLocalTime()->format('c'),
-            ],
-            'pace_zones' => $paceStats->toArray($totalPaceSeconds),
-            'heart_rate_zones' => $hrStats->toArray($totalHrSeconds),
-            'polarized_training' => [
-                'easy_seconds' => $metrics->easySeconds,
-                'easy_percentage' => round($metrics->getEasyPercentage(), 2),
-                'medium_seconds' => $metrics->mediumSeconds,
-                'medium_percentage' => round($metrics->getMediumPercentage(), 2),
-                'hard_seconds' => $metrics->hardSeconds,
-                'hard_percentage' => round($metrics->getHardPercentage(), 2),
-            ],
-        ]);
-    }
-
-    private static function createZoneSessions(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): ZoneSessions
-    {
-        if ($athlete->getTreshold()->isZero()) {
-            throw new HttpException(400, 'Please configure a treshold!');
-        }
-        if (!$athlete->getMaxHeartRate()->isValid()) {
-            throw new HttpException(400, 'Please configure a max. heart rate!');
-        }
-
-        $startDate = $activity->getStartDateLocalTime();
-        $dataPoints = iterator_to_array($stream->yield($startDate, 50));
-
-        return ZoneSessions::create($athlete, $activity->getEndDateLocalTime(), $dataPoints);
-    }
-
-    private function analyzeActivity(User $user, int $stravaActivityId): Response
+    private function renderResponse(User $user, int $stravaActivityId): Response
     {
         $activity = $this->activityRepository->findOrNull($user->getStravaId(), $stravaActivityId);
 
@@ -202,5 +130,20 @@ final class ActivityController extends AbstractController
             'heartRateZoneSessions' => $heartRateZoneSessions,
             'hrStats' => $hrStatsArray,
         ];
+    }
+
+    private static function createZoneSessions(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): ZoneSessions
+    {
+        if ($athlete->getTreshold()->isZero()) {
+            throw new HttpException(400, 'Please configure a treshold!');
+        }
+        if (!$athlete->getMaxHeartRate()->isValid()) {
+            throw new HttpException(400, 'Please configure a max. heart rate!');
+        }
+
+        $startDate = $activity->getStartDateLocalTime();
+        $dataPoints = iterator_to_array($stream->yield($startDate, 50));
+
+        return ZoneSessions::create($athlete, $activity->getEndDateLocalTime(), $dataPoints);
     }
 }
