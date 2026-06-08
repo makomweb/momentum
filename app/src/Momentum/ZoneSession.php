@@ -8,7 +8,7 @@ final readonly class ZoneSession implements \Stringable
 {
     // TODO: Make ctor private!
     public function __construct(
-        public PaceZone|HeartRateZone $zone,
+        public PaceZone|HeartRateZone|SpeedZone $zone,
         public \DateTimeImmutable $start,
         public \DateTimeImmutable $end,
     ) {
@@ -75,7 +75,7 @@ final readonly class ZoneSession implements \Stringable
         return in_array($this->zone, [PaceZone::ZONE_4, PaceZone::ZONE_5]);
     }
 
-    public function isEqual(PaceZone|HeartRateZone $zone): bool
+    public function isEqual(PaceZone|HeartRateZone|SpeedZone $zone): bool
     {
         return $this->zone === $zone;
     }

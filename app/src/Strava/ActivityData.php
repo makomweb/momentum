@@ -9,6 +9,7 @@ use App\Momentum\PaceUnit;
 use App\Momentum\SpeedUnit;
 use App\Momentum\SpeedZone;
 use App\Momentum\Velocity;
+use App\Momentum\ZoneSession;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
 
@@ -201,6 +202,8 @@ final class ActivityData
      */
     private function yieldSpeedZonePoints(): \Generator
     {
+        assert(!$this->getVelocityAverage()->isZero());
+
         $average = $this->getVelocityAverage();
         foreach ($this->yieldDataPoints() as $point) {
             yield [
@@ -258,7 +261,7 @@ final class ActivityData
      * Get speed zone session data for chart visualization.
      * Groups consecutive points with the same zone into sessions.
      *
-     * @return array<array{zone: SpeedZone, start: \DateTimeImmutable, end: \DateTimeImmutable}>
+     * @return array<ZoneSession>
      */
     public function getSpeedZoneSessions(): array
     {
@@ -276,11 +279,7 @@ final class ActivityData
 
             if ($currentZone !== $zone) {
                 if (null !== $currentZone && null !== $sessionStart) {
-                    $sessions[] = [
-                        'zone' => $currentZone,
-                        'start' => $sessionStart,
-                        'end' => $point->getTimestamp(),
-                    ];
+                    $sessions[] = new ZoneSession($currentZone, $sessionStart, $point->getTimestamp());
                 }
                 $currentZone = $zone;
                 $sessionStart = $point->getTimestamp();
@@ -292,11 +291,7 @@ final class ActivityData
             $lastPoint = array_key_last(iterator_to_array($this->yieldDataPoints()));
             if (null !== $lastPoint) {
                 $lastTimestamp = iterator_to_array($this->yieldDataPoints())[$lastPoint]->getTimestamp();
-                $sessions[] = [
-                    'zone' => $currentZone,
-                    'start' => $sessionStart,
-                    'end' => $lastTimestamp,
-                ];
+                $sessions[] = new ZoneSession($currentZone, $sessionStart, $lastTimestamp);
             }
         }
 

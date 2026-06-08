@@ -167,8 +167,8 @@ final class ActivityController extends AbstractController
      *     heartRateZoneSessions: array<ZoneSession>,
      *     paceStats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      *     hrStats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
-     *     speedStats: list<array{zone: SpeedZone, duration: int, duration_percentage: float}>,
-     *     speedZoneSessions: array<array{zone: SpeedZone, start: \DateTimeImmutable, end: \DateTimeImmutable}>,
+     *     speedStats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
+     *     speedZoneSessions: array<ZoneSession>,
      * }
      */
     private static function createActivityData(User $user, Activity $activity, ActivityStream $stream): array
@@ -184,18 +184,12 @@ final class ActivityController extends AbstractController
         $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
         $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
-        $speedStatsFormatted = [];
+        $speedStats = [];
         $speedZoneSessions = [];
         if ($metaData->useSpeedZonesForBike()) {
-            $speedStats = $activityData->getSpeedZoneStatistics();
-            foreach ($speedStats as $stat) {
-                $speedStatsFormatted[] = [
-                    'zone' => $stat['zone'],
-                    'duration' => $stat['duration'],
-                    'duration_percentage' => $stat['duration_percentage'],
-                ];
-            }
             $speedZoneSessions = $activityData->getSpeedZoneSessions();
+            $speedZoneStats = ZoneStatistics::fromSessions($speedZoneSessions, SpeedZone::cases());
+            $speedStats = $speedZoneStats->toArray($activity->getMovingTimeSeconds());
         }
 
         return [
@@ -203,10 +197,10 @@ final class ActivityController extends AbstractController
             'metaData' => $metaData,
             'metrics' => $metrics,
             'paceZoneSessions' => $paceZoneSessions,
-            'heartRateZoneSessions' => $heartRateZoneSessions,
             'paceStats' => $paceStats->toArray($activity->getMovingTimeSeconds()),
+            'heartRateZoneSessions' => $heartRateZoneSessions,
             'hrStats' => $hrStats->toArray($activity->getMovingTimeSeconds()),
-            'speedStats' => $speedStatsFormatted,
+            'speedStats' => $speedStats,
             'speedZoneSessions' => $speedZoneSessions,
         ];
     }

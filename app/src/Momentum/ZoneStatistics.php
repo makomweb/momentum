@@ -12,8 +12,8 @@ final readonly class ZoneStatistics
     }
 
     /**
-     * @param ZoneSession[]                 $sessions
-     * @param array<HeartRateZone|PaceZone> $zones
+     * @param ZoneSession[]                           $sessions
+     * @param array<HeartRateZone|PaceZone|SpeedZone> $zones
      */
     public static function fromSessions(array $sessions, array $zones): self
     {
@@ -25,7 +25,7 @@ final readonly class ZoneStatistics
              *
              * @return array<string, int>
              */
-            static function (array $carry, HeartRateZone|PaceZone $zone): array {
+            static function (array $carry, HeartRateZone|PaceZone|SpeedZone $zone): array {
                 $carry[$zone->value] = 0;
 
                 return $carry;
