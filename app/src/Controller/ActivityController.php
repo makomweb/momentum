@@ -193,21 +193,6 @@ final class ActivityController extends AbstractController
         $paceStatsArray = $paceStats->toArray($totalPaceSeconds);
         $hrStatsArray = $hrStats->toArray($totalHrSeconds);
 
-        $pacePercentageSum = array_sum(array_column($paceStatsArray, 'duration_percentage'));
-        $hrPercentageSum = array_sum(array_column($hrStatsArray, 'duration_percentage'));
-
-        dump('Heart Rate Zone Percentages', [
-            'zone_session_total_seconds' => $totalHrSeconds,
-            'stats' => $hrStatsArray,
-            'total_percentage' => $hrPercentageSum,
-        ]);
-
-        dump('Pace Zone Percentages', [
-            'zone_session_total_seconds' => $totalPaceSeconds,
-            'stats' => $paceStatsArray,
-            'total_percentage' => $pacePercentageSum,
-        ]);
-
         return [
             'activityData' => $activityData,
             'metaData' => $metaData,
