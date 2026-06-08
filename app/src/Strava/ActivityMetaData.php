@@ -174,4 +174,9 @@ final readonly class ActivityMetaData
             default /* Ride */ => false,
         };
     }
+
+    public function isRun(): bool
+    {
+        return 'Run' === $this->getActivityType();
+    }
 }
