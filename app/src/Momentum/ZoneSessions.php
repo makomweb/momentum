@@ -10,25 +10,10 @@ final readonly class ZoneSessions
     {
     }
 
-    /**
-     * @param ActivityDataPoint[]        $dataPoints
-     * @param array{0: int, 1: int}|null $movingTimeWindow [startOffset, endOffset] in seconds from start time, or null to use all points
-     */
-    public static function create(
-        AthleteInterface $athlete,
-        \DateTimeImmutable $endTime,
-        array $dataPoints,
-        ?array $movingTimeWindow = null,
-    ): self {
-        return new self(
-            $endTime,
-            new ZoneEntries(
-                $athlete->getTreshold(),
-                $athlete->getMaxHeartRate(),
-                $dataPoints,
-                $movingTimeWindow
-            )
-        );
+    /** @param ActivityDataPoint[] $dataPoints */
+    public static function create(AthleteInterface $athlete, \DateTimeImmutable $endTime, array $dataPoints): self
+    {
+        return new self($endTime, new ZoneEntries($athlete->getTreshold(), $athlete->getMaxHeartRate(), $dataPoints));
     }
 
     /** @return ZoneSession[] */

@@ -71,6 +71,7 @@ final class ZonePercentageAggregationTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) end($timeData)).'S'));
+        $zoneSessionsData = ZoneSessions::create(self::createAthlete($treshold, $maxHeartRate), $endTime, $dataPoints);
 
         // Total time span of zone sessions (from first to last data point)
         $totalZoneSeconds = (int) end($timeData);  // 4781 seconds
@@ -78,93 +79,55 @@ final class ZonePercentageAggregationTest extends TestCase
         // Strava moving_time (actual time when moving, excluding pauses)
         $stravaMovingTime = 3196; // As reported by user
 
-        // Find moving time window for Option A fix
-        $firstMoving = null;
-        $lastMoving = null;
-        for ($i = 0; $i < count($velocityData); ++$i) {
-            if ($velocityData[$i] > 0) {
-                if (null === $firstMoving) {
-                    $firstMoving = $timeData[$i];
-                }
-                $lastMoving = $timeData[$i];
-            }
-        }
+        // Calculate moving time (similar to Activity::getMovingTimeSeconds)
+        $paceSessions = $zoneSessionsData->getPaceZoneSessions();
+        $hrSessions = $zoneSessionsData->getHeartRateSessions();
 
-        // Assert we found a moving window
-        self::assertNotNull($firstMoving, 'Should have found first moving point');
-        self::assertNotNull($lastMoving, 'Should have found last moving point');
-        /** @var array{0: int, 1: int} $movingTimeWindow */
-        $movingTimeWindow = [$firstMoving, $lastMoving];
+        // When using total zone seconds (correct for unit test):
+        $paceStatistics = ZoneStatistics::fromSessions($paceSessions, PaceZone::cases());
+        $paceStatsArrayCorrect = $paceStatistics->toArray($totalZoneSeconds);
+        $paceTotalPercentageCorrect = array_sum(array_column($paceStatsArrayCorrect, 'duration_percentage'));
 
-        // Test WITHOUT Option A fix (full data points)
-        $zoneSessionsDataFull = ZoneSessions::create(
-            self::createAthlete($treshold, $maxHeartRate),
-            $endTime,
-            $dataPoints
-        );
-        $paceSessionsFull = $zoneSessionsDataFull->getPaceZoneSessions();
-        $hrSessionsFull = $zoneSessionsDataFull->getHeartRateSessions();
+        // When using Strava moving_time (reproduces the 149% bug):
+        $paceStatsArrayWithBug = $paceStatistics->toArray($stravaMovingTime);
+        $paceTotalPercentageWithBug = array_sum(array_column($paceStatsArrayWithBug, 'duration_percentage'));
 
-        // Test WITH Option A fix (filtered by moving time window)
-        $zoneSessionsDataFiltered = ZoneSessions::create(
-            self::createAthlete($treshold, $maxHeartRate),
-            $endTime,
-            $dataPoints,
-            $movingTimeWindow
-        );
-        $paceSessionsFiltered = $zoneSessionsDataFiltered->getPaceZoneSessions();
-        $hrSessionsFiltered = $zoneSessionsDataFiltered->getHeartRateSessions();
-
-        // Calculate totals
-        $totalPaceSeconds = array_sum(array_map(fn ($s) => $s->getSeconds(), $paceSessionsFiltered));
-        $totalHrSeconds = array_sum(array_map(fn ($s) => $s->getSeconds(), $hrSessionsFiltered));
-
-        // Create statistics
-        $paceStatisticsFull = ZoneStatistics::fromSessions($paceSessionsFull, PaceZone::cases());
-        $hrStatisticsFull = ZoneStatistics::fromSessions($hrSessionsFull, HeartRateZone::cases());
-
-        $paceStatisticsFiltered = ZoneStatistics::fromSessions($paceSessionsFiltered, PaceZone::cases());
-        $hrStatisticsFiltered = ZoneStatistics::fromSessions($hrSessionsFiltered, HeartRateZone::cases());
-
-        // Test without fix using moving_time (reproduces bug)
-        $paceStatsArrayBuggy = $paceStatisticsFull->toArray($stravaMovingTime);
-        $paceTotalPercentageBuggy = array_sum(array_column($paceStatsArrayBuggy, 'duration_percentage'));
-
-        // Test with fix - zones filtered to moving window
-        $paceStatsArrayFixed = $paceStatisticsFiltered->toArray($totalPaceSeconds);
-        $paceTotalPercentageFixed = array_sum(array_column($paceStatsArrayFixed, 'duration_percentage'));
-
-        $hrStatsArrayFixed = $hrStatisticsFiltered->toArray($totalHrSeconds);
-        $hrTotalPercentageFixed = array_sum(array_column($hrStatsArrayFixed, 'duration_percentage'));
+        $hrStatistics = ZoneStatistics::fromSessions($hrSessions, HeartRateZone::cases());
+        $hrStatsArrayCorrect = $hrStatistics->toArray($totalZoneSeconds);
+        $hrTotalPercentageCorrect = array_sum(array_column($hrStatsArrayCorrect, 'duration_percentage'));
 
         // Debug output
-        echo sprintf("\n=== Zone Percentage Aggregation Fix - Option A ===\n");
+        echo sprintf("\n=== Zone Percentage Aggregation - 149%% Bug Reproduction ===\n");
         echo sprintf("Activity: 18768361285\n");
-        echo sprintf("Total time span: %d seconds\n", $totalZoneSeconds);
-        echo sprintf("Strava moving_time: %d seconds\n", $stravaMovingTime);
-        echo sprintf("Filtered zone sessions total: %d seconds\n\n", $totalPaceSeconds);
+        echo sprintf("Zone sessions total: %d seconds\n", $totalZoneSeconds);
+        echo sprintf("Strava moving_time: %d seconds (from Activity entity)\n\n", $stravaMovingTime);
 
-        echo sprintf("WITHOUT Fix (using full data + moving_time divider):\n");
-        foreach ($paceStatsArrayBuggy as $stat) {
+        echo sprintf("CORRECT - Using zone session total (%d secs as denominator):\n", $totalZoneSeconds);
+        foreach ($paceStatsArrayCorrect as $stat) {
             echo sprintf("  %s: %.2f%% (%d secs)\n", $stat['zone'], $stat['duration_percentage'], $stat['duration_seconds']);
         }
-        echo sprintf("  TOTAL: %.2f%% ❌ (Bug: 149.59%%)\n\n", $paceTotalPercentageBuggy);
+        echo sprintf("  TOTAL: %.2f%% ✓\n\n", $paceTotalPercentageCorrect);
 
-        echo sprintf("WITH Fix (Option A - filtered data):\n");
-        foreach ($paceStatsArrayFixed as $stat) {
+        echo sprintf("BUG - Using Strava moving_time (%d secs as denominator):\n", $stravaMovingTime);
+        foreach ($paceStatsArrayWithBug as $stat) {
             echo sprintf("  %s: %.2f%% (%d secs)\n", $stat['zone'], $stat['duration_percentage'], $stat['duration_seconds']);
         }
-        echo sprintf("  TOTAL: %.2f%% ✓ (Fixed: 100%%)\n\n", $paceTotalPercentageFixed);
+        echo sprintf("  TOTAL: %.2f%% ❌ (Should be 100%%)\n\n", $paceTotalPercentageWithBug);
 
-        echo sprintf("Heart Rate Zones (with fix):\n");
-        foreach ($hrStatsArrayFixed as $stat) {
+        echo sprintf("Heart Rate Zones (using zone session total):\n");
+        foreach ($hrStatsArrayCorrect as $stat) {
             echo sprintf("  %s: %.2f%%\n", $stat['zone'], $stat['duration_percentage']);
         }
-        echo sprintf("  TOTAL: %.2f%% ✓\n\n", $hrTotalPercentageFixed);
+        echo sprintf("  TOTAL: %.2f%% ✓\n\n", $hrTotalPercentageCorrect);
 
-        // Assertions
-        self::assertGreaterThan(140, $paceTotalPercentageBuggy, 'Without fix: should show 149%% bug');
-        self::assertEqualsWithDelta(100.0, $paceTotalPercentageFixed, 0.5, 'With fix: pace zones should aggregate to 100%');
-        self::assertEqualsWithDelta(100.0, $hrTotalPercentageFixed, 0.5, 'With fix: HR zones should aggregate to 100%');
+        // Assertions for correct calculation
+        self::assertEqualsWithDelta(100.0, $paceTotalPercentageCorrect, 0.5, 'Pace zones should aggregate to 100%');
+        self::assertEqualsWithDelta(100.0, $hrTotalPercentageCorrect, 0.5, 'HR zones should aggregate to 100%');
+
+        // Document the bug: when using moving_time, percentages exceed 100%
+        self::assertGreaterThan(140, $paceTotalPercentageWithBug, sprintf(
+            'Bug: Using moving_time causes %.1f%% (expected ~149%%)',
+            $paceTotalPercentageWithBug
+        ));
     }
 }

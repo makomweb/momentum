@@ -124,10 +124,7 @@ final class ActivityController extends AbstractController
         $startDate = $activity->getStartDateLocalTime();
         $dataPoints = iterator_to_array($stream->yield($startDate, 50));
 
-        // Get moving time window from stream (first and last point where velocity > 0)
-        $movingTimeWindow = $stream->getMovingTimeWindow();
-
-        return ZoneSessions::create($athlete, $activity->getEndDateLocalTime(), $dataPoints, $movingTimeWindow);
+        return ZoneSessions::create($athlete, $activity->getEndDateLocalTime(), $dataPoints);
     }
 
     private function analyzeActivity(User $user, int $stravaActivityId): Response
