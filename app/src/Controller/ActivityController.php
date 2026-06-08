@@ -8,11 +8,14 @@ use App\Entity\User;
 use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRateZone;
 use App\Momentum\PaceZone;
+use App\Momentum\SpeedZone;
 use App\Momentum\TrainingMetrics;
+use App\Momentum\ZoneSession;
 use App\Momentum\ZoneSessions;
 use App\Momentum\ZoneStatistics;
 use App\Repository\ActivityRepository;
 use App\Strava\ActivityData;
+use App\Strava\ActivityMetaData;
 use App\Strava\ActivityStreamCache;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
@@ -150,6 +153,26 @@ final class ActivityController extends AbstractController
             ]);
         }
 
+        $data = self::createActivityData($user, $activity, $stream);
+
+        return $this->render('activity/analysis.html.twig', $data);
+    }
+
+    /**
+     * @return array{
+     *     activityData: ActivityData,
+     *     metaData: ActivityMetaData,
+     *     metrics: TrainingMetrics,
+     *     paceZoneSessions: array<ZoneSession>,
+     *     heartRateZoneSessions: array<ZoneSession>,
+     *     paceStats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
+     *     hrStats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
+     *     speedStats: list<array{zone: SpeedZone, duration: int, duration_percentage: float}>,
+     *     speedZoneSessions: array<array{zone: SpeedZone, start: \DateTimeImmutable, end: \DateTimeImmutable}>,
+     * }
+     */
+    private static function createActivityData(User $user, Activity $activity, ActivityStream $stream): array
+    {
         $activityData = new ActivityData($activity, $stream);
         $metaData = $activityData->getMetaData();
 
@@ -161,20 +184,21 @@ final class ActivityController extends AbstractController
         $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
         $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
-        // Calculate speed zones for bikes
-        $speedStats = $activityData->getSpeedZoneStatistics();
         $speedStatsFormatted = [];
-        foreach ($speedStats as $stat) {
-            $speedStatsFormatted[] = [
-                'zone' => $stat['zone'],
-                'duration' => $stat['duration'],
-                'duration_percentage' => $stat['duration_percentage'],
-            ];
+        $speedZoneSessions = [];
+        if ($metaData->useSpeedZonesForBike()) {
+            $speedStats = $activityData->getSpeedZoneStatistics();
+            foreach ($speedStats as $stat) {
+                $speedStatsFormatted[] = [
+                    'zone' => $stat['zone'],
+                    'duration' => $stat['duration'],
+                    'duration_percentage' => $stat['duration_percentage'],
+                ];
+            }
+            $speedZoneSessions = $activityData->getSpeedZoneSessions();
         }
 
-        $speedZoneSessions = $activityData->getSpeedZoneSessions();
-
-        return $this->render('activity/analysis.html.twig', [
+        return [
             'activityData' => $activityData,
             'metaData' => $metaData,
             'metrics' => $metrics,
@@ -184,6 +208,6 @@ final class ActivityController extends AbstractController
             'hrStats' => $hrStats->toArray($activity->getMovingTimeSeconds()),
             'speedStats' => $speedStatsFormatted,
             'speedZoneSessions' => $speedZoneSessions,
-        ]);
+        ];
     }
 }
