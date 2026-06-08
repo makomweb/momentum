@@ -164,4 +164,19 @@ final readonly class ActivityMetaData
             default => '📊',
         };
     }
+
+    public function usesPaceZones(): bool
+    {
+        $type = $this->getActivityType();
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike', 'Swim' => true,
+            default /* Ride */ => false,
+        };
+    }
+
+    public function isRun(): bool
+    {
+        return 'Run' === $this->getActivityType();
+    }
 }

@@ -22,15 +22,35 @@ Built with Symfony 8 and clean architecture principles. Integrates with Strava O
 
 **Prerequisites:** Kubernetes cluster (K3s, EKS, etc.), kubectl, Helm 3
 
-1. Get [Strava API credentials](https://www.strava.com/settings/api) and configure the redirect URI for your domain (e.g., `http://your-domain.com/exchange-token`)
-2. Generate a Symfony app secret: `openssl rand -hex 32`
-3. Install via Helm:
+Momentum deploys on Kubernetes with automatic HTTPS via Traefik's native ACME (Let's Encrypt DNS-01).
+
+1. Get [Strava API credentials](https://www.strava.com/settings/api)
+2. Register your domain and point nameservers to your DNS provider (e.g., Hetzner DNS)
+3. Generate a Symfony app secret: `openssl rand -hex 32`
+4. Install via Helm:
+
+**Basic Installation (NodePort only):**
 ```bash
 helm install momentum ./helm/momentum \
   --set app.pullPolicy=Always \
-  --set app.secret=YOUR_SECRET_HERE \
+  --set app.secret="$(openssl rand -hex 32)" \
   --set strava.clientId=YOUR_CLIENT_ID \
   --set strava.clientSecret=YOUR_CLIENT_SECRET \
-  --set strava.redirectUri=http://your-domain.com/exchange-token
+  --set strava.redirectUri=http://YOUR_IP:31228/exchange-token
 ```
-4. Get the app URL: `kubectl get svc momentum-app` and configure the Strava callback URL accordingly
+
+**With Ingress & HTTPS (Traefik DNS-01 + Let's Encrypt):**
+```bash
+helm install momentum ./helm/momentum \
+  --set app.pullPolicy=Always \
+  --set app.secret="$(openssl rand -hex 32)" \
+  --set ingress.enabled=true \
+  --set ingress.hostname=www.your-domain.com \
+  --set strava.clientId=YOUR_CLIENT_ID \
+  --set strava.clientSecret=YOUR_CLIENT_SECRET \
+  --set strava.redirectUri=https://www.your-domain.com/exchange-token
+```
+
+**Note:** Traefik's ACME resolver is automatically configured on K3s clusters with Hetzner DNS provider. DNS records must be created in your DNS provider for domain verification.
+
+5. Verify deployment: `kubectl get pods` and `kubectl get ingress`

@@ -17,6 +17,11 @@ trait AthleteFactory
             {
             }
 
+            public function getStravaId(): int
+            {
+                return 123;
+            }
+
             public function getTreshold(): Pace
             {
                 return $this->threshold;

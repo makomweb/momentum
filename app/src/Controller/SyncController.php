@@ -27,7 +27,7 @@ final class SyncController extends AbstractController
         $user = $this->getUser();
         assert($user instanceof User);
 
-        $this->bus->dispatch(new SyncActivitiesMessage($user->getStravaId()));
+        $this->bus->dispatch(SyncActivitiesMessage::for($user));
 
         return $this->json([
             'status' => 'syncing',
