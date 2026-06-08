@@ -83,31 +83,8 @@ final class ActivityController extends AbstractController
             return $this->json(['error' => 'Activity stream has no data'], 404);
         }
 
-        // Create zone sessions from the activity stream
-        // $tracker = ZoneTransitionTracker::for($user);
-
-        // $startDate = $activity->getStartDateLocalTime();
-
-        // foreach ($stream->yield($startDate, 50) as $point) {
-        //     if ($point->hasVelocity() && !$point->getVelocityAverage()->tooSlow()) {
-        //         $tracker->processPoint($point);
-        //     }
-        // }
-
-        // // Get end time from the activity's moving time
-        // $movingTimeInterval = $activity->getMovingTime();
-        // $endTime = $startDate->add($movingTimeInterval);
-
-        // $tracker->finalize($endTime);
-
-        // $paceZoneSessions = $tracker->getPaceZoneSessions();
-        // $hrZoneSessions = $tracker->getHeartRateZoneSessions();
-
         $sessions = self::createZoneSessions($user, $activity, $stream);
-
         $heartRateZoneSessions = $sessions->getHeartRateSessions();
-        // $confirmed = ConfirmedPaceZoneSessions::from($sessions);
-        // $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
         $paceZoneSessions = $sessions->getPaceZoneSessions();
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
@@ -177,10 +154,7 @@ final class ActivityController extends AbstractController
         $metaData = $activityData->getMetaData();
 
         $sessions = self::createZoneSessions($user, $activity, $stream);
-
         $heartRateZoneSessions = $sessions->getHeartRateSessions();
-        // $confirmed = ConfirmedPaceZoneSessions::from($sessions);
-        // $paceZoneSessions = iterator_to_array($confirmed->yieldSessions());
         $paceZoneSessions = $sessions->getPaceZoneSessions();
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
