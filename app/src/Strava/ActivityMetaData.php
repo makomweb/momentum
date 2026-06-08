@@ -72,11 +72,6 @@ final readonly class ActivityMetaData
         };
     }
 
-    public function useSpeedZonesForBike(): bool
-    {
-        return 'Ride' === $this->getActivityType();
-    }
-
     public function getVelocityChartTitle(): string
     {
         $type = $this->getActivityType();
@@ -167,6 +162,16 @@ final readonly class ActivityMetaData
             'Run', 'Walk', 'Hike', 'Swim' => '⏱️',
             'Ride' => '🚴‍♂️',
             default => '📊',
+        };
+    }
+
+    public function usesPaceZones(): bool
+    {
+        $type = $this->getActivityType();
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike', 'Swim' => true,
+            default /* Ride */ => false,
         };
     }
 }

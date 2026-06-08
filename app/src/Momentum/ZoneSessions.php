@@ -13,13 +13,7 @@ final readonly class ZoneSessions
     /** @param ActivityDataPoint[] $dataPoints */
     public static function create(AthleteInterface $athlete, \DateTimeImmutable $endTime, array $dataPoints): self
     {
-        return new self($endTime, new ZoneEntries($athlete->getTreshold(), $athlete->getMaxHeartRate(), null, $dataPoints));
-    }
-
-    /** @param ActivityDataPoint[] $dataPoints */
-    public static function createWithSpeedZones(AthleteInterface $athlete, \DateTimeImmutable $endTime, array $dataPoints, Velocity $averageVelocity): self
-    {
-        return new self($endTime, new ZoneEntries($athlete->getTreshold(), $athlete->getMaxHeartRate(), $averageVelocity, $dataPoints));
+        return new self($endTime, new ZoneEntries($athlete->getTreshold(), $athlete->getMaxHeartRate(), $dataPoints));
     }
 
     /** @return ZoneSession[] */
@@ -44,23 +38,12 @@ final readonly class ZoneSessions
         return self::finalize($result, $this->endTime);
     }
 
-    /** @return ZoneSession[] */
-    public function getSpeedZoneSessions(): array
-    {
-        $entries = $this->zoneEntries->getSpeedZoneEntries();
-
-        /** @var ZoneSession[] $result */
-        $result = array_reduce($entries, self::reduce(...), []);
-
-        return self::finalize($result, $this->endTime);
-    }
-
     /**
      * @param ZoneSession[] $carry
      *
      * @return ZoneSession[]
      */
-    private static function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry|SpeedZoneEntry $entry): array
+    private static function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $entry): array
     {
         if (!empty($carry)) {
             $previous = array_pop($carry);

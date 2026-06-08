@@ -11,12 +11,8 @@ final readonly class ZoneEntries
     private \DateInterval $gapTreshold;
 
     /** @param ActivityDataPoint[] $dataPoints */
-    public function __construct(
-        private Pace $treshold,
-        private HeartRate $maxHeartRate,
-        private ?Velocity $averageVelocity,
-        private array $dataPoints,
-    ) {
+    public function __construct(private Pace $treshold, private HeartRate $maxHeartRate, private array $dataPoints)
+    {
         Assert::that(!$treshold->isZero(), 'Please configure a treshold pace!');
         Assert::that($maxHeartRate->isValid(), 'Please configure a max. heart rate!');
 
@@ -35,23 +31,6 @@ final readonly class ZoneEntries
         /** @var HeartRateZoneEntry[] $result */
         $result = array_reduce(
             iterator_to_array($this->yieldHeartRateEntries()),
-            self::reduce(...),
-            []
-        );
-
-        return $result;
-    }
-
-    /** @return SpeedZoneEntry[] */
-    public function getSpeedZoneEntries(): array
-    {
-        if (null === $this->averageVelocity) {
-            return [];
-        }
-
-        /** @var SpeedZoneEntry[] $result */
-        $result = array_reduce(
-            iterator_to_array($this->yieldSpeedZoneEntries()),
             self::reduce(...),
             []
         );
@@ -104,44 +83,12 @@ final readonly class ZoneEntries
         }
     }
 
-    /** @return \Generator<SpeedZoneEntry> */
-    private function yieldSpeedZoneEntries(): \Generator
-    {
-        if (null === $this->averageVelocity) {
-            return;
-        }
-
-        for ($i = 0; $i < count($this->dataPoints); ++$i) {
-            $current = $this->dataPoints[$i];
-
-            if (!$current->hasVelocity()) {
-                continue;
-            }
-
-            $entry = SpeedZoneEntry::fromDataPoint($current, $this->averageVelocity);
-
-            if (0 == $i) {
-                yield $entry;
-            } else {
-                // Solely append when gap threshold is exceeded OR speed zones vary:
-                $previous = $this->dataPoints[$i - 1];
-                if (
-                    !$previous->hasVelocity()
-                    || $previous->getTimestamp()->add($this->gapTreshold) < $current->getTimestamp()
-                    || $previous->getSpeedZone($this->averageVelocity) !== $current->getSpeedZone($this->averageVelocity)
-                ) {
-                    yield $entry;
-                }
-            }
-        }
-    }
-
     /**
-     * @param array<PaceZoneEntry|HeartRateZoneEntry|SpeedZoneEntry> $carry
+     * @param array<PaceZoneEntry|HeartRateZoneEntry> $carry
      *
-     * @return array<PaceZoneEntry|HeartRateZoneEntry|SpeedZoneEntry>
+     * @return array<PaceZoneEntry|HeartRateZoneEntry>
      */
-    private function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry|SpeedZoneEntry $current): array
+    private function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $current): array
     {
         if (empty($carry)) {
             return [$current];

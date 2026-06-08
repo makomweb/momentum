@@ -7,7 +7,6 @@ namespace App\Strava;
 use App\Momentum\ActivityDataPoint;
 use App\Momentum\PaceUnit;
 use App\Momentum\SpeedUnit;
-use App\Momentum\SpeedZone;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
@@ -186,74 +185,6 @@ final class ActivityData
         }
 
         return Velocity::max($velocities);
-    }
-
-    /**
-     * @return array<array{timestamp: string, value: string}>
-     */
-    public function getSpeedZonePoints(): array
-    {
-        return iterator_to_array($this->yieldSpeedZonePoints());
-    }
-
-    /**
-     * @return \Generator<array{timestamp: string, value: string}>
-     */
-    private function yieldSpeedZonePoints(): \Generator
-    {
-        assert(!$this->getVelocityAverage()->isZero());
-
-        $average = $this->getVelocityAverage();
-        foreach ($this->yieldDataPoints() as $point) {
-            yield [
-                'timestamp' => $point->getTimestamp()->format('H:i:s'),
-                'value' => $point->hasVelocity()
-                    ? $point->getSpeedZone($average)->value
-                    : '',
-            ];
-        }
-    }
-
-    /**
-     * Get speed zone statistics for bikes.
-     *
-     * @return array<string, array{duration: int, duration_percentage: float, zone: SpeedZone}>
-     */
-    public function getSpeedZoneStatistics(): array
-    {
-        $stats = [];
-        $average = $this->getVelocityAverage();
-        $totalPoints = 0;
-
-        foreach ($this->yieldDataPoints() as $point) {
-            if (!$point->hasVelocity()) {
-                continue;
-            }
-
-            ++$totalPoints;
-            $zone = $point->getSpeedZone($average);
-            $zoneKey = $zone->value;
-
-            if (!isset($stats[$zoneKey])) {
-                $stats[$zoneKey] = [
-                    'zone' => $zone,
-                    'duration' => 0,
-                    'duration_percentage' => 0.0,
-                ];
-            }
-
-            ++$stats[$zoneKey]['duration'];
-        }
-
-        if (0 === $totalPoints) {
-            return [];
-        }
-
-        foreach ($stats as &$stat) {
-            $stat['duration_percentage'] = ($stat['duration'] / $totalPoints) * 100;
-        }
-
-        return $stats;
     }
 
     private function convertVelocity(Velocity $velocity): float
