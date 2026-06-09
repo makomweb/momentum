@@ -8,7 +8,7 @@
                 <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
                     <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
                     <div class="timeline-meta">
-                        <span>{{ session.start | local_date('H:i:s') }}</span>
+                        <span>{{ session.start | format_local_date_time('H:i:s') }}</span>
                         <span>→ {{ '%02d:%02d' | format((session.seconds // 60), (session.seconds % 60)) }}</span>
                     </div>
                 </div>

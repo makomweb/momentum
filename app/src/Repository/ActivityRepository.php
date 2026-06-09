@@ -70,7 +70,7 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
     /**
      * Get recent activities for dashboard display.
      *
-     * @return ActivityEntity[] Recent activities sorted by start date
+     * @return ActivityEntity[] recent activities sorted by start date
      */
     public function findRecentByStravaUser(int $stravaUserId, int $limit = 20): array
     {

@@ -143,15 +143,9 @@ final readonly class ActivityMetaData
         };
     }
 
-    public function getMovingTimeAsString(): string
+    public function getMovingTime(): \DateInterval
     {
-        $totalSeconds = $this->activity->getMovingTime()->s;
-
-        $hours = intdiv($totalSeconds, 3600);
-        $minutes = intdiv($totalSeconds % 3600, 60);
-        $seconds = $totalSeconds % 60;
-
-        return sprintf('%02dh %02dmin %02ds', $hours, $minutes, $seconds);
+        return $this->activity->getMovingTime();
     }
 
     public function getSpeedPaceEmoji(): string

@@ -9,7 +9,7 @@ use App\Momentum\Velocity;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-final class VelocityExtension extends AbstractExtension
+final class FormatVelocity extends AbstractExtension
 {
     /**
      * @return TwigFilter[]
@@ -17,11 +17,11 @@ final class VelocityExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('format_velocity', self::formatVelocity(...)),
+            new TwigFilter('format_velocity', self::format(...)),
         ];
     }
 
-    public static function formatVelocity(Velocity $velocity, string $activityType): string
+    public static function format(Velocity $velocity, string $activityType): string
     {
         return match ($activityType) {
             'Run', 'Walk', 'Hike', 'Swim' => (string) $velocity->asPace(),

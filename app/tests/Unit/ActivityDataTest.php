@@ -7,6 +7,7 @@ use App\Strava\ActivityStreamFactory;
 use App\Strava\API\Activity;
 use App\Strava\Serializer\ActivityStreamDenormalizer;
 use App\Strava\Serializer\SeriesDenormalizer;
+use App\Twig\FormatMovingTime;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Serializer;
@@ -14,13 +15,13 @@ use Symfony\Component\Serializer\Serializer;
 class ActivityDataTest extends TestCase
 {
     #[Test]
-    public function moving_time_is_properly_formatted(): void
+    public function format_moving_time_should_work(): void
     {
         $data = self::createActivityData();
 
         self::assertInstanceOf(ActivityData::class, $data);
 
-        self::assertEquals('00h 12min 00s', $data->getMetaData()->getMovingTimeAsString());
+        self::assertEquals('12 min 0 s', FormatMovingTime::format($data->getMetaData()->getMovingTime()));
     }
 
     private static function createActivityData(): ActivityData

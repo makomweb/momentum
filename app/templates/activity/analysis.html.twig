@@ -603,8 +603,8 @@
                             </div>
                         </div>
                         <div class="stat-box">
-                            <div class="stat-label">Duration</div>
-                            <div class="stat-value">{{ metaData.getMovingTimeAsString() }}</div>
+                            <div class="stat-label">Moving Time</div>
+                            <div class="stat-value">{{ metaData.getMovingTime() | format_moving_time }}</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Avg. {{ metaData.getLabel() }}</div>
