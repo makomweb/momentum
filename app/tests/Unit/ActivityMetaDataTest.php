@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Tests\Unit;
+
+use App\Strava\ActivityMetaData;
+use App\Strava\API\Activity;
+use DateTimeImmutable;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+
+class ActivityMetaDataTest extends TestCase
+{
+    #[Test]
+    #[DataProvider('provideTestData')]
+    public function format_moving_time(ActivityMetaData $data, string $expected): void
+    {
+        $actual = $data->getMovingTimeAsString();
+
+        self::assertSame($expected, $actual);
+    }
+
+    /**
+     * @return array<string, array{ActivityMetaData, string}>
+     */
+    public static function provideTestData(): array
+    {
+        return [
+            '22 s' => [self::create(['moving_time' => 22]), '22 s'],
+            '2 min 3 s' => [self::create(['moving_time' => 123]), '2 min 3 s'],
+            '2 min 55 s' => [self::create(['moving_time' => 175]), '2 min 55 s'],
+            '2 h 46 min 40 s' => [self::create(/* Rely on default value. */), '2 h 46 min 40 s'],
+            '3 h 3 min 20 s' => [self::create(['moving_time' => 11000]), '3 h 3 min 20 s'],
+        ];
+    }
+
+    /**
+     * @param array<string, int|float|string|bool> $data
+     */
+    private static function create(array $data = []): ActivityMetaData
+    {
+        $prototTypeData = [
+            'id' => 123,
+            'device_name' => 'Test-Device',
+            'name' => 'Test Activity',
+            'start_date' => new DateTimeImmutable()->getTimestamp(),
+            'timezone' => 'Germany/Berlin',
+            'elapsed_time' => 10000,
+            'moving_time' => 10000,
+            'distance' => 0.0,
+            'max_speed' => 0.0,
+            'average_speed' => 0.0,
+            'type' => 'Hike',
+        ];
+
+        return new ActivityMetaData(Activity::fromRawData([...$prototTypeData, ...$data]));
+    }
+}

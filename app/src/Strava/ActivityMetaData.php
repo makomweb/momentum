@@ -151,7 +151,7 @@ final readonly class ActivityMetaData
         $minutes = intdiv($totalSeconds % 3600, 60);
         $seconds = $totalSeconds % 60;
 
-        return sprintf('%02dh %02dmin %02ds', $hours, $minutes, $seconds);
+        return sprintf('%d h %d min %d s', $hours, $minutes, $seconds);
     }
 
     public function getSpeedPaceEmoji(): string
