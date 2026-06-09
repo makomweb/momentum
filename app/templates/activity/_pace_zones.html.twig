@@ -10,7 +10,7 @@
                 <div class="zone-row">
                     <div class="zone-name">{{ zone }}</div>
                     <div class="zone-bar">
-                        <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone | zone_color('pace') }};"></div>
+                        <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone | format_zone_color('pace') }};"></div>
                     </div>
                     <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
                 </div>

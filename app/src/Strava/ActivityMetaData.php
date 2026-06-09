@@ -143,30 +143,9 @@ final readonly class ActivityMetaData
         };
     }
 
-    /**
-     * Format the moving time into a human readible string - omit zeros.
-     */
-    public function getMovingTimeAsString(): string
+    public function getMovingTime(): \DateInterval
     {
-        $totalSeconds = $this->activity->getMovingTime()->s;
-
-        $hours = intdiv($totalSeconds, 3600);
-        $minutes = intdiv($totalSeconds % 3600, 60);
-        $seconds = $totalSeconds % 60;
-
-        if ($hours > 0) {
-            if ($minutes > 0) {
-                return sprintf('%d h %d min %d s', $hours, $minutes, $seconds);
-            }
-
-            return sprintf('%d h %d s', $hours, $seconds);
-        }
-
-        if ($minutes > 0) {
-            return sprintf('%d min %d s', $minutes, $seconds);
-        }
-
-        return sprintf('%d s', $seconds);
+        return $this->activity->getMovingTime();
     }
 
     public function getSpeedPaceEmoji(): string

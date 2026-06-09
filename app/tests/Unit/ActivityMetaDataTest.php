@@ -4,6 +4,7 @@ namespace App\Tests\Unit;
 
 use App\Strava\ActivityMetaData;
 use App\Strava\API\Activity;
+use App\Twig\FormatMovingTime;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -14,7 +15,7 @@ class ActivityMetaDataTest extends TestCase
     #[DataProvider('provideTestData')]
     public function format_moving_time(ActivityMetaData $data, string $expected): void
     {
-        $actual = $data->getMovingTimeAsString();
+        $actual = FormatMovingTime::format($data->getMovingTime());
 
         self::assertSame($expected, $actual);
     }

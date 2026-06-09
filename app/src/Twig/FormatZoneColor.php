@@ -9,7 +9,7 @@ use App\Momentum\PaceZone;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-final class ZoneColor extends AbstractExtension
+final class FormatZoneColor extends AbstractExtension
 {
     /**
      * @return TwigFilter[]
@@ -17,11 +17,11 @@ final class ZoneColor extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('zone_color', self::getColor(...)),
+            new TwigFilter('format_zone_color', self::format(...)),
         ];
     }
 
-    private static function getColor(string $value, string $type): string
+    private static function format(string $value, string $type): string
     {
         $zone = match (true) {
             in_array($type, ['hr', 'heart_rate', 'pulse']) => HeartRateZone::from($value),

@@ -161,4 +161,11 @@ final class Activity
     {
         return $this->data['moving_time'];
     }
+
+    public function getMovingTime(): \DateInterval
+    {
+        $seconds = $this->getMovingTimeSeconds();
+
+        return \DateInterval::createFromDateString("$seconds seconds");
+    }
 }
