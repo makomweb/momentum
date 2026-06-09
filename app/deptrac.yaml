@@ -12,17 +12,42 @@ deptrac:
     - name: Generic
       collectors:
         - type: classLike
+          value: .*Doctrine\\.*
+        - type: classLike
           value: .*PHPUnit\\Framework\\.*
         - type: classLike
           value: .*Psr\\.*
         - type: classLike
           value: .*Symfony\\.*
+        - type: bool
+          must:
+            - type: classLike
+              value: .*Twig\\.*
+          must_not:
+            - type: classLike
+              value: .*App\\Twig\\.*
         - type: classLike
           value: .*League\\Flysystem\\.*
     - name: Supporting
       collectors:
         - type: classLike
+          value: .*App\\Async\\.*
+        - type: classLike
+          value: .*App\\Command\\.*
+        - type: classLike
+          value: .*App\\Controller\\.*
+        - type: classLike
+          value: .*App\\Entity\\.*
+        - type: classLike
+          value: .*App\\Listener\\.*
+        - type: classLike
+          value: .*App\\Repository\\.*
+        - type: classLike
+          value: .*App\\Security\\.*
+        - type: classLike
           value: .*App\\Strava\\.*
+        - type: classLike
+          value: .*App\\Twig\\.*
     - name: Tests
       collectors:
         - type: classLike
