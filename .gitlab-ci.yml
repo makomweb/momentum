@@ -32,6 +32,7 @@ build-dockerhub:
   rules:
     # Push image only after merge (push pipeline) to master
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+      when: manual
   script:
     - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
     - docker buildx create --use
