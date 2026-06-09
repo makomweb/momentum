@@ -28,6 +28,7 @@ class ActivityMetaDataTest extends TestCase
             '22 s' => [self::create(['moving_time' => 22]), '22 s'],
             '2 min 3 s' => [self::create(['moving_time' => 123]), '2 min 3 s'],
             '2 min 55 s' => [self::create(['moving_time' => 175]), '2 min 55 s'],
+            '1 h 30 s' => [self::create(['moving_time' => 3630]), '1 h 30 s'],
             '2 h 46 min 40 s' => [self::create(/* Rely on default value. */), '2 h 46 min 40 s'],
             '3 h 3 min 20 s' => [self::create(['moving_time' => 11000]), '3 h 3 min 20 s'],
         ];

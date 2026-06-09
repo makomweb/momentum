@@ -20,7 +20,7 @@ class ActivityDataTest extends TestCase
 
         self::assertInstanceOf(ActivityData::class, $data);
 
-        self::assertEquals('00h 12min 00s', $data->getMetaData()->getMovingTimeAsString());
+        self::assertEquals('12 min 0 s', $data->getMetaData()->getMovingTimeAsString());
     }
 
     private static function createActivityData(): ActivityData
