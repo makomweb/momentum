@@ -4,7 +4,6 @@ namespace App\Tests\Unit;
 
 use App\Strava\ActivityMetaData;
 use App\Strava\API\Activity;
-use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -43,7 +42,7 @@ class ActivityMetaDataTest extends TestCase
             'id' => 123,
             'device_name' => 'Test-Device',
             'name' => 'Test Activity',
-            'start_date' => new DateTimeImmutable()->getTimestamp(),
+            'start_date' => (new \DateTimeImmutable())->format('c'),
             'timezone' => 'Germany/Berlin',
             'elapsed_time' => 10000,
             'moving_time' => 10000,
@@ -53,6 +52,22 @@ class ActivityMetaDataTest extends TestCase
             'type' => 'Hike',
         ];
 
-        return new ActivityMetaData(Activity::fromRawData([...$prototTypeData, ...$data]));
+        /**
+         * @var array{
+         *  id: int,
+         *  device_name: string|bool,
+         *  name: string,
+         *  start_date: string,
+         *  timezone: string,
+         *  elapsed_time: int,
+         *  moving_time: int,
+         *  distance: float,
+         *  max_speed: float,
+         *  average_speed: float,
+         *  type: string
+         * } $mergedData */
+        $mergedData = [...$prototTypeData, ...$data];
+
+        return new ActivityMetaData(Activity::fromRawData($mergedData));
     }
 }
