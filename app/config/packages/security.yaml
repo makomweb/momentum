@@ -26,8 +26,6 @@ security:
                 secure: '%env(bool:SECURE_COOKIE)%'
                 httponly: true
                 samesite: lax
-                # Because users don't have a password in Momentum:
-                signature_properties: ['stravaId']
             logout:
                 path: logout
                 target: login

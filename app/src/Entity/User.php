@@ -83,7 +83,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface, A
     // UserInterface implementation
     public function getUserIdentifier(): string
     {
-        return sprintf('%s (Strava ID: %d)', $this->getName(), $this->getStravaId());
+        return (string) $this->getStravaId();
     }
 
     public function getProfilePicture(): string
