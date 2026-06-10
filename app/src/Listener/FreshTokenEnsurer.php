@@ -12,72 +12,57 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\RememberMeToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 #[AsEventListener(event: 'kernel.request', priority: 15)]
 final class FreshTokenEnsurer
 {
     public function __construct(
-        private Client $client,
         private TokenStorageInterface $tokenStorage,
+        private Client $client,
     ) {
     }
 
     public function __invoke(RequestEvent $event): void
     {
-        if (!$event->isMainRequest()) {
-            return;
-        }
-
-        $request = $event->getRequest();
-
-        // Skip if already fully authenticated
-        if ($this->isFullyAuthenticated($request)) {
-            return;
-        }
-
-        // Get security token
-        $token = $this->tokenStorage->getToken();
-
-        // Check if we have a RememberMe token
-        if (!$token instanceof RememberMeToken) {
-            return;
-        }
-
-        $user = $token->getUser();
-
-        if (!$user instanceof User) {
-            return;
-        }
-
-        try {
-            // Try to exchange/refresh the token
-            $this->client->refreshTokenFor($user->getStravaId());
-
-            // Redirect to referrer or activities
-            $referrer = $request->headers->get('referer');
-            if (!$referrer) {
-                $referrer = $request->getBasePath().'/activities';
+        if ($event->isMainRequest()) {
+            $request = $event->getRequest();
+            if (!$this->isFullyAuthenticated($request)) {
+                $token = $this->tokenStorage->getToken();
+                if ($token instanceof RememberMeToken) {
+                    $user = $token->getUser();
+                    if ($user instanceof User) {
+                        try {
+                            $this->client->refreshTokenFor($user->getStravaId());
+                            self::setRedirect($event, $request);
+                        } catch (\Exception) {
+                            /* Token exchange failed - let it pass through, error handling will catch it. */
+                        }
+                    }
+                }
             }
-            $event->setResponse(new RedirectResponse($referrer));
-        } catch (\Exception) {
-            // Token exchange failed - let it pass through, error handling will catch it
         }
     }
 
-    /**
-     * Check if the user is fully authenticated.
-     */
+    private static function setRedirect(RequestEvent $event, Request $request): void
+    {
+        $event->setResponse(
+            new RedirectResponse(
+                $request->headers->get('referer') ??
+                $request->getBasePath().'/activities'
+            )
+        );
+    }
+
     private function isFullyAuthenticated(Request $request): bool
     {
-        if (!$request->hasSession()) {
-            return false;
+        if ($request->hasSession()) {
+            $token = $this->tokenStorage->getToken();
+            if ($token instanceof TokenInterface) {
+                return in_array('IS_AUTHENTICATED_FULLY', $token->getRoleNames(), strict: true);
+            }
         }
 
-        $token = $this->tokenStorage->getToken();
-        if (null === $token) {
-            return false;
-        }
-
-        return in_array('IS_AUTHENTICATED_FULLY', $token->getRoleNames(), strict: true);
+        return false;
     }
 }
