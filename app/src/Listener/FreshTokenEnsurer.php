@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Middleware;
+namespace App\Listener;
 
 use App\Entity\User;
 use App\Strava\API\Client;
@@ -14,7 +14,7 @@ use Symfony\Component\Security\Core\Authentication\Token\RememberMeToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 #[AsEventListener(event: 'kernel.request', priority: 15)]
-final class TokenExchangeMiddleware
+final class FreshTokenEnsurer
 {
     public function __construct(
         private Client $client,
