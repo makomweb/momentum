@@ -1,38 +1,44 @@
-<div class="zone-summary-card {% if metrics.isBalanced() %}zone-summary-card--balanced{% else %}zone-summary-card--unbalanced{% endif %}">
-    <div class="zone-summary-header">
-        <span class="zone-summary-badge">
-            {% if metrics.isBalanced() %}✅ Balanced{% else %}⚠️ Unbalanced{% endif %}
-        </span>
-        <span class="zone-summary-hint">
-            {% if metrics.isBalanced() %}
-                Good balance of easy aerobic base and hard quality work.
-            {% else %}
-                Shift more volume into easy (Z1–2) or hard (Z4–5) zones.
-            {% endif %}
-        </span>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden">
+    <div class="{% if metrics.isBalanced() %}bg-green-50 border-b border-green-200{% else %}bg-yellow-50 border-b border-yellow-200{% endif %} p-4">
+        <div class="flex gap-3 items-center">
+            <span class="px-3 py-1 rounded-full text-sm font-semibold text-white {% if metrics.isBalanced() %}bg-green-500{% else %}bg-yellow-500{% endif %}">
+                {% if metrics.isBalanced() %}Balanced{% else %}Unbalanced{% endif %}
+            </span>
+            <small class="{% if metrics.isBalanced() %}text-green-700{% else %}text-yellow-700{% endif %}">
+                {% if metrics.isBalanced() %}
+                    Good balance of easy aerobic base and hard quality work.
+                {% else %}
+                    Shift more volume into easy (Z1–2) or hard (Z4–5) zones.
+                {% endif %}
+            </small>
+        </div>
     </div>
-    <div class="zone-summary-body">
-        <div class="zone-summary-grid">
-            <div class="zone-summary-metric-inner">
-                <div class="zone-summary-label">Easy · Z1–2</div>
-                <div class="zone-summary-value" style="color: #2196f3;">{{ metrics.getEasyPercentage() | number_format(1, '.') }}%</div>
-                <div class="zone-summary-bar">
-                    <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getEasyPercentage(), 100) | number_format(1, '.') }}%; background: #2196f3;"></div>
-                </div>
+    <div class="p-4 space-y-4">
+        <div>
+            <div class="flex justify-between items-start mb-2">
+                <div class="font-semibold text-gray-900">Easy · Z1–2</div>
+                <div class="text-lg font-bold text-blue-500">{{ metrics.getEasyPercentage() | number_format(1, '.') }}%</div>
             </div>
-            <div class="zone-summary-metric-inner">
-                <div class="zone-summary-label">Medium · Z3</div>
-                <div class="zone-summary-value" style="color: #ff9800;">{{ metrics.getMediumPercentage() | number_format(1, '.') }}%</div>
-                <div class="zone-summary-bar">
-                    <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getMediumPercentage(), 100) | number_format(1, '.') }}%; background: #ff9800;"></div>
-                </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="bg-blue-500 h-full rounded-full transition-all" style="width: {{ min(metrics.getEasyPercentage(), 100) | number_format(1, '.') }}%;"></div>
             </div>
-            <div class="zone-summary-metric-inner">
-                <div class="zone-summary-label">Hard · Z4–5</div>
-                <div class="zone-summary-value" style="color: #f44336;">{{ metrics.getHardPercentage() | number_format(1, '.') }}%</div>
-                <div class="zone-summary-bar">
-                    <div class="zone-summary-bar-fill" style="width: {{ min(metrics.getHardPercentage(), 100) | number_format(1, '.') }}%; background: #f44336;"></div>
-                </div>
+        </div>
+        <div>
+            <div class="flex justify-between items-start mb-2">
+                <div class="font-semibold text-gray-900">Medium · Z3</div>
+                <div class="text-lg font-bold text-amber-500">{{ metrics.getMediumPercentage() | number_format(1, '.') }}%</div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="bg-amber-500 h-full rounded-full transition-all" style="width: {{ min(metrics.getMediumPercentage(), 100) | number_format(1, '.') }}%;"></div>
+            </div>
+        </div>
+        <div>
+            <div class="flex justify-between items-start mb-2">
+                <div class="font-semibold text-gray-900">Hard · Z4–5</div>
+                <div class="text-lg font-bold text-red-500">{{ metrics.getHardPercentage() | number_format(1, '.') }}%</div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="bg-red-500 h-full rounded-full transition-all" style="width: {{ min(metrics.getHardPercentage(), 100) | number_format(1, '.') }}%;"></div>
             </div>
         </div>
     </div>

@@ -1,15 +1,16 @@
-<div class="timeline-card">
-    <div class="timeline-card-header">
-        <h3 class="timeline-title">⏱ Pace Zone Transitions</h3>
-    </div>
-    <div class="timeline-card-body">
-        <div class="timeline-list">
+<div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden flex flex-col" style="max-height: 350px;">
+        <div class="bg-gray-100 border-b border-gray-200 p-4 flex-shrink-0">
+            <h3 class="font-semibold text-gray-900 m-0">Pace Zone Transitions</h3>
+        </div>
+        <div class="p-4 overflow-y-auto flex-grow space-y-2">
             {% for session in paceZoneSessions %}
-                <div class="timeline-item" style="background: {{ session.zone.getColor() }}22; border-left: 3px solid {{ session.zone.getColor() }};">
-                    <div class="timeline-zone" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
-                    <div class="timeline-meta">
-                        <span>{{ session.start | format_local_date_time('H:i:s') }}</span>
-                        <span>→ {{ '%02d:%02d' | format((session.seconds // 60), (session.seconds % 60)) }}</span>
+                <div class="flex items-center justify-between gap-3 p-3 rounded-lg border-l-4 transition" style="background: {{ session.zone.getColor() }}11; border-left-color: {{ session.zone.getColor() }};">
+                    <div class="font-semibold" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
+                    <div class="text-gray-600 text-sm">
+                        <small>{{ session.start | format_local_date_time('H:i:s') }}</small>
+                        <small class="mx-1">→</small>
+                        <small>{{ '%02d:%02d' | format((session.seconds // 60), (session.seconds % 60)) }}</small>
                     </div>
                 </div>
             {% endfor %}

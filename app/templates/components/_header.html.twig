@@ -1,67 +1,33 @@
-<nav class="navbar navbar-header" role="navigation" aria-label="Main navigation">
-    <div class="navbar-content">
-        <a href="{{ path('activities') }}" class="navbar-brand" title="Back to Activities">
+<header class="sticky top-0 z-100 bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="{{ path('activities') }}" class="font-bold text-xl text-gray-900 no-underline">
             Momentum
         </a>
         
-        <div class="navbar-user-section" id="navbarUserMenu">
-            {% if app.user %}
-                {% set user = app.user %}
-                {% set profile_picture = user.profilePictureMedium %}
-                
-                <button class="menu-toggle" id="menuToggle" aria-label="Toggle user menu" aria-expanded="false">
-                    ☰
-                </button>
-                
-                <div class="user-menu">
+        {% if app.user %}
+            {% set user = app.user %}
+            {% set profile_picture = user.profilePictureMedium %}
+            
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     {% if profile_picture %}
-                        <img src="{{ profile_picture }}" alt="{{ user.name }}" class="profile-avatar" title="{{ user.name }}">
+                        <img src="{{ profile_picture }}" alt="{{ user.name }}" class="w-10 h-10 rounded-full object-cover" title="{{ user.name }}">
                     {% else %}
-                        <div class="profile-avatar" style="background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;" aria-label="Profile">👤</div>
+                        <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white text-lg">👤</div>
                     {% endif %}
-                    
-                    <div class="user-info">
-                        <p class="user-name">{{ user.name }}</p>
-                        <p class="user-id">ID: {{ user.stravaId }}</p>
+                    <div>
+                        <div class="font-medium text-gray-900">{{ user.name }}</div>
+                        <small class="text-gray-600">ID: {{ user.stravaId }}</small>
                     </div>
-
-                    <a href="{{ path('profile_settings') }}" class="logout-btn" style="text-decoration: none; display: inline-flex; align-items: center;">Settings</a>
-                    
-                    <form method="post" action="{{ path('logout') }}" class="logout-form">
-                        <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
-                        <button type="submit" class="logout-btn" title="Logout">Logout</button>
-                    </form>
                 </div>
-            {% endif %}
-        </div>
-    </div>
-</nav>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.getElementById('menuToggle');
-    const userMenu = document.getElementById('navbarUserMenu');
-    
-    if (menuToggle) {
-        menuToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            userMenu.classList.toggle('active');
-            menuToggle.setAttribute('aria-expanded', userMenu.classList.contains('active'));
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', function() {
-            userMenu.classList.remove('active');
-            menuToggle.setAttribute('aria-expanded', 'false');
-        });
-        
-        // Close menu when clicking inside (but not on toggle)
-        userMenu.addEventListener('click', function(e) {
-            if (e.target !== menuToggle) {
-                userMenu.classList.remove('active');
-                menuToggle.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
-});
-</script>
+                <a href="{{ path('profile_settings') }}" class="px-4 py-2 bg-transparent border border-gray-300 rounded text-gray-900 no-underline text-sm hover:bg-gray-50 transition">Settings</a>
+                
+                <form method="post" action="{{ path('logout') }}" class="inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition cursor-pointer border-none">Logout</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</header>
