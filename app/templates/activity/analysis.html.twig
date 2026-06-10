@@ -10,86 +10,69 @@
 <body class="bg-gray-50">
     {% include 'components/_header.html.twig' %}
 
-    <div class="max-w-6xl mx-auto px-4 py-4 space-y-4">
-        <!-- Activity Header Card -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Left Column: Title and Stats -->
-                <div class="lg:col-span-2">
-                    <!-- Activity Title -->
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ metaData.getActivityName() }}</h1>
-                        <small class="text-gray-600 flex gap-2 items-center">
-                            <span>{{ metaData.getStartDateLocalTimeFormatted() }}</span>
-                        </small>
-                    </div>
-
-                    <!-- Stat Boxes Grid -->
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="text-gray-600 text-xs uppercase font-semibold tracking-wide mb-2">Distance</div>
-                            <div class="text-lg font-bold text-gray-900">
-                                {% if metaData.getData()['distance'] is not null %}
-                                    {{ (metaData.getData()['distance'].getMeters() / 1000) | number_format(1, '.') }} km
-                                {% else %}
-                                    <span class="opacity-50">N/A</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="text-gray-600 text-xs uppercase font-semibold tracking-wide mb-2">Moving Time</div>
-                            <div class="text-lg font-bold text-gray-900">{{ metaData.getMovingTime() | format_moving_time }}</div>
-                        </div>
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="text-gray-600 text-xs uppercase font-semibold tracking-wide mb-2">Avg. {{ metaData.getLabel() }}</div>
-                            <div class="text-lg font-bold text-gray-900">
-                                {% if metaData.getData()['average_velocity'] is not null %}
-                                    {{ metaData.getData()['average_velocity'] }}
-                                {% else %}
-                                    <span class="opacity-50">N/A</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column: Additional Stats -->
-                <div class="bg-gray-50 rounded-lg p-4 space-y-4">
-                    {% if activityData.hasHeartRateData() %}
-                    <div class="flex justify-between items-center border-b border-gray-200 pb-3">
-                        <span class="text-gray-600 text-sm">Avg. Heart Rate</span>
-                        <span class="font-semibold text-gray-900">{{ activityData.getHeartRateAverage() }} bpm</span>
-                    </div>
-                    {% endif %}
-
-                    {% if activityData.hasHeartRateData() %}
-                    <div class="flex justify-between items-center border-b border-gray-200 pb-3">
-                        <span class="text-gray-600 text-sm">Max. Heart Rate</span>
-                        <span class="font-semibold text-gray-900">{{ activityData.getHeartRateMax() }} bpm</span>
-                    </div>
-                    {% endif %}
-
-                    {% if activityData.hasVelocityData() %}
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600 text-sm">Max. {{ metaData.getLabel() }}</span>
-                        <span class="font-semibold text-gray-900">{{ activityData.getVelocityMax() | format_velocity(metaData.getActivityType()) }}</span>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
+    <div class="space-y-6 p-6">
+        <!-- Activity Header -->
+        <div>
+            <h1 class="text-3xl font-bold mb-1">{{ metaData.getActivityName() }}</h1>
+            <small class="text-gray-600">{{ metaData.getStartDateLocalTimeFormatted() }}</small>
         </div>
 
-        <!-- Zone Analysis and Charts Card -->
-        <div class="bg-white rounded-lg shadow p-6 space-y-6">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <h2 class="text-xl font-bold text-gray-900 mb-3">Training Zones</h2>
-                <p class="text-sm text-gray-600">
-                    <span class="font-semibold">Zone Validation:</span>
-                    Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.
-                </p>
+                <div class="text-xs text-gray-600 uppercase font-semibold mb-1">Distance</div>
+                <div class="text-lg font-bold">
+                    {% if metaData.getData()['distance'] is not null %}
+                        {{ (metaData.getData()['distance'].getMeters() / 1000) | number_format(1, '.') }} km
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </div>
             </div>
+            <div>
+                <div class="text-xs text-gray-600 uppercase font-semibold mb-1">Moving Time</div>
+                <div class="text-lg font-bold">{{ metaData.getMovingTime() | format_moving_time }}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-600 uppercase font-semibold mb-1">Avg. {{ metaData.getLabel() }}</div>
+                <div class="text-lg font-bold">
+                    {% if metaData.getData()['average_velocity'] is not null %}
+                        {{ metaData.getData()['average_velocity'] }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </div>
+            </div>
+            {% if activityData.hasVelocityData() %}
+            <div>
+                <div class="text-xs text-gray-600 uppercase font-semibold mb-1">Max. {{ metaData.getLabel() }}</div>
+                <div class="text-lg font-bold">{{ activityData.getVelocityMax() | format_velocity(metaData.getActivityType()) }}</div>
+            </div>
+            {% endif %}
+        </div>
 
-            <!-- Zone Layout -->
+        <!-- Heart Rate Stats -->
+        {% if activityData.hasHeartRateData() %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <div class="text-xs text-gray-600 uppercase font-semibold mb-1">Avg. Heart Rate</div>
+                <div class="text-lg font-bold">{{ activityData.getHeartRateAverage() }} bpm</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-600 uppercase font-semibold mb-1">Max. Heart Rate</div>
+                <div class="text-lg font-bold">{{ activityData.getHeartRateMax() }} bpm</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Training Zones -->
+        <div>
+            <h2 class="text-2xl font-bold mb-2">Training Zones</h2>
+            <p class="text-sm text-gray-600 mb-4">
+                <span class="font-semibold">Zone Validation:</span>
+                Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.
+            </p>
+
             {% if metaData.usesPaceZones() and paceZoneSessions | length > 0 %}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {% if metaData.isRun() %}
@@ -115,73 +98,56 @@
                 </div>
 
             {% elseif app.user.getTreshold().isZero() %}
-                <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
                     To see zone analysis, please configure your threshold pace in your profile settings.
                 </div>
             {% endif %}
-
-            <!-- Data Availability Alerts -->
-            {% if not activityData.hasAnyData() %}
-                <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
-                    No data available for analysis. This activity may not have complete stream data.
-                </div>
-            {% else %}
-                <!-- Velocity Chart -->
-                {% if activityData.hasVelocityData() %}
-                    <div class="bg-white rounded-lg border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ metaData.getVelocityChartTitle() }}</h3>
-                        <div class="h-96">
-                            <canvas id="velocityChart"></canvas>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg">
-                        Velocity data not available for this activity.
-                    </div>
-                {% endif %}
-
-                <!-- Heart Rate Chart -->
-                {% if activityData.hasHeartRateData() %}
-                    <div class="bg-white rounded-lg border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Heart Rate Over Time</h3>
-                        <div class="h-96">
-                            <canvas id="heartRateChart"></canvas>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg">
-                        Heart rate data not available for this activity.
-                    </div>
-                {% endif %}
-            {% endif %}
         </div>
+
+        <!-- Charts -->
+        {% if not activityData.hasAnyData() %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                No data available for analysis. This activity may not have complete stream data.
+            </div>
+        {% else %}
+            {% if activityData.hasVelocityData() %}
+                <div>
+                    <h3 class="text-lg font-bold mb-3">{{ metaData.getVelocityChartTitle() }}</h3>
+                    <div class="h-80 bg-white rounded border p-4">
+                        <canvas id="velocityChart"></canvas>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if activityData.hasHeartRateData() %}
+                <div>
+                    <h3 class="text-lg font-bold mb-3">Heart Rate Over Time</h3>
+                    <div class="h-80 bg-white rounded border p-4">
+                        <canvas id="heartRateChart"></canvas>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
 
     <script>
-        // Custom Chart.js plugin to draw zone backgrounds
         const zoneBackgroundPlugin = {
             id: 'zoneBackground',
             afterDatasetsDraw(chart) {
-                if (!chart.data.zoneColors || chart.data.zoneColors.length === 0) {
-                    return;
-                }
+                if (!chart.data.zoneColors || chart.data.zoneColors.length === 0) return;
 
                 const ctx = chart.ctx;
                 const xScale = chart.scales.x;
                 const yScale = chart.scales.y;
                 const chartArea = chart.chartArea;
-
-                // Get all labels (timestamps)
                 const labels = chart.data.labels;
 
                 chart.data.zoneColors.forEach(zone => {
-                    // Find start and end indices
                     const startIdx = labels.findIndex(label => label >= zone.startTime);
                     const endIdx = labels.findIndex(label => label > zone.endTime);
                     
                     if (startIdx === -1) return;
                     
-                    // Calculate pixel positions
                     const startPixel = startIdx < labels.length 
                         ? xScale.getPixelForValue(startIdx)
                         : chartArea.left;
@@ -189,9 +155,8 @@
                         ? chartArea.right
                         : xScale.getPixelForValue(endIdx);
 
-                    // Draw semi-transparent zone background
                     ctx.save();
-                    ctx.fillStyle = zone.color + '44'; // Add alpha channel (44 hex = ~0.27 opacity)
+                    ctx.fillStyle = zone.color + '44';
                     ctx.fillRect(
                         Math.max(startPixel, chartArea.left),
                         chartArea.top,
@@ -199,8 +164,7 @@
                         chartArea.bottom - chartArea.top
                     );
 
-                    // Draw zone label
-                    if (endPixel - startPixel > 40) { // Only show label if space available
+                    if (endPixel - startPixel > 40) {
                         ctx.fillStyle = zone.color;
                         ctx.font = '11px sans-serif';
                         ctx.textAlign = 'center';
@@ -215,7 +179,6 @@
             }
         };
         
-        // Register the zone background plugin
         Chart.register(zoneBackgroundPlugin);
         
         {% if activityData.hasVelocityData() %}
@@ -283,10 +246,7 @@
                     legend: {
                         display: true,
                         position: 'top',
-                        labels: {
-                            padding: 15,
-                            font: { size: 13, weight: 600 }
-                        }
+                        labels: { padding: 15, font: { size: 13, weight: 600 } }
                     },
                     zoneBackground: {}
                 },
@@ -367,10 +327,7 @@
                     legend: {
                         display: true,
                         position: 'top',
-                        labels: {
-                            padding: 15,
-                            font: { size: 13, weight: 600 }
-                        }
+                        labels: { padding: 15, font: { size: 13, weight: 600 } }
                     },
                     zoneBackground: {}
                 },

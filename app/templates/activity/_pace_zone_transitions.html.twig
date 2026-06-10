@@ -1,19 +1,13 @@
-<div>
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden flex flex-col" style="max-height: 350px;">
-        <div class="bg-gray-100 border-b border-gray-200 p-4 flex-shrink-0">
-            <h3 class="font-semibold text-gray-900 m-0">Pace Zone Transitions</h3>
+<div class="border-l-4 border-gray-300 p-4 space-y-2">
+    <h3 class="font-semibold mb-3 text-sm">Pace Zone Transitions</h3>
+    {% for session in paceZoneSessions %}
+        <div class="flex items-center justify-between gap-3 p-2 border-l-4 text-xs" style="background: {{ session.zone.getColor() }}11; border-left-color: {{ session.zone.getColor() }};">
+            <div class="font-semibold" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
+            <div class="text-gray-600">
+                <small>{{ session.start | format_local_date_time('H:i:s') }}</small>
+                <small class="mx-1">→</small>
+                <small>{{ '%02d:%02d' | format((session.seconds // 60), (session.seconds % 60)) }}</small>
+            </div>
         </div>
-        <div class="p-4 overflow-y-auto flex-grow space-y-2">
-            {% for session in paceZoneSessions %}
-                <div class="flex items-center justify-between gap-3 p-3 rounded-lg border-l-4 transition" style="background: {{ session.zone.getColor() }}11; border-left-color: {{ session.zone.getColor() }};">
-                    <div class="font-semibold" style="color: {{ session.zone.getColor() }};">{{ session.zone.value }}</div>
-                    <div class="text-gray-600 text-sm">
-                        <small>{{ session.start | format_local_date_time('H:i:s') }}</small>
-                        <small class="mx-1">→</small>
-                        <small>{{ '%02d:%02d' | format((session.seconds // 60), (session.seconds % 60)) }}</small>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
+    {% endfor %}
 </div>
