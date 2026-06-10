@@ -93,6 +93,70 @@
             to { transform: rotate(360deg); }
         }
 
+        .configuration-banner {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe8b6 100%);
+            border-left: 4px solid #ff9800;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.15);
+        }
+
+        .configuration-banner-icon {
+            font-size: 1.5rem;
+            min-width: 1.5rem;
+            text-align: center;
+        }
+
+        .configuration-banner-content {
+            flex: 1;
+        }
+
+        .configuration-banner-content p {
+            margin: 0;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .configuration-banner-link {
+            color: #ff9800;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .configuration-banner-link:hover {
+            text-decoration: underline;
+        }
+
+        .activities-disabled {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .activity-card-disabled-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            text-align: center;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .activity-card-disabled-overlay-text {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+
         .activities-section {
             margin-bottom: 3rem;
         }
@@ -533,11 +597,30 @@
             </button>
         </div>
 
-        <div class="activities-section">
+        {% if not isConfigured %}
+            <div class="configuration-banner">
+                <div class="configuration-banner-icon">⚠️</div>
+                <div class="configuration-banner-content">
+                    <p>
+                        Please configure your profile to analyze activities.
+                        <a href="{{ path('profile_settings') }}" class="configuration-banner-link">Configure now →</a>
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="activities-section{% if not isConfigured %} activities-disabled{% endif %}">
             {% if activities is not empty %}
                 <div class="activities-grid" id="activitiesContainer">
                     {% for activity in activities %}
-                        {% include 'activity/_card.html.twig' %}
+                        <div class="activity-card-wrapper" style="position: relative;">
+                            {% include 'activity/_card.html.twig' %}
+                            {% if not isConfigured %}
+                                <div class="activity-card-disabled-overlay">
+                                    <div class="activity-card-disabled-overlay-text">Configure profile to analyze</div>
+                                </div>
+                            {% endif %}
+                        </div>
                     {% endfor %}
                 </div>
             {% else %}
