@@ -67,8 +67,6 @@ final class ActivityController extends AbstractController
             return $this->render('activity/analysis_empty.html.twig');
         }
 
-        dump($activity->getName(), ['type' => $activity->data['type']]);
-
         try {
             $stream = $this->streamCache->get(
                 $user->getStravaId(),
