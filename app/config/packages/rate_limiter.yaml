@@ -1,0 +1,11 @@
+framework:
+    rate_limiter:
+        per_ip_rate_limiter:
+            policy: 'token_bucket'
+            limit: 30
+            interval: '30 seconds'
+        
+        global_rate_limiter:
+            policy: 'token_bucket'
+            limit: 60
+            interval: '1 minute'
