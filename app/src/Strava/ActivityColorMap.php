@@ -6,9 +6,9 @@ namespace App\Strava;
 
 final class ActivityColorMap
 {
-    private const COLORS = [        
+    private const COLORS = [
         'run' => 'bg-amber-100',
-        'walk' => 'bg-green-100', 
+        'walk' => 'bg-green-100',
         'hike' => 'bg-green-100',
         'ride' => 'bg-red-100',
         'swim' => 'bg-indigo-100',
