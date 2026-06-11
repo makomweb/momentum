@@ -1,6 +1,6 @@
-<header class="sticky top-0 z-10 bg-white border-b">
+<header class="sticky top-0 z-10 bg-sky-500 border-b border-sky-600">
     <nav class="flex items-center justify-between px-6 py-4">
-        <a href="{{ path('activities') }}" class="font-bold text-lg no-underline">
+        <a href="{{ path('activities') }}" class="font-bold text-lg no-underline text-white">
             Momentum
         </a>
         
@@ -8,26 +8,39 @@
             {% set user = app.user %}
             {% set profile_picture = user.profilePictureMedium %}
             
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-2">
+            <div class="relative" id="userDropdown">
+                <button onclick="document.getElementById('menu').classList.toggle('hidden')" class="flex items-center gap-2 focus:outline-none">
                     {% if profile_picture %}
                         <img src="{{ profile_picture }}" alt="{{ user.name }}" class="w-8 h-8 rounded-full object-cover">
                     {% else %}
-                        <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white text-sm">👤</div>
+                        <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sky-500 text-sm font-semibold">
+                            {{ user.name | first | upper }}
+                        </div>
                     {% endif %}
-                    <div class="text-sm">
+                    <div class="text-sm text-white">
                         <div class="font-medium">{{ user.name }}</div>
-                        <div class="text-gray-500 text-xs">{{ user.stravaId }}</div>
+                        <div class="text-xs text-sky-100">Strava-ID: {{ user.stravaId }}</div>
                     </div>
-                </div>
+                </button>
 
-                <a href="{{ path('profile_settings') }}" class="text-sm hover:underline">Settings</a>
-                
-                <form method="post" action="{{ path('logout') }}" class="inline">
-                    <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
-                    <button type="submit" class="text-sm hover:underline">Logout</button>
-                </form>
+                <div id="menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded shadow-lg border border-gray-200 z-20">
+                    <a href="{{ path('profile_settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t">Settings</a>
+                    
+                    <form method="post" action="{{ path('logout') }}" class="block">
+                        <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
+                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-b border-t border-gray-200">Logout</button>
+                    </form>
+                </div>
             </div>
+
+            <script>
+                document.addEventListener('click', function(event) {
+                    const dropdown = document.getElementById('userDropdown');
+                    if (!dropdown.contains(event.target)) {
+                        document.getElementById('menu').classList.add('hidden');
+                    }
+                });
+            </script>
         {% endif %}
     </nav>
 </header>
