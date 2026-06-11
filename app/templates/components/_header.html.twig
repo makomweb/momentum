@@ -25,6 +25,7 @@
 
                 <div id="menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded shadow-lg border border-gray-200 z-20">
                     <a href="{{ path('profile_settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t">Settings</a>
+                    <a href="{{ path('about') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-200">About</a>
                     
                     <form method="post" action="{{ path('logout') }}" class="block">
                         <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">

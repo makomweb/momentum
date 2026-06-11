@@ -6,10 +6,10 @@
     <title>Profile Settings - Momentum</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 flex flex-col min-h-screen">
     {% include 'components/_header.html.twig' %}
 
-    <main class="max-w-2xl mx-auto px-4 py-8">
+    <main class="max-w-2xl mx-auto px-4 py-8 flex-grow">
         <section class="bg-white rounded border border-gray-200 max-w-2xl w-full">
             <div class="border-b border-gray-200 p-4">
                 <h1 class="text-2xl font-bold mb-1">Profile settings</h1>
@@ -83,5 +83,7 @@
             </div>
         </section>
     </main>
+
+    {% include 'components/_footer.html.twig' %}
 </body>
 </html>

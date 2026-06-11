@@ -6,10 +6,10 @@
     <title>Momentum - Activities</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 flex flex-col min-h-screen">
     {% include 'components/_header.html.twig' %}
 
-    <div>
+    <div class="flex-grow">
         <div class="flex items-center justify-between p-6 border-b">
             <h2 class="text-2xl font-bold">Recent Activities <span id="activityCount" class="text-gray-600">(20)</span></h2>
             <button class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-semibold" id="syncButton" onclick="syncActivities()">
@@ -56,6 +56,8 @@
             {% endif %}
         </div>
     </div>
+
+    {% include 'components/_footer.html.twig' %}
 
     <div id="toastContainer" class="fixed top-0 right-0 p-4 space-y-2 pointer-events-none"></div>
 
