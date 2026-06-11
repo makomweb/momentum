@@ -1,13 +1,13 @@
-<div class="border-l-4 border-gray-300 p-4">
-    <h3 class="font-semibold mb-3 text-sm">Pace Zones</h3>
-    <div class="space-y-2">
+<div class="bg-white border border-gray-200 rounded p-4 flex flex-col lg:h-full overflow-hidden" style="max-height: 15rem;">
+    <h3 class="text-sm font-semibold mb-3 flex-shrink-0">Pace Zones</h3>
+    <div class="space-y-2 overflow-y-auto flex-grow">
         {% for stat in paceStats %}
             {% set zone = stat.zone %}
             {% set percentage = stat.duration_percentage %}
             <div>
-                <div class="flex justify-between items-center mb-1 text-xs">
-                    <div class="font-medium">{{ zone }}</div>
-                    <div class="text-gray-600">{{ percentage | number_format(1, '.') }}%</div>
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-xs font-semibold">{{ zone }}</div>
+                    <div class="text-xs font-bold" style="color: {{ zone | format_zone_color('pace') }};">{{ percentage | number_format(1, '.') }}%</div>
                 </div>
                 <div class="w-full bg-gray-200 rounded h-1.5">
                     <div class="h-full rounded" style="width: {{ percentage }}%; background: {{ zone | format_zone_color('pace') }};"></div>
