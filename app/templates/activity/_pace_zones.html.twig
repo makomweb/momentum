@@ -1,20 +1,18 @@
-<div class="zone-card">
-    <div class="zone-card-header">
-        <h3 class="zone-card-title">⏱️ Pace Zones</h3>
-    </div>
-    <div class="zone-card-body">
-        <div class="zone-list">
-            {% for stat in paceStats %}
-                {% set zone = stat.zone %}
-                {% set percentage = stat.duration_percentage %}
-                <div class="zone-row">
-                    <div class="zone-name">{{ zone }}</div>
-                    <div class="zone-bar">
-                        <div class="zone-bar-fill" style="width: {{ percentage }}%; background: {{ zone | format_zone_color('pace') }};"></div>
-                    </div>
-                    <div class="zone-percentage">{{ percentage | number_format(1, '.') }}%</div>
+<div class="bg-white border border-gray-200 rounded p-4 flex flex-col lg:h-full overflow-hidden" style="max-height: 15rem;">
+    <h3 class="text-sm font-semibold mb-3 flex-shrink-0">Pace Zones</h3>
+    <div class="space-y-2 overflow-y-auto flex-grow">
+        {% for stat in paceStats %}
+            {% set zone = stat.zone %}
+            {% set percentage = stat.duration_percentage %}
+            <div>
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-xs font-semibold">{{ zone }}</div>
+                    <div class="text-xs font-bold" style="color: {{ zone | format_zone_color('pace') }};">{{ percentage | number_format(1, '.') }}%</div>
                 </div>
-            {% endfor %}
-        </div>
+                <div class="w-full bg-gray-200 rounded h-1.5">
+                    <div class="h-full rounded" style="width: {{ percentage }}%; background: {{ zone | format_zone_color('pace') }};"></div>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 </div>

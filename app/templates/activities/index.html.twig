@@ -3,549 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activities - Momentum</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('styles/navbar.css') }}">
-    <style>
-        :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --light-bg: #f8f9fa;
-            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            --card-shadow-hover: 0 8px 16px rgba(102, 126, 234, 0.2);
-        }
-
-        * {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background: var(--light-bg);
-            color: #333;
-        }
-
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
-            gap: 1.5rem;
-        }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .header-title h1 {
-            margin: 0;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .sync-button {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .sync-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-        }
-
-        .sync-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .sync-spinner {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .activities-section {
-            margin-bottom: 3rem;
-        }
-
-        .activities-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            grid-auto-rows: 1fr;
-            gap: 1.2rem;
-        }
-
-        @media (min-width: 768px) {
-            .activities-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            .activities-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .activity-link {
-            text-decoration: none;
-            color: inherit;
-            transition: none;
-        }
-
-        .activity-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--card-shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
-            border-left: 5px solid #ccc;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            min-height: 220px;
-        }
-
-        .activity-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 1;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-
-        /* Activity type specific backgrounds */
-        .activity-card[data-activity-type="run"] {
-            border-left-color: #ef4444;
-            background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
-        }
-
-        .activity-card[data-activity-type="run"]::before {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, rgba(234, 88, 12, 0.06) 100%);
-        }
-
-        .activity-card[data-activity-type="ride"] {
-            border-left-color: #3b82f6;
-            background: linear-gradient(135deg, #eff6ff 0%, #f0f4ff 100%);
-        }
-
-        .activity-card[data-activity-type="ride"]::before {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(99, 102, 241, 0.06) 100%);
-        }
-
-        .activity-card[data-activity-type="swim"] {
-            border-left-color: #06b6d4;
-            background: linear-gradient(135deg, #ecf8fc 0%, #e0f7ff 100%);
-        }
-
-        .activity-card[data-activity-type="swim"]::before {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.06) 0%, rgba(59, 130, 246, 0.06) 100%);
-        }
-
-        .activity-card[data-activity-type="walk"] {
-            border-left-color: #22c55e;
-            background: linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%);
-        }
-
-        .activity-card[data-activity-type="walk"]::before {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.06) 0%, rgba(168, 85, 247, 0.06) 100%);
-        }
-
-        .activity-card[data-activity-type="hike"] {
-            border-left-color: #a855f7;
-            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-        }
-
-        .activity-card[data-activity-type="hike"]::before {
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.06) 0%, rgba(34, 197, 94, 0.06) 100%);
-        }
-
-        .activity-card[data-activity-type="weighttraining"] {
-            border-left-color: #eab308;
-            background: linear-gradient(135deg, #fefce8 0%, #fffbeb 100%);
-        }
-
-        .activity-card[data-activity-type="weighttraining"]::before {
-            background: linear-gradient(135deg, rgba(234, 179, 8, 0.06) 0%, rgba(234, 179, 8, 0.06) 100%);
-        }
-
-        .activity-link:hover .activity-card {
-            transform: translateY(-8px);
-            box-shadow: var(--card-shadow-hover);
-            border-color: var(--primary-color);
-        }
-
-        .activity-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1.2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .activity-type-icon {
-            font-size: 2.5rem;
-            min-width: 3.5rem;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            padding: 0.5rem;
-        }
-
-        .activity-card[data-activity-type="run"] .activity-type-icon {
-            background: rgba(239, 68, 68, 0.15);
-        }
-
-        .activity-card[data-activity-type="ride"] .activity-type-icon {
-            background: rgba(59, 130, 246, 0.15);
-        }
-
-        .activity-card[data-activity-type="swim"] .activity-type-icon {
-            background: rgba(6, 182, 212, 0.15);
-        }
-
-        .activity-card[data-activity-type="walk"] .activity-type-icon {
-            background: rgba(34, 197, 94, 0.15);
-        }
-
-        .activity-card[data-activity-type="hike"] .activity-type-icon {
-            background: rgba(168, 85, 247, 0.15);
-        }
-
-        .activity-card[data-activity-type="weighttraining"] .activity-type-icon {
-            background: rgba(234, 179, 8, 0.15);
-        }
-
-        .activity-info-basic {
-            flex: 1;
-        }
-
-        .activity-name {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
-            line-height: 1.3;
-            word-break: break-word;
-        }
-
-        .activity-date {
-            margin: 0.3rem 0 0 0;
-            font-size: 0.85rem;
-            color: #999;
-        }
-
-        .activity-stats {
-            display: grid;
-            grid-template-columns: auto auto auto;
-            grid-template-rows: auto auto;
-            gap: 0.8rem 1.2rem;
-            padding: 1rem;
-            background: rgba(102, 126, 234, 0.03);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: #666;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            white-space: nowrap;
-            grid-row: 1;
-        }
-
-        .stat-value {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            white-space: nowrap;
-            grid-row: 2;
-        }
-
-        /* Type-specific stat label colors */
-        .activity-card[data-activity-type="run"] .stat-label {
-            color: #ef4444;
-        }
-
-        .activity-card[data-activity-type="run"] .stat-value {
-            color: #dc2626;
-        }
-
-        .activity-card[data-activity-type="ride"] .stat-label {
-            color: #3b82f6;
-        }
-
-        .activity-card[data-activity-type="ride"] .stat-value {
-            color: #1d4ed8;
-        }
-
-        .activity-card[data-activity-type="swim"] .stat-label {
-            color: #06b6d4;
-        }
-
-        .activity-card[data-activity-type="swim"] .stat-value {
-            color: #0891b2;
-        }
-
-        .activity-card[data-activity-type="walk"] .stat-label {
-            color: #22c55e;
-        }
-
-        .activity-card[data-activity-type="walk"] .stat-value {
-            color: #16a34a;
-        }
-
-        .activity-card[data-activity-type="hike"] .stat-label {
-            color: #a855f7;
-        }
-
-        .activity-card[data-activity-type="hike"] .stat-value {
-            color: #9333ea;
-        }
-
-        .activity-card[data-activity-type="weighttraining"] .stat-label {
-            color: #eab308;
-        }
-
-        .activity-card[data-activity-type="weighttraining"] .stat-value {
-            color: #ca8a04;
-        }
-
-        .activity-card-hover-indicator {
-            font-size: 0.85rem;
-            color: var(--primary-color);
-            font-weight: 600;
-            position: relative;
-            z-index: 1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            margin-top: auto;
-            align-self: flex-end;
-        }
-
-        .activity-link:hover .activity-card-hover-indicator {
-            opacity: 1;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .empty-state h3 {
-            color: #666;
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-state p {
-            color: #999;
-            margin-bottom: 1.5rem;
-        }
-
-        .empty-state-button {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .empty-state-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-        }
-
-        .toast-container {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            z-index: 1050;
-        }
-
-        .toast {
-            background: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            min-width: 300px;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .toast.success {
-            border-left: 4px solid var(--success-color);
-        }
-
-        .toast.success .toast-icon {
-            color: var(--success-color);
-        }
-
-        .toast.error {
-            border-left: 4px solid var(--danger-color);
-        }
-
-        .toast.error .toast-icon {
-            color: var(--danger-color);
-        }
-
-        .toast-icon {
-            font-size: 1.3rem;
-            min-width: 1.5rem;
-        }
-
-        @media (max-width: 576px) {
-            .header-section {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .header-title {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header-title h1 {
-                font-size: 1.5rem;
-            }
-
-            .sync-button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .navbar-user-section {
-                gap: 0.5rem;
-            }
-
-            .user-info {
-                display: none;
-            }
-
-            .activities-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .toast-container {
-                right: 1rem;
-                left: 1rem;
-            }
-
-            .toast {
-                min-width: auto;
-            }
-
-            .activity-stats {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
-                padding: 0.75rem;
-            }
-
-            .stat-label {
-                font-size: 0.7rem;
-            }
-
-            .stat-value {
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+    <title>Momentum - Activities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-50">
     {% include 'components/_header.html.twig' %}
 
-    <div class="dashboard-container">
-        <div class="header-section">
-            <div class="header-title">
-                <h3>📊 Recent Activities <span id="activityCount">(20)</span></h3>
-            </div>
-            <button class="sync-button" id="syncButton" onclick="syncActivities()">
+    <div>
+        <div class="flex items-center justify-between p-6 border-b">
+            <h2 class="text-2xl font-bold">Recent Activities <span id="activityCount" class="text-gray-600">(20)</span></h2>
+            <button class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-semibold" id="syncButton" onclick="syncActivities()">
                 <span id="syncIcon">↻</span>
                 <span id="syncText">Sync from Strava</span>
             </button>
         </div>
 
-        <div class="activities-section">
+        {% if not isConfigured %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 flex gap-3">
+                <div class="text-xl flex-shrink-0">⚠️</div>
+                <div class="flex-grow">
+                    <p class="m-0 text-sm">
+                        Please configure your profile to analyze activities.
+                        <a href="{{ path('profile_settings') }}" class="font-semibold hover:underline">Configure now →</a>
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="{% if not isConfigured %}opacity-50 pointer-events-none{% endif %}">
             {% if activities is not empty %}
-                <div class="activities-grid" id="activitiesContainer">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6" id="activitiesContainer">
                     {% for activity in activities %}
-                        {% include 'activity/_card.html.twig' %}
+                        <div class="relative">
+                            {% include 'activity/_card.html.twig' %}
+                            {% if not isConfigured %}
+                                <div class="absolute inset-0 flex items-center justify-center bg-white/70 rounded">
+                                    <small class="text-gray-600 font-semibold text-center px-2">Configure profile to analyze</small>
+                                </div>
+                            {% endif %}
+                        </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">📭</div>
-                    <h3>No activities yet</h3>
-                    <p>Click the "Sync from Strava" button to fetch your activities</p>
-                    <button class="empty-state-button" onclick="syncActivities()">
+                <div class="text-center p-12">
+                    <div class="text-5xl mb-3 opacity-50">📭</div>
+                    <h3 class="text-lg font-semibold mb-1">No activities yet</h3>
+                    <p class="text-gray-600 mb-4 text-sm">Click the "Sync from Strava" button to fetch your activities</p>
+                    <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium" onclick="syncActivities()">
                         Sync Now
                     </button>
                 </div>
@@ -553,7 +57,7 @@
         </div>
     </div>
 
-    <div class="toast-container" id="toastContainer"></div>
+    <div id="toastContainer" class="fixed top-0 right-0 p-4 space-y-2 pointer-events-none"></div>
 
     <script>
         async function syncActivities() {
@@ -562,8 +66,8 @@
             const text = document.getElementById('syncText');
 
             button.disabled = true;
-            icon.classList.add('sync-spinner');
             icon.style.display = 'inline-block';
+            icon.classList.add('animate-spin');
             text.textContent = 'Syncing...';
 
             showToast('Sync started in background', 'success');
@@ -580,7 +84,6 @@
                     throw new Error('Sync failed');
                 }
 
-                // Wait a bit, then refresh activities
                 setTimeout(async () => {
                     await refreshActivities();
                     showToast('Activities synced successfully!', 'success');
@@ -591,7 +94,7 @@
                 console.error('Sync error:', error);
             } finally {
                 button.disabled = false;
-                icon.classList.remove('sync-spinner');
+                icon.classList.remove('animate-spin');
                 icon.style.display = 'inline';
                 text.textContent = 'Sync from Strava';
             }
@@ -606,17 +109,16 @@
                 
                 if (activities.length === 0) {
                     container.innerHTML = `
-                        <div class="empty-state" style="grid-column: 1/-1;">
-                            <div class="empty-state-icon">📭</div>
-                            <h3>No activities yet</h3>
-                            <p>Click the "Sync from Strava" button to fetch your activities</p>
+                        <div class="col-span-full text-center p-12">
+                            <div class="text-5xl mb-3 opacity-50">📭</div>
+                            <h3 class="text-lg font-semibold mb-1">No activities yet</h3>
+                            <p class="text-gray-600 text-sm">Click the "Sync from Strava" button to fetch your activities</p>
                         </div>
                     `;
                     document.getElementById('activityCount').textContent = '';
                     return;
                 }
 
-                // Reload the page to show fresh data with proper formatting
                 location.reload();
 
             } catch (error) {
@@ -627,7 +129,12 @@
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
+            
+            const bgColors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            };
 
             const icons = {
                 success: '✓',
@@ -635,32 +142,27 @@
                 info: 'ℹ'
             };
 
-            toast.innerHTML = `
-                <span class="toast-icon">${icons[type]}</span>
-                <span>${message}</span>
-            `;
+            toast.className = `${bgColors[type]} text-white px-4 py-3 rounded shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto`;
+            toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
 
             container.appendChild(toast);
 
             setTimeout(() => {
-                toast.style.animation = 'slideIn 0.3s ease reverse';
+                toast.classList.remove('animate-in');
+                toast.classList.add('animate-out', 'fade-out', 'slide-out-to-top-4', 'duration-300');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // Update activity count on load
         function updateActivityCount() {
-            const count = document.querySelectorAll('.activity-card').length;
+            const count = document.querySelectorAll('[data-activity-card]').length;
             const countEl = document.getElementById('activityCount');
             if (count > 0) {
                 countEl.textContent = `(${count})`;
             }
         }
 
-        // Call on page load
         document.addEventListener('DOMContentLoaded', updateActivityCount);
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

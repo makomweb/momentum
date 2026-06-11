@@ -28,7 +28,7 @@ security:
                 samesite: lax
             logout:
                 path: logout
-                target: login
+                target: /login
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall

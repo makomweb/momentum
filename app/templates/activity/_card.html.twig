@@ -1,8 +1,11 @@
-{# Activity card for display in activity stream #}
-<a href="{{ path('activity_analysis_by_id', { id: activity.stravaActivityId }) }}" class="activity-link">
-    <div class="activity-card" data-activity-type="{{ activity.data.type | lower }}">
-        <div class="activity-header">
-            <span class="activity-type-icon">
+<a href="{{ path('activity_analysis_by_id', { id: activity.stravaActivityId }) }}" class="block no-underline">
+    <div class="bg-white rounded border border-gray-200 p-2 flex flex-col h-full" data-activity-card data-activity-type="{{ activity.data.type | lower }}">
+        <div class="flex items-start justify-between gap-1 mb-3 rounded p-2 {{ activity.data.type | activity_bg_color }}">
+            <div class="flex-grow min-w-0">
+                <h3 class="font-semibold truncate mb-0.5">{{ activity.data.name }}</h3>
+                <div class="text-gray-600 text-xs">{{ activity.getStartDateFormatted() }}</div>
+            </div>
+            <span class="text-2xl flex-shrink-0">
                 {% set type_lower = activity.data.type | lower %}
                 {% if type_lower == 'run' %}
                     🏃
@@ -18,42 +21,55 @@
                     🏅
                 {% endif %}
             </span>
-            <div class="activity-info-basic">
-                <h3 class="activity-name">{{ activity.data.name }}</h3>
-                <p class="activity-date">{{ activity.getStartDateFormatted() }}</p>
-            </div>
         </div>
 
-        <div class="activity-stats">
+        <div class="grid grid-cols-3 gap-2 flex-grow">
             {%- set type_lower = activity.data.type | lower -%}
             
-            {# Row 1: Labels #}
             {%- if activity.data.distance > 0 -%}
-            <span class="stat-label">Distance</span>
+            <div class="flex flex-col gap-1 bg-gray-50 border border-gray-200 rounded p-2">
+                <div class="text-xs font-semibold text-gray-600">Distance</div>
+                <div class="text-sm font-bold truncate">{{ (activity.data.distance / 1000) | round(1) }} km</div>
+            </div>
+            {%- else -%}
+            <div class="flex flex-col gap-1 bg-gray-50 border border-gray-200 rounded p-2">
+                <div class="text-xs font-semibold text-gray-600">Distance</div>
+                <div class="text-sm font-bold text-gray-400 truncate">N/A</div>
+            </div>
             {%- endif -%}
-            <span class="stat-label">Moving Time</span>
+
+            <div class="flex flex-col gap-1 bg-gray-50 border border-gray-200 rounded p-2">
+                <div class="text-xs font-semibold text-gray-600">Moving Time</div>
+                <div class="text-sm font-bold truncate">{{ activity.getMovingTime() | format_moving_time }}</div>
+            </div>
+
             {%- if activity.data.distance > 0 -%}
-            <span class="stat-label">
-                {%- if type_lower == 'ride' -%}
-                    Speed
-                {%- else -%}
-                    Pace
-                {%- endif -%}
-            </span>
-            {%- endif -%}
-            
-            {# Row 2: Values #}
-            {%- if activity.data.distance > 0 -%}
-            <span class="stat-value">{{ (activity.data.distance / 1000) | round(1) }} km</span>
-            {%- endif -%}
-            <span class="stat-value">{{ activity.getMovingTime() | format_moving_time }}</span>
-            {%- if activity.data.distance > 0 -%}
-            <span class="stat-value">{{ activity.getAverageVelocityAsStringable() }}</span>
+            <div class="flex flex-col gap-1 bg-gray-50 border border-gray-200 rounded p-2">
+                <div class="text-xs font-semibold text-gray-600">
+                    {%- if type_lower == 'ride' -%}
+                        Speed
+                    {%- else -%}
+                        Pace
+                    {%- endif -%}
+                </div>
+                <div class="text-sm font-bold truncate">{{ activity.getAverageVelocityAsStringable() }}</div>
+            </div>
+            {%- else -%}
+            <div class="flex flex-col gap-1 bg-gray-50 border border-gray-200 rounded p-2">
+                <div class="text-xs font-semibold text-gray-600">
+                    {%- if type_lower == 'ride' -%}
+                        Speed
+                    {%- else -%}
+                        Pace
+                    {%- endif -%}
+                </div>
+                <div class="text-sm font-bold text-gray-400 truncate">N/A</div>
+            </div>
             {%- endif -%}
         </div>
 
-        <div class="activity-card-hover-indicator">
-            View details →
+        <div class="mt-4 pt-2 text-sky-600 text-xs font-semibold flex items-center gap-1 opacity-70 hover:opacity-100">
+            View details <span>→</span>
         </div>
     </div>
 </a>

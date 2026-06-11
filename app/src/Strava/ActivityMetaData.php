@@ -77,10 +77,10 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike' => '⏱️ Pace Over Time',
-            'Swim' => '🏊‍♀️ Speed Over Time',
-            'Ride' => '🚴‍♂️ Speed Over Time',
-            default => '📊 Activity Data',
+            'Run', 'Walk', 'Hike' => 'Pace Over Time',
+            'Swim' => 'Speed Over Time',
+            'Ride' => 'Speed Over Time',
+            default => 'Activity Data',
         };
     }
 

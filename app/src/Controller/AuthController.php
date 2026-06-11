@@ -20,10 +20,13 @@ final class AuthController extends AbstractController
     #[Route('/login', name: 'login', methods: ['GET'])]
     public function login(): Response
     {
-        if ($this->getUser()) {
+        // If fully authenticated, redirect to activities
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('activities');
         }
 
+        // Show login page for unauthenticated users
+        // (RememberMe users will be handled by TokenExchangeMiddleware)
         return $this->render('auth/login.html.twig', [
             'auth_url' => $this->configuration->getAuthorizationAddress(),
         ]);

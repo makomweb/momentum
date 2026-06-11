@@ -26,11 +26,14 @@ final class ActivitiesController extends AbstractController
 
         $activities = $this->activityRepository->findRecentByStravaUser($user->getStravaId(), 20);
 
+        $isConfigured = !$user->getTreshold()->isZero() && $user->getMaxHeartRate()->isValid();
+
         return $this->render('activities/index.html.twig', [
             'name' => $user->getName(),
             'strava_user_id' => $user->getStravaId(),
             'profile_picture' => $user->getProfilePictureMedium(),
             'activities' => $activities,
+            'isConfigured' => $isConfigured,
         ]);
     }
 }
