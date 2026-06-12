@@ -5,10 +5,11 @@ This document covers Helm installation, Kubernetes cluster setup, and CI/CD auto
 ## Table of Contents
 
 1. [Initial Cluster Setup](#initial-cluster-setup)
-2. [Helm Installation](#helm-installation)
-3. [GitLab CI/CD Automation](#gitlab-cicd-automation)
-4. [Manual Deployment](#manual-deployment)
-5. [Troubleshooting](#troubleshooting)
+2. [Infrastructure Requirements](#infrastructure-requirements)
+3. [Helm Installation](#helm-installation)
+4. [GitLab CI/CD Automation](#gitlab-cicd-automation)
+5. [Manual Deployment](#manual-deployment)
+6. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -33,6 +34,38 @@ This allows pods to make outbound connections for:
 - External APIs (TCP port 443 - HTTPS)
 - HTTP webhooks (TCP port 80)
 - Blocks AWS metadata access for security (169.254.169.254)
+
+---
+
+## Infrastructure Requirements
+
+### Production Deployment (Hetzner)
+
+- **Kubernetes cluster**: K3s or Kubernetes 1.24+
+- **Ingress controller**: Traefik (default in K3s)
+- **Certificate manager**: cert-manager for Let's Encrypt SSL (DNS-01 challenge via Hetzner)
+- **Domain**: DNS records pointing to Kubernetes LoadBalancer IP
+- **Firewall**: Inbound rules for ports 80 (HTTP) and 443 (HTTPS)
+
+### Health Checks & Monitoring
+
+The app exposes Kubernetes health endpoints on an **internal-only port (8081)**:
+
+- `/health/live` - Liveness probe (is app running?)
+- `/health/ready` - Readiness probe (is app ready for traffic?)
+
+**Security**: These endpoints are:
+- Only accessible from within the cluster (not exposed on public port)
+- Not subject to rate limiting
+- Blocked with 404 if accessed on public port (8080)
+- Used by Kubernetes for pod lifecycle management
+
+### Session Persistence
+
+Sessions are stored in **Redis** (not filesystem) to:
+- Survive pod restarts/redeployments
+- Support horizontal scaling (multiple pod replicas)
+- Enable remember-me authentication across sessions
 
 ---
 
@@ -64,7 +97,7 @@ KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm install momentum ./helm/momentum \
   --set-string strava.redirectUri=https://your-domain.com/exchange-token
 ```
 
-Or with **Ingress + Let's Encrypt (Traefik)**:
+Or with **Ingress + Let's Encrypt (Traefik + cert-manager)**:
 
 ```bash
 KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm install momentum ./helm/momentum \
@@ -72,10 +105,20 @@ KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm install momentum ./helm/momentum \
   --set-string app.secret="$(openssl rand -hex 32)" \
   --set-string strava.clientId=YOUR_CLIENT_ID \
   --set-string strava.clientSecret=YOUR_CLIENT_SECRET \
-  --set-string strava.redirectUri=https://your-domain.com/momentum/exchange-token \
+  --set-string strava.redirectUri=https://www.your-domain.com/momentum/exchange-token \
   --set-string ingress.enabled=true \
-  --set-string ingress.hostname=your-domain.com
+  --set-string ingress.hostname=www.your-domain.com
 ```
+
+**Important**: The Ingress includes:
+- **TLS termination** via cert-manager/Let's Encrypt (DNS-01 challenge)
+- **Path rewriting** middleware that strips the `/momentum` prefix before routing to the app
+- **Health endpoint isolation** - internal port (8081) only, blocked on public port (8080)
+
+The redirect URI **must include `/momentum/`** because:
+1. External traffic hits `www.your-domain.com/momentum/exchange-token`
+2. Traefik strips `/momentum` before sending to app
+3. App receives `/exchange-token` and routes correctly
 
 #### Verify Installation
 
@@ -254,7 +297,51 @@ kubectl describe pod <pod-name>
 # - Database connection string incorrect
 # - Missing environment variables
 # - Image pull failed
+# - Redis connection failed (sessions cannot initialize)
 ```
+
+#### Health Probes Failing (Pod Not Ready)
+
+The readiness probe (`/health/ready`) must respond with HTTP 200 within 1 second.
+
+```bash
+# Test health endpoint directly from pod:
+kubectl exec -it <pod-name> -- curl -v http://localhost:8081/health/ready
+
+# Check Kubernetes probe configuration:
+kubectl describe pod <pod-name> | grep -A 5 "Readiness:"
+
+# Common causes:
+# - Security firewall blocking health endpoints (must be PUBLIC_ACCESS)
+# - Redis connection failed during initialization
+# - Symfony not fully initialized
+# - Timeout too short for slow startup
+```
+
+#### HTTP Traffic Not Reaching App (404 from Traefik)
+
+The Ingress must have proper TLS configuration and middlewares:
+
+```bash
+# Check ingress configuration:
+kubectl get ingress momentum-ingress -o yaml
+
+# Verify middleware exists and is referenced:
+kubectl get middleware
+kubectl get ingress momentum-ingress -o yaml | grep router.middlewares
+
+# Restart Traefik to pick up ingress changes:
+kubectl rollout restart deployment traefik -n kube-system
+
+# Test from pod:
+kubectl exec -it <pod-name> -- curl -v http://localhost:8080/activities
+```
+
+**Expected Ingress structure**:
+- `spec.tls` section with cert-manager certificate
+- `spec.rules` with HTTP paths pointing to service port 80
+- Annotation referencing path-rewrite middleware to strip prefix
+- Middleware resource to strip `/momentum` prefix
 
 #### Helm Upgrade Failed
 
@@ -381,6 +468,32 @@ kubectl rollout status deployment/momentum-app
 - Use HTTPS only in production (`SECURE_COOKIE=true`)
 - Network policies restrict egress to required ports only
 
+### Production Security Architecture
+
+**Health Endpoints**:
+- Port 8081 (internal): `/health/live`, `/health/ready` accessible only within cluster
+- Port 8080 (public): Health endpoints blocked with 404
+- No DDoS attack surface via health endpoint exposure
+- Kubernetes probes bypass rate limiter to prevent false negatives
+
+**Session Storage**:
+- Sessions stored in Redis (not filesystem)
+- Encrypted in-transit when Redis runs on separate pod
+- Survives container restarts for authenticated users (remember-me feature)
+- Enables horizontal pod scaling without session loss
+
+**Ingress Routing**:
+- cert-manager handles Let's Encrypt certificates via DNS-01 challenge
+- Traefik routes traffic based on hostname + path rules
+- Middleware strips `/momentum` prefix for clean internal routing
+- HTTP requests automatically upgrade to HTTPS at Ingress level
+
+**Application Firewall**:
+- Security firewall allows public access only to documented routes
+- Health endpoints (`/health/*`) require `PUBLIC_ACCESS` role
+- All other routes require `IS_AUTHENTICATED_REMEMBERED`
+- Rate limiter skips health endpoints to prevent false probe failures
+
 ---
 
 ## References
@@ -389,3 +502,4 @@ kubectl rollout status deployment/momentum-app
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
 - [K3s Documentation](https://docs.k3s.io/)
 - [Traefik Ingress Controller](https://doc.traefik.io/traefik/)
+- [cert-manager](https://cert-manager.io/)
