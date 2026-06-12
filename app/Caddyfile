@@ -8,15 +8,48 @@ http:// {
     redir https://{host}{uri} permanent
 }
 
-# Main app - serves both HTTP (from redirect) and HTTPS (from Kubernetes Ingress)
-# Listen on all hosts (Kubernetes/NodePort uses server IP as Host header)
+# Block health endpoints on public ports - they're ONLY on :8081
+# This prevents attackers from reaching /health/* via internet-facing ports
+@health_path {
+    path /health/*
+}
+
+# Main app - serves public traffic (80/443)
+# Health endpoints are explicitly blocked here (see @health_path matcher)
 :443, :80 {
+    # REJECT health check requests - they're only for internal use on :8081
+    handle @health_path {
+        respond "Not Found" 404
+    }
+    
+    root * /app/public
+    encode gzip
+    php_server
+}
+
+# Internal health check endpoints - ONLY accessible from within the cluster
+# Kubelet probes connect directly to this port (bypasses Ingress, no internet access)
+# 
+# How routing works:
+#   1. Kubelet makes request: GET http://pod-ip:8081/health/live
+#   2. Caddy listens on :8081 and passes request to php_server
+#   3. Symfony Router matches the request to HealthController (via @Route("/health/live"))
+#   4. HealthController::liveness() returns JSON response
+#
+# These requests:
+# - Are NOT subject to rate limiting (RateLimiter listener skips /health/*)
+# - Are NOT reachable from the internet (blocked on :80/:443, only on :8081)
+# - Are NOT exposed via Kubernetes Service or Ingress
+# - Provide ZERO DDoS attack surface
+#
+:8081 {
     root * /app/public
     encode gzip
     php_server
 }
 
 # Development fallback on port 8080 (no HTTPS needed locally)
+# Used for local docker-compose development
 :8080 {
     root * /app/public
     encode gzip
