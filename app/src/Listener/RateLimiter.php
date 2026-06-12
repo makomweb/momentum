@@ -28,11 +28,20 @@ final class RateLimiter
         }
 
         $request = $event->getRequest();
+        $path = $request->getPathInfo();
 
         // Skip rate limiting for health check endpoints (Kubernetes probes)
-        if (str_starts_with($request->getPathInfo(), '/health/')) {
+        if (str_starts_with($path, '/health/')) {
+            $this->logger->debug('Skipping rate limiter for health endpoint', [
+                'path' => $path,
+            ]);
+
             return;
         }
+
+        $this->logger->debug('Checking rate limiter for request', [
+            'path' => $path,
+        ]);
 
         $clientIp = $request->getClientIp() ?? 'unknown';
 
