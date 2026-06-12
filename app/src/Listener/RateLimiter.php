@@ -35,6 +35,7 @@ final class RateLimiter
             $this->logger->debug('Skipping rate limiter for health endpoint', [
                 'path' => $path,
             ]);
+
             return;
         }
 
