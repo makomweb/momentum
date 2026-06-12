@@ -1,17 +1,19 @@
 # Rate Limiting Implementation
 
-This document explains the dual-tier rate limiting system implemented for the Momentum backend.
+This document explains the rate limiting system implemented for the Momentum backend.
 
 ## Overview
 
-The application uses Symfony's built-in Rate Limiter component with **two independent rate limiters**:
+The application uses Symfony's built-in Rate Limiter component with a **two-tier hybrid approach**:
 
-1. **Per-IP Rate Limiter**: 30 requests per 30 seconds per individual IP address
-2. **Global Bucket Rate Limiter**: 100 requests per 1 minute globally (all IPs combined)
+1. **Per-IP Compound Limiter** (per client IP)
+   - 40 requests per 10 minutes (fixed window)
+   - 5 tokens refill per 30 seconds, max 10 (token bucket)
+   - **BOTH must pass** for request to be accepted
 
-This two-tier approach provides optimal protection:
-- **Per-IP**: Prevents single bad actors from overwhelming the server
-- **Global**: Prevents total server overload even from distributed sources
+2. **Global Burst Limiter** (all IPs combined)
+   - 200 tokens refill per 1 minute, max 500
+   - Protects against distributed attacks
 
 ## Configuration
 
@@ -20,77 +22,88 @@ This two-tier approach provides optimal protection:
 ```yaml
 framework:
     rate_limiter:
-        global_limiter:
-            policy: 'token_bucket'
-            limit: 30
-            interval: '30 seconds'
+        per_ten_minutes:
+            policy: 'fixed_window'
+            limit: 40
+            interval: '10 minutes'
         
-        global_bucket:
+        per_thirty_seconds:
             policy: 'token_bucket'
-            limit: 100
-            interval: '1 minute'
+            limit: 10
+            rate:
+                amount: 5
+                interval: '30 seconds'
+        
+        per_ip:
+            policy: 'compound'
+            limiters: [per_ten_minutes, per_thirty_seconds]
+        
+        global_burst:
+            policy: 'token_bucket'
+            limit: 500
+            rate:
+                amount: 200
+                interval: '1 minute'
 ```
-
-**Parameters:**
-- **policy**: `token_bucket` - Uses token bucket algorithm for fair rate limiting
-- **limit**: Number of requests allowed per interval
-- **interval**: Time period for refilling tokens
-- **cache_pool**: Uses Redis (via cache system) to track limiter state
 
 ## How It Works
 
 ### Request Flow
 
-1. **Request arrives** → RateLimitListener intercepts at priority 50
-2. **Per-IP check**: Extracts client IP and consumes 1 token from per-IP limiter
-   - ✅ Token available → Continue
-   - ❌ No tokens → Return 429 with `Retry-After: 30`
-3. **Global bucket check**: Consumes 1 token from global limiter (using fixed key 'global')
-   - ✅ Token available → Request proceeds normally
-   - ❌ No tokens → Return 429 with `Retry-After: 60`
-
-### Example Scenarios
-
-**Scenario A: Single IP hitting limits**
 ```
-IP 192.168.1.1: Makes 31 requests in 30 seconds
-→ First 30 succeed
-→ Request 31: Blocked by per-IP limiter (429)
-→ Request 32: Blocked by per-IP limiter (429)
-
-IP 192.168.1.2: Makes 1 request
-→ Request succeeds (per-IP bucket is independent)
+Request arrives
+    ↓
+Per-IP Check (Compound):
+  ├─ Has used <40 requests in 10 minutes? ✅ Continue
+  └─ AND has token available (max 10, refill 5/30s)? ✅ Continue
+    ↓
+Global Burst Check:
+  └─ Has token available (max 500, refill 200/1min)? ✅ Continue
+    ↓
+Request succeeds
 ```
 
-**Scenario B: Multiple IPs hitting global limit**
-```
-IP 192.168.1.1: Makes 50 requests
-IP 192.168.1.2: Makes 50 requests
-Total: 100 requests in 1 minute
-→ All succeed (distributed across IPs)
+### What Each Limiter Does
 
-IP 192.168.1.3: Makes 1 request
-→ Blocked by global bucket limiter (429)
-→ Must wait up to 1 minute for bucket to refill
-```
+**Per-Ten-Minutes (Fixed Window):**
+- Prevents sustained abuse
+- Hard limit of 40 requests per 10-minute window
+- Resets completely every 10 minutes
+- Example: User making 40 requests, must wait up to 10 minutes for next batch
+
+**Per-Thirty-Seconds (Token Bucket):**
+- Allows short bursts
+- 5 new tokens every 30 seconds (up to max 10)
+- Smooth refill rate
+- Example: User can make 10 quick requests, then limited to 5/30s
+
+**Global Burst (Token Bucket):**
+- Protects the entire server
+- 200 new tokens every 1 minute (up to max 500)
+- Catches distributed attacks where many IPs respect per-IP limits but collectively overload
+- Example: 100 different IPs each staying under 40 req/10min could still hit this
 
 ## Logging
 
-Rate limit violations are logged with detailed context:
+Detailed logging for violations:
 
 ```php
+// Per-IP limit exceeded
 $this->logger->warning('Per-IP rate limit exceeded', [
     'client_ip' => '192.168.1.1',
     'method' => 'GET',
     'path' => '/activities',
-    'retry_after_timestamp' => 1718118900,
+    'limiter' => 'compound (per_ten_minutes + per_thirty_seconds)',
+    'retry_after_seconds' => 45,
 ]);
 
-$this->logger->warning('Global bucket rate limit exceeded', [
-    'client_ip' => '192.168.1.5',
+// Global limit exceeded
+$this->logger->warning('Global rate limit exceeded', [
+    'client_ip' => '10.0.0.5',
     'method' => 'POST',
     'path' => '/api/sync',
-    'retry_after_timestamp' => 1718118960,
+    'limiter' => 'global_burst',
+    'retry_after_seconds' => 60,
 ]);
 ```
 
@@ -98,54 +111,54 @@ $this->logger->warning('Global bucket rate limit exceeded', [
 
 **Development:**
 ```bash
-docker compose logs -f app | grep "rate limit"
+docker compose logs -f app | grep "rate limit exceeded"
 ```
 
-**Production:** Check your logging system (ELK Stack, CloudWatch, Datadog, etc) for:
+**Production:** Check your logging system for:
 - Level: `warning`
-- Messages: "Per-IP rate limit exceeded" or "Global bucket rate limit exceeded"
+- Messages: "Per-IP rate limit exceeded" or "Global rate limit exceeded"
+- Filter by `limiter` field to distinguish which limit was hit
 
 ## Response Behavior
 
-### Per-IP Limit Exceeded
+When a rate limit is exceeded:
+
 ```
 HTTP/1.1 429 Too Many Requests
-Retry-After: 30
+Retry-After: 45
 Content-Type: text/plain
 
 Too Many Requests
 ```
 
-### Global Bucket Limit Exceeded
-```
-HTTP/1.1 429 Too Many Requests
-Retry-After: 60
-Content-Type: text/plain
-
-Too Many Requests
-```
-
-## Storage
-
-Rate limit data is stored in the application's cache system (Redis in production):
-- **Per-IP buckets**: One bucket per unique IP address
-- **Global bucket**: Single shared bucket with fixed key 'global'
-- Both refill independently according to their configured intervals
+The `Retry-After` header contains actual seconds until next token is available (calculated dynamically).
 
 ## Customization
 
-### Change Rate Limits
+### Adjust Per-IP Limits
 
 Edit `config/packages/rate_limiter.yaml`:
 
 ```yaml
-global_limiter:
-    limit: 60                    # Increase per-IP to 60 requests
-    interval: '1 minute'         # Change interval to 1 minute
+per_ten_minutes:
+    limit: 100              # Increase sustained limit
+    interval: '10 minutes'
 
-global_bucket:
-    limit: 500                   # Increase global to 500 requests
-    interval: '1 minute'         # Keep at 1 minute interval
+per_thirty_seconds:
+    limit: 20               # Increase burst limit
+    rate:
+        amount: 10          # Increase refill rate
+        interval: '30 seconds'
+```
+
+### Adjust Global Burst
+
+```yaml
+global_burst:
+    limit: 1000             # Increase max burst
+    rate:
+        amount: 500         # Increase refill rate
+        interval: '1 minute'
 ```
 
 ### Add Per-Endpoint Rate Limiting
@@ -155,11 +168,10 @@ Create additional limiters for specific endpoints:
 ```yaml
 framework:
     rate_limiter:
-        global_limiter: { ... }
-        global_bucket: { ... }
+        # ... existing limiters ...
         
         auth_limiter:
-            policy: 'token_bucket'
+            policy: 'fixed_window'
             limit: 5
             interval: '5 minutes'
 ```
@@ -173,126 +185,127 @@ final class AuthRateLimitListener
     public function onKernelRequest(RequestEvent $event): void
     {
         if (str_starts_with($event->getRequest()->getPathInfo(), '/auth/login')) {
-            $limiter = $this->rateLimiterAuth->create($clientIp);
-            // ... check limits ...
+            $clientIp = $event->getRequest()->getClientIp() ?? 'unknown';
+            $limiter = $this->limiterAuth->create($clientIp);
+            // ... check limit ...
         }
     }
 }
-```
-
-### Per-User Rate Limiting
-
-For authenticated users, use user ID instead of IP:
-
-```php
-if ($user = $this->getUser()) {
-    $key = 'user_' . $user->getId();
-} else {
-    $key = $clientIp;
-}
-$limiter = $this->rateLimiter->create($key);
 ```
 
 ## Testing
 
 ### Manual Testing
 
-Test per-IP limiting:
+**Test per-IP burst limit:**
 ```bash
-# Send 31 requests rapidly
-for i in {1..31}; do
-  curl -s http://localhost:8080/activities -w "%{http_code}\n"
+# Make 11 requests rapidly (per_thirty_seconds allows 10 max)
+for i in {1..11}; do
+  curl -s http://localhost:8080/ -w "%{http_code}\n"
 done
 
-# Expected: 30 × 200, 1 × 429
+# Expected: 10 × 200, 1 × 429
 ```
 
-Test global bucket limiting:
+**Test per-IP sustained limit:**
 ```bash
-# Terminal 1 (IP 1)
-for i in {1..50}; do curl -s http://localhost:8080/ -w "%{http_code}\n"; done
+# Make 41 requests over time (per_ten_minutes allows 40)
+for i in {1..41}; do
+  curl -s http://localhost:8080/ -w "%{http_code}\n"
+  sleep 1  # Space them out
+done
 
-# Terminal 2 (IP 2)  
-for i in {1..50}; do curl -s http://localhost:8080/ -w "%{http_code}\n"; done
-
-# Terminal 3 (IP 3)
-curl -s http://localhost:8080/ -w "%{http_code}\n"  # Should get 429 or 200 depending on timing
+# Expected: 40 × 200, 1 × 429
 ```
 
-### View Violations
+**Test global burst limit:**
+```bash
+# Simulate 100 different IPs making requests
+# Terminal 1-5: Each runs this loop with different sleep offset
+for i in {1..200}; do
+  curl -s http://localhost:8080/ 2>&1 | head -c1
+  sleep 0.1
+done
+
+# When total requests hit 500 in 1 minute, all IPs get 429
+```
+
+### View Violations in Logs
 
 ```bash
-docker compose logs app | grep "rate limit exceeded"
+docker compose logs app | grep "rate limit exceeded" | tail -10
 ```
 
 ## Monitoring & Metrics
 
-### Track Violations
+### Key Metrics to Track
 
-Extract logs to identify patterns:
+1. **Violations by limiter type**: Which limiter is being hit most?
+2. **Top offending IPs**: Which IPs exceed per-IP limits?
+3. **Global spike detection**: Is global burst being hit repeatedly?
+4. **Peak hours**: When do violations spike?
+
+### Example Log Analysis
 
 ```bash
-# Count violations per IP
-docker compose logs app | grep "Per-IP rate limit exceeded" | grep -oP '(?<="client_ip": ")[^"]+' | sort | uniq -c
+# Count violations per limiter
+docker compose logs app | grep "rate limit exceeded" | grep -oP '(?<="limiter": ")[^"]+' | sort | uniq -c
 
-# Count violations per endpoint
-docker compose logs app | grep "rate limit exceeded" | grep -oP '(?<="path": ")[^"]+' | sort | uniq -c
+# Top 10 offending IPs
+docker compose logs app | grep "Per-IP rate limit" | grep -oP '(?<="client_ip": ")[^"]+' | sort | uniq -c | sort -rn | head -10
+
+# Global violations over time
+docker compose logs app | grep "Global rate limit exceeded" | wc -l
 ```
 
 ### Recommended Alerts
 
-- Alert if any single IP exceeds 100 violations per hour
-- Alert if global bucket violations exceed 10 per minute
-- Alert if violations spike unexpectedly (DDoS detection)
+- Alert if any IP exceeds 100 per-IP violations per hour
+- Alert if global violations spike (> 20 in 5 minutes)
+- Alert if 50+ different IPs hit limits simultaneously (DDoS indicator)
 
 ## Performance Considerations
 
-- **Cache-backed**: Uses Redis/APCu for microsecond lookups
-- **Independent buckets**: Each IP has isolated state
-- **Atomic operations**: Token consumption is thread-safe
-- **Memory efficient**: Minimal storage per IP (typically <1KB per active IP)
-- **Zero blocking**: Failed requests respond immediately without computation
+- **Cache-backed**: Uses Redis for microsecond-level lookups
+- **Atomic operations**: Thread-safe token consumption
+- **Minimal memory**: ~1-2KB per active IP
+- **Zero blocking**: Failed requests return immediately
+- **Compound efficiency**: Both per-IP limiters checked atomically
+
+## Architecture
+
+```
+RateLimiter (Event Listener)
+    ├─ Per-IP Check (Compound)
+    │   ├─ per_ten_minutes (Fixed Window)
+    │   └─ per_thirty_seconds (Token Bucket)
+    └─ Global Burst Check (Token Bucket)
+```
+
+- **Layer**: Integration (Listener)
+- **Dependencies**: Symfony HttpKernel, PSR LoggerInterface
+- **Per-IP**: Uses client IP as key
+- **Global**: Uses fixed key 'global' for single shared bucket
 
 ## Disabling Rate Limiting (Development Only)
 
-To disable rate limiting during development:
+Comment out the listener in `src/Listener/RateLimiter.php`:
 
-**Option 1: Comment out listener**
 ```php
-// In src/Listener/RateLimitListener.php
 // #[AsEventListener(event: KernelEvents::REQUEST, priority: 50)]
-final class RateLimitListener { ... }
+final class RateLimiter { ... }
 ```
-
-**Option 2: Environment variable**
-```bash
-# In .env.local
-DISABLE_RATE_LIMIT=1
-```
-
-Then check in listener:
-```php
-if ($_ENV['DISABLE_RATE_LIMIT'] ?? false) {
-    return;
-}
-```
-
-## Architecture Integration
-
-- **Generic Layer**: Uses Symfony HttpKernel components
-- **Integration Layer**: Listener in `src/Listener/RateLimitListener.php`
-- **No core logic impact**: Business logic unaffected
-- **Layered design compliant**: Respects Deptrac architecture rules
 
 ## Files
 
-- `config/packages/rate_limiter.yaml` - Configuration
-- `src/Listener/RateLimitListener.php` - Implementation
+- `config/packages/rate_limiter.yaml` - Configuration (4 limiters)
+- `src/Listener/RateLimiter.php` - Implementation (per-IP + global)
 - `config/services.yaml` - Service wiring
 
 ## References
 
 - [Symfony Rate Limiter Documentation](https://symfony.com/doc/current/rate_limiter.html)
 - [Token Bucket Algorithm](https://en.wikipedia.org/wiki/Token_bucket)
+- [Fixed Window Algorithm](https://en.wikipedia.org/wiki/Rate_limiting)
 - [HTTP 429 Status Code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429)
-- [Distributed Rate Limiting](https://en.wikipedia.org/wiki/Rate_limiting)
+- [Compound Rate Limiting](https://en.wikipedia.org/wiki/Compound_limiter)

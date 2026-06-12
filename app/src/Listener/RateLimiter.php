@@ -15,7 +15,8 @@ use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 final class RateLimiter
 {
     public function __construct(
-        private RateLimiterFactoryInterface $limiterFactory,
+        private RateLimiterFactoryInterface $limiterPerIp,
+        private RateLimiterFactoryInterface $limiterGlobalBurst,
         private LoggerInterface $logger,
     ) {
     }
@@ -29,24 +30,50 @@ final class RateLimiter
         $request = $event->getRequest();
         $clientIp = $request->getClientIp() ?? 'unknown';
 
-        $limiter = $this->limiterFactory->create($clientIp);
-        $limit = $limiter->consume(1);
+        // Check per-IP compound limiter (includes per_ten_minutes + per_thirty_seconds)
+        $perIpLimiter = $this->limiterPerIp->create($clientIp);
+        $perIpLimit = $perIpLimiter->consume(1);
 
-        if (!$limit->isAccepted()) {
-            $this->logger->warning('Rate limit exceeded', [
+        if (!$perIpLimit->isAccepted()) {
+            $retryAfterSeconds = $perIpLimit->getRetryAfter()->getTimestamp() - time();
+            $this->logger->warning('Per-IP rate limit exceeded', [
                 'client_ip' => $clientIp,
                 'method' => $request->getMethod(),
                 'path' => $request->getPathInfo(),
-                'retry_after_timestamp' => $limit->getRetryAfter()->getTimestamp(),
+                'limiter' => 'compound (per_ten_minutes + per_thirty_seconds)',
+                'retry_after_seconds' => $retryAfterSeconds,
             ]);
 
             $event->setResponse(new Response(
                 'Too Many Requests',
                 Response::HTTP_TOO_MANY_REQUESTS,
-                ['Retry-After' => '30 seconds']
+                ['Retry-After' => (string) $retryAfterSeconds]
             ));
 
-            return; // Reject the request.
+            return;
+        }
+
+        // Check global burst limiter (protects against distributed attacks)
+        $globalLimiter = $this->limiterGlobalBurst->create('global');
+        $globalLimit = $globalLimiter->consume(1);
+
+        if (!$globalLimit->isAccepted()) {
+            $retryAfterSeconds = $globalLimit->getRetryAfter()->getTimestamp() - time();
+            $this->logger->warning('Global rate limit exceeded', [
+                'client_ip' => $clientIp,
+                'method' => $request->getMethod(),
+                'path' => $request->getPathInfo(),
+                'limiter' => 'global_burst',
+                'retry_after_seconds' => $retryAfterSeconds,
+            ]);
+
+            $event->setResponse(new Response(
+                'Too Many Requests',
+                Response::HTTP_TOO_MANY_REQUESTS,
+                ['Retry-After' => (string) $retryAfterSeconds]
+            ));
+
+            return;
         }
     }
 }
