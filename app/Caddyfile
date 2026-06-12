@@ -8,15 +8,15 @@ http:// {
     redir https://{host}{uri} permanent
 }
 
-# Block health endpoints on public ports - they're ONLY on :8081
-# This prevents attackers from reaching /health/* via internet-facing ports
-@health_path {
-    path /health/*
-}
-
 # Main app - serves public traffic (80/443)
-# Health endpoints are explicitly blocked here (see @health_path matcher)
+# Health endpoints are explicitly blocked here
 :443, :80 {
+    # Block health endpoints on public ports - they're ONLY for internal :8081
+    # This prevents attackers from reaching /health/* via internet-facing ports
+    @health_path {
+        path /health/*
+    }
+    
     # REJECT health check requests - they're only for internal use on :8081
     handle @health_path {
         respond "Not Found" 404
