@@ -8,14 +8,22 @@ http:// {
     redir https://{host}{uri} permanent
 }
 
-# Main app - serves both HTTP (from redirect) and HTTPS (from Kubernetes Ingress)
-# Listen on all hosts (Kubernetes/NodePort uses server IP as Host header)
-# NOTE: This port (80/443) does NOT serve /health/* endpoints (they're on internal port 8081)
+# Block health endpoints on public ports - they're ONLY on :8081
+# This prevents attackers from reaching /health/* via internet-facing ports
+@health_path {
+    path /health/*
+}
+
+# Main app - serves public traffic (80/443)
+# Health endpoints are explicitly blocked here (see @health_path matcher)
 :443, :80 {
+    # REJECT health check requests - they're only for internal use on :8081
+    handle @health_path {
+        respond "Not Found" 404
+    }
+    
     root * /app/public
     encode gzip
-    # php_server routes ALL requests to PHP
-    # Symfony application routing (@Route) determines what gets handled
     php_server
 }
 
@@ -30,9 +38,9 @@ http:// {
 #
 # These requests:
 # - Are NOT subject to rate limiting (RateLimiter listener skips /health/*)
-# - Are NOT reachable from the internet (only accessible internally in cluster)
+# - Are NOT reachable from the internet (blocked on :80/:443, only on :8081)
 # - Are NOT exposed via Kubernetes Service or Ingress
-# - Provide zero DDoS attack surface
+# - Provide ZERO DDoS attack surface
 #
 :8081 {
     root * /app/public
