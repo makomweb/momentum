@@ -10,7 +10,17 @@ http:// {
 
 # Main app - serves both HTTP (from redirect) and HTTPS (from Kubernetes Ingress)
 # Listen on all hosts (Kubernetes/NodePort uses server IP as Host header)
+# NOTE: Health endpoints are NOT exposed on this port - they're internal only on :8081
 :443, :80 {
+    root * /app/public
+    encode gzip
+    php_server
+}
+
+# Internal health check endpoints - ONLY accessible from within the cluster
+# Kubelet probes connect to this port directly (not via Ingress)
+# Not exposed to external traffic, not subject to rate limiting
+:8081 {
     root * /app/public
     encode gzip
     php_server

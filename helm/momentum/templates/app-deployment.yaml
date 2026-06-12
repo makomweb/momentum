@@ -66,6 +66,9 @@ spec:
         imagePullPolicy: {{ .Values.app.pullPolicy }}
         ports:
         - containerPort: {{ .Values.app.port }}
+          name: http
+        - containerPort: 8081
+          name: health
         envFrom:
         - configMapRef:
             name: {{ include "momentum.fullname" . }}-config
@@ -74,13 +77,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health/live
-            port: {{ .Values.app.port }}
+            port: health
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health/ready
-            port: {{ .Values.app.port }}
+            port: health
           initialDelaySeconds: 10
           periodSeconds: 5
 
