@@ -13,6 +13,13 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-{{ include "momentum.fullname" . }}-rewrite@kubernetescrd
     {{- end }}
 spec:
+  tls:
+  - hosts:
+    - {{ .Values.ingress.hostname | quote }}
+    {{- range .Values.ingress.alternativeHostnames }}
+    - {{ . | quote }}
+    {{- end }}
+    secretName: {{ include "momentum.fullname" . }}-tls
   rules:
   - host: {{ .Values.ingress.hostname | quote }}
     http:
