@@ -28,6 +28,12 @@ final class RateLimiter
         }
 
         $request = $event->getRequest();
+
+        // Skip rate limiting for health check endpoints (Kubernetes probes)
+        if (str_starts_with($request->getPathInfo(), '/health/')) {
+            return;
+        }
+
         $clientIp = $request->getClientIp() ?? 'unknown';
 
         // Check per-IP compound limiter (includes per_ten_minutes + per_thirty_seconds)

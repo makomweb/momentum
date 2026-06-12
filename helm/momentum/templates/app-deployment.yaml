@@ -73,13 +73,13 @@ spec:
             name: {{ include "momentum.fullname" . }}-secret
         livenessProbe:
           httpGet:
-            path: /
+            path: /health/live
             port: {{ .Values.app.port }}
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /
+            path: /health/ready
             port: {{ .Values.app.port }}
           initialDelaySeconds: 10
           periodSeconds: 5
