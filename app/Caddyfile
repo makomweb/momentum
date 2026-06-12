@@ -1,7 +1,24 @@
-:8080
+# Disable auto HTTPS - let Kubernetes Ingress/cert-manager handle TLS certificates
+{
+    auto_https off
+}
 
-# Listen on all hosts (Kubernetes/NodePort uses server IP as Host header; localhost-only breaks routing)
-root * /app/public
-encode gzip
+# HTTP to HTTPS redirect for any domain (production)
+http:// {
+    redir https://{host}{uri} permanent
+}
 
-php_server
+# Main app - serves both HTTP (from redirect) and HTTPS (from Kubernetes Ingress)
+# Listen on all hosts (Kubernetes/NodePort uses server IP as Host header)
+:443, :80 {
+    root * /app/public
+    encode gzip
+    php_server
+}
+
+# Development fallback on port 8080 (no HTTPS needed locally)
+:8080 {
+    root * /app/public
+    encode gzip
+    php_server
+}
