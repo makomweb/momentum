@@ -1,11 +1,24 @@
 framework:
     rate_limiter:
-        per_ip_rate_limiter:
-            policy: 'token_bucket'
-            limit: 30
-            interval: '30 seconds'
+        per_ten_minutes:
+            policy: 'fixed_window'
+            limit: 40
+            interval: '10 minutes'
         
-        global_rate_limiter:
+        per_thirty_seconds:
             policy: 'token_bucket'
-            limit: 60
-            interval: '1 minute'
+            limit: 10
+            rate:
+                amount: 5
+                interval: '30 seconds'
+        
+        per_ip:
+            policy: 'compound'
+            limiters: [per_ten_minutes, per_thirty_seconds]
+        
+        global_burst:
+            policy: 'token_bucket'
+            limit: 500
+            rate:
+                amount: 200
+                interval: '1 minute'

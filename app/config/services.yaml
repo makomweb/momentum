@@ -44,11 +44,11 @@ services:
         arguments:
             $filesystem: '@activity_stream.filesystem'
 
-    # Rate limit listener configuration
-    App\Listener\RateLimitListener:
+    # Inject Rate limiter factories into rate limiter listener
+    App\Listener\RateLimiter:
         arguments:
-            $perIpRateLimiter: '@limiter.per_ip_rate_limiter'
-            $globalRateLimiter: '@limiter.global_rate_limiter'
+            $limiterPerIp: '@limiter.per_ip'
+            $limiterGlobalBurst: '@limiter.global_burst'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

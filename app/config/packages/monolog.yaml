@@ -10,6 +10,7 @@ when@dev:
                 path: "php://stderr"
                 level: debug
                 channels: ["!event", "!doctrine"]
+                formatter: App\Instrumentation\CustomLineFormatter
             console:
                 type: console
                 process_psr_3_messages: false
@@ -31,7 +32,7 @@ when@prod:
                 type: stream
                 path: php://stderr
                 level: info
-                formatter: monolog.formatter.json
+                formatter: App\Instrumentation\CustomLineFormatter
             console:
                 type: console
                 process_psr_3_messages: false

@@ -104,7 +104,7 @@
 
         async function refreshActivities() {
             try {
-                const response = await fetch('/api/activities/recent');
+                const response = await fetch('/api/activities');
                 const activities = await response.json();
 
                 const container = document.getElementById('activitiesContainer');
