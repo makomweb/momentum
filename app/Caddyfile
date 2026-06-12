@@ -3,16 +3,13 @@
     auto_https off
 }
 
-# HTTP to HTTPS redirect for any domain (production)
-http:// {
-    redir https://{host}{uri} permanent
-}
-
-# Main app - serves public traffic (80/443)
+# Main app - serves public traffic on port 8080
+# In production: Kubernetes Ingress handles TLS termination on :443
+# This container only needs to listen on :8080 and :8081
 # Health endpoints are explicitly blocked here
-:443, :80 {
-    # Block health endpoints on public ports - they're ONLY for internal :8081
-    # This prevents attackers from reaching /health/* via internet-facing ports
+:8080 {
+    # Block health endpoints on public port - they're ONLY for internal :8081
+    # This prevents attackers from reaching /health/* via internet-facing port
     @health_path {
         path /health/*
     }
@@ -38,19 +35,11 @@ http:// {
 #
 # These requests:
 # - Are NOT subject to rate limiting (RateLimiter listener skips /health/*)
-# - Are NOT reachable from the internet (blocked on :80/:443, only on :8081)
+# - Are NOT reachable from the internet (blocked on :8080, only on :8081)
 # - Are NOT exposed via Kubernetes Service or Ingress
 # - Provide ZERO DDoS attack surface
 #
 :8081 {
-    root * /app/public
-    encode gzip
-    php_server
-}
-
-# Development fallback on port 8080 (no HTTPS needed locally)
-# Used for local docker-compose development
-:8080 {
     root * /app/public
     encode gzip
     php_server
