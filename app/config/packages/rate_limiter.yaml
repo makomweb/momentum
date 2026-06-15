@@ -2,15 +2,13 @@ framework:
     rate_limiter:
         per_ten_minutes:
             policy: 'fixed_window'
-            limit: 40
+            limit: 100
             interval: '10 minutes'
         
         per_thirty_seconds:
             policy: 'token_bucket'
-            limit: 10
-            rate:
-                amount: 5
-                interval: '30 seconds'
+            limit: 100
+            rate: { interval: '30 seconds', amount: 5 }
         
         per_ip:
             policy: 'compound'

@@ -30,16 +30,15 @@ final class RateLimiter
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        // Skip rate limiting for health check endpoints (Kubernetes probes)
-        if (str_starts_with($path, '/health/')) {
-            $this->logger->debug('Skipping rate limiter for health endpoint', [
+        if (array_any(['/health/', '/_wdt/'], static fn ($item) => str_starts_with($path, $item))) {
+            $this->logger->debug('Skipping rate limiter', [
                 'path' => $path,
             ]);
 
             return;
         }
 
-        $this->logger->debug('Checking rate limiter for request', [
+        $this->logger->debug('Checking rate limiter for path', [
             'path' => $path,
         ]);
 
@@ -51,11 +50,21 @@ final class RateLimiter
 
         if (!$perIpLimit->isAccepted()) {
             $retryAfterSeconds = $perIpLimit->getRetryAfter()->getTimestamp() - time();
-            $this->logger->warning('Per-IP rate limit exceeded', [
+
+            // Determine which limiter caused the rate limit by checking the limit value
+            $limiterName = match ($perIpLimit->getLimit()) {
+                10 => 'per_thirty_seconds',
+                40 => 'per_ten_minutes',
+                default => 'unknown',
+            };
+
+            $this->logger->warning(sprintf('Per-IP rate limit exceeded (retry after: %d s)', $retryAfterSeconds), [
                 'client_ip' => $clientIp,
                 'method' => $request->getMethod(),
                 'path' => $request->getPathInfo(),
-                'limiter' => 'compound (per_ten_minutes + per_thirty_seconds)',
+                'limiter' => $limiterName,
+                'limit_value' => $perIpLimit->getLimit(),
+                'remaining_tokens' => $perIpLimit->getRemainingTokens(),
                 'retry_after_seconds' => $retryAfterSeconds,
             ]);
 
