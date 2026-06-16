@@ -9,14 +9,6 @@
 
             <div class="relative" id="userDropdown">
                 <button onclick="document.getElementById('menu').classList.toggle('hidden')" class="flex items-center gap-2 focus:outline-none">
-                    <!-- {% if profile_picture %}
-                        <img src="{{ profile_picture }}" alt="{{ user.name }}" class="w-8 h-8 rounded-full object-cover">
-                    {% else %}
-                        <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sky-500 text-sm font-semibold">
-                            {{ user.name | first | upper }}
-                        </div>
-                    {% endif %} -->
-
                     <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sky-500 text-sm font-semibold">
                         {{ user.name | first | upper }}
                     </div>

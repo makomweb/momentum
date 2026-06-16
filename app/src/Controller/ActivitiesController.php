@@ -31,7 +31,6 @@ final class ActivitiesController extends AbstractController
         return $this->render('activities/index.html.twig', [
             'name' => $user->getName(),
             'strava_user_id' => $user->getStravaId(),
-            'profile_picture' => $user->getProfilePictureMedium(),
             'activities' => $activities,
             'isConfigured' => $isConfigured,
         ]);
