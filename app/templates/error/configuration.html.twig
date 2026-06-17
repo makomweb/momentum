@@ -2,32 +2,32 @@
 
 {% block title %}Configuration Required - Momentum{% endblock %}
 
+{% block body_class %}class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen flex flex-col"{% endblock %}
+
 {% block body %}
-<body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen flex flex-col">
-    {% include 'components/_header.html.twig' %}
+{% include 'components/_header.html.twig' %}
 
-    <div class="flex-1 flex items-center justify-center px-4 py-12">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md text-center space-y-6">
-            <div class="text-5xl">⚙️</div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-2">Configuration Required</h1>
-                <p class="text-gray-600 text-lg leading-relaxed">
-                    {{ message }}
-                </p>
-            </div>
-            <div class="bg-gray-100 rounded px-3 py-2 font-mono text-sm text-gray-700">
-                Error 400
-            </div>
+<div class="flex-1 flex items-center justify-center px-4 py-12">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md text-center space-y-6">
+        <div class="text-5xl">⚙️</div>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Configuration Required</h1>
+            <p class="text-gray-600 text-lg leading-relaxed">
+                {{ message }}
+            </p>
+        </div>
+        <div class="bg-gray-100 rounded px-3 py-2 font-mono text-sm text-gray-700">
+            Error 400
+        </div>
 
-            <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                <a href="{{ path('profile_settings') }}" class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition transform hover:-translate-y-0.5 shadow-lg">
-                    Configure Profile
-                </a>
-                <a href="{{ path('activities') }}" class="px-6 py-2 bg-white hover:bg-gray-50 text-indigo-600 border-2 border-indigo-600 rounded-lg font-semibold transition">
-                    Back to Activities
-                </a>
-            </div>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <a href="{{ path('profile_settings') }}" class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition transform hover:-translate-y-0.5 shadow-lg">
+                Configure Profile
+            </a>
+            <a href="{{ path('activities') }}" class="px-6 py-2 bg-white hover:bg-gray-50 text-indigo-600 border-2 border-indigo-600 rounded-lg font-semibold transition">
+                Back to Activities
+            </a>
         </div>
     </div>
-</body>
+</div>
 {% endblock %}
