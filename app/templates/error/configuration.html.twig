@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuration Required - Momentum</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+{% extends "base.html.twig" %}
+
+{% block title %}Configuration Required - Momentum{% endblock %}
+
+{% block body %}
 <body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen flex flex-col">
     {% include 'components/_header.html.twig' %}
 
@@ -33,4 +30,4 @@
         </div>
     </div>
 </body>
-</html>
+{% endblock %}
