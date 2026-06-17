@@ -71,6 +71,11 @@ build-dockerhub:
   image: docker:27
   services:
     - name: docker:27-dind
+  needs:
+    - phpstan
+    - php-cs-fixer
+    - phpunit
+    - deptrac
   rules:
     # Push image only after merge (push pipeline) to master
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
@@ -82,11 +87,18 @@ build-dockerhub:
 
 deploy-hetzner:
   stage: deploy
-  image: alpine:3.20
+  image: alpine/helm:latest
+  needs:
+    - build-dockerhub
   rules:
     # Deploy only after merge (push pipeline) to master
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
       when: manual
+  environment:
+    name: production
+    kubernetes:
+      namespace: default
+  timeout: 15 minutes
   before_script:
     - apk add --no-cache openssh-client bash curl tar
     - mkdir -p ~/.ssh
@@ -101,9 +113,6 @@ deploy-hetzner:
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" "bash -lc 'set -euo pipefail
       tar -xzf /tmp/helm-chart.tgz -C /tmp
-      if ! command -v helm >/dev/null 2>&1; then
-        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-      fi
       export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
       helm upgrade momentum /tmp/helm/momentum \
         --reuse-values \
