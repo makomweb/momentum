@@ -18,8 +18,9 @@ qa:
     - apt-get update && apt-get install -y git
     - curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   script:
+    - cd app
     # Create .env from .env.example for composer post-install scripts
-    - cp app/.env.example app/.env
+    - cp .env.example .env
     # Install dependencies without running post-install scripts
     - composer install --no-interaction --prefer-dist --no-scripts
     - composer qa
