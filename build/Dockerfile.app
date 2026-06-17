@@ -31,6 +31,9 @@ RUN install-php-extensions \
 # Copy vendor from builder
 COPY --from=builder /app/vendor /app/vendor
 
+# Copy pre-built assets from builder (vendor + compiled CSS/JS)
+COPY --from=builder /app/public/assets /app/public/assets
+
 # Copy pre-built Tailwind CSS from builder (fixes missing CSS in production)
 COPY --from=builder /app/var/tailwind /app/var/tailwind
 
