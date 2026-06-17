@@ -89,15 +89,5 @@
             text.textContent = 'Sync from Strava';
         }
     }
-
-    function updateActivityCount() {
-        const count = document.querySelectorAll('[data-activity-card]').length;
-        const countEl = document.getElementById('activityCount');
-        if (count > 0) {
-            countEl.textContent = `(${count})`;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', updateActivityCount);
 </script>
 {% endblock %}
