@@ -3,6 +3,7 @@ FROM composer:latest as builder
 WORKDIR /app
 
 # Copy app structure needed for composer scripts and Tailwind build
+COPY app/.env /app/.env
 COPY app/composer.json app/composer.lock /app/
 COPY app/bin /app/bin
 COPY app/config /app/config
