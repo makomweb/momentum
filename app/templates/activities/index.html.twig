@@ -87,8 +87,7 @@
                 }
 
                 setTimeout(async () => {
-                    await refreshActivities();
-                    showToast('Activities synced successfully!', 'success');
+                    showToast('Tap "Momentum" to refresh UI!', 'success');
                 }, 2000);
 
             } catch (error) {
@@ -99,32 +98,6 @@
                 icon.classList.remove('animate-spin');
                 icon.style.display = 'inline';
                 text.textContent = 'Sync from Strava';
-            }
-        }
-
-        async function refreshActivities() {
-            try {
-                const response = await fetch('/api/activities');
-                const activities = await response.json();
-
-                const container = document.getElementById('activitiesContainer');
-                
-                if (activities.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-span-full text-center p-12">
-                            <div class="text-5xl mb-3 opacity-50">📭</div>
-                            <h3 class="text-lg font-semibold mb-1">No activities yet</h3>
-                            <p class="text-gray-600 text-sm">Click the "Sync from Strava" button to fetch your activities</p>
-                        </div>
-                    `;
-                    document.getElementById('activityCount').textContent = '';
-                    return;
-                }
-
-                location.reload();
-
-            } catch (error) {
-                console.error('Error refreshing activities:', error);
             }
         }
 
