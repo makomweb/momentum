@@ -7,9 +7,9 @@
 {% block body %}
 {% include 'components/_header.html.twig' %}
 
-<div class="flex-grow">
-    <div class="flex items-center justify-between p-6 border-b">
-        <h2 class="text-2xl font-bold">Recent Activities <span id="activityCount" class="text-gray-600">(20)</span></h2>
+<div class="flex-grow space-y-4 p-4">
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold">Recent Activities</h2>
         <button class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-semibold" id="syncButton" onclick="syncActivities()">
             <span id="syncIcon">↻</span>
             <span id="syncText">Sync from Strava</span>
@@ -30,7 +30,7 @@
 
     <div class="{% if not isConfigured %}opacity-50 pointer-events-none{% endif %}">
         {% if activities is not empty %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6" id="activitiesContainer">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="activitiesContainer">
                 {% for activity in activities %}
                     <div class="relative">
                         {% include 'activity/_card.html.twig' %}
@@ -57,8 +57,6 @@
 
 {% include 'components/_footer.html.twig' %}
 
-<div id="toastContainer" class="fixed top-0 right-0 p-4 space-y-2 pointer-events-none"></div>
-
 <script>
     async function syncActivities() {
         const button = document.getElementById('syncButton');
@@ -69,8 +67,6 @@
         icon.style.display = 'inline-block';
         icon.classList.add('animate-spin');
         text.textContent = 'Syncing...';
-
-        showToast('Sync started in background', 'success');
 
         try {
             const response = await fetch('/sync', {
@@ -84,12 +80,7 @@
                 throw new Error('Sync failed');
             }
 
-            setTimeout(async () => {
-                showToast('Tap "Momentum" to refresh UI!', 'success');
-            }, 2000);
-
         } catch (error) {
-            showToast('Error syncing activities. Please try again.', 'error');
             console.error('Sync error:', error);
         } finally {
             button.disabled = false;
@@ -97,34 +88,6 @@
             icon.style.display = 'inline';
             text.textContent = 'Sync from Strava';
         }
-    }
-
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        
-        const bgColors = {
-            success: 'bg-green-500',
-            error: 'bg-red-500',
-            info: 'bg-blue-500'
-        };
-
-        const icons = {
-            success: '✓',
-            error: '✕',
-            info: 'ℹ'
-        };
-
-        toast.className = `${bgColors[type]} text-white px-4 py-3 rounded shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto`;
-        toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.remove('animate-in');
-            toast.classList.add('animate-out', 'fade-out', 'slide-out-to-top-4', 'duration-300');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
     }
 
     function updateActivityCount() {
