@@ -13,18 +13,16 @@ variables:
 
 qa:
   stage: qa
-  image: docker:27
-  services:
-    - name: docker:27-dind
+  image: php:8.4-cli
+  before_script:
+    - apt-get update && apt-get install -y git
+    - curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   script:
-    - docker version
-    - docker compose version
-    - docker compose build composer
-    # Create .env from .env.example for composer post-install scripts (cache:clear, etc)
-    - docker compose run --rm composer bash -c 'cat app/.env.example > app/.env'
-    # Install dependencies so vendor/bin/phpstan exists (exit code 127 = command not found)
-    - docker compose run --rm composer install --no-interaction --prefer-dist --no-scripts
-    - docker compose run --rm composer qa
+    # Create .env from .env.example for composer post-install scripts
+    - cp app/.env.example app/.env
+    # Install dependencies without running post-install scripts
+    - composer install --no-interaction --prefer-dist --no-scripts
+    - composer qa
 
 build-dockerhub:
   stage: build
