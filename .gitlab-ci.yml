@@ -21,9 +21,9 @@ qa:
     - docker compose version
     - docker compose build composer
     # Create .env from .env.example for composer post-install scripts (cache:clear, etc)
-    - docker compose run --rm composer cp app/.env.example app/.env
+    - docker compose run --rm composer php -r "copy('app/.env.example', 'app/.env');"
     # Install dependencies so vendor/bin/phpstan exists (exit code 127 = command not found)
-    - docker compose run --rm composer install --no-interaction --prefer-dist
+    - docker compose run --rm composer install --no-interaction --prefer-dist --no-scripts
     - docker compose run --rm composer qa
 
 build-dockerhub:
