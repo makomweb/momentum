@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Copy app structure needed for composer scripts and asset builds
 COPY app/composer.json app/composer.lock /app/
+COPY app/.env.example /app/.env
 COPY app/bin /app/bin
 COPY app/config /app/config
 COPY app/public /app/public
@@ -12,14 +13,14 @@ COPY app/templates /app/templates
 COPY app/assets /app/assets
 
 # Install dependencies without post-install scripts
-# (cache:clear needs .env which isn't available during build)
+# (needs .env which is created from .env.example above)
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+# Build Tailwind CSS for production first (templates needed for class scanning)
+RUN APP_ENV=prod bin/console tailwind:build --minify
 
 # Compile Asset Mapper (generates hashed CSS/JS files in public/assets/)
 RUN APP_ENV=prod bin/console asset-map:compile
-
-# Build Tailwind CSS for production (templates needed for class scanning)
-RUN APP_ENV=prod bin/console tailwind:build --minify
 
 FROM dunglas/frankenphp:latest
 
