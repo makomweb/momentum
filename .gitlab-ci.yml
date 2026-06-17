@@ -1,8 +1,7 @@
 stages:
-  - install
+  - dependencies
   - qa
-  - build
-  - deploy
+  - delivery
 
 variables:
   # Use plain TCP to docker:dind in GitLab SaaS runners (buildx otherwise fails with TLS env context)
@@ -14,7 +13,7 @@ variables:
 
 # Install dependencies with composer
 composer-install:
-  stage: install
+  stage: dependencies
   image: composer:latest
   script:
     - cd app
@@ -66,8 +65,8 @@ deptrac:
     - cd app
     - vendor/bin/deptrac analyse --report-uncovered
 
-build-dockerhub:
-  stage: build
+build-image:
+  stage: delivery
   image: docker:27
   services:
     - name: docker:27-dind
@@ -85,11 +84,11 @@ build-dockerhub:
     - docker buildx create --use
     - docker buildx build --platform "$IMAGE_PLATFORMS" -f build/Dockerfile.app -t "$IMAGE_NAME:$CI_COMMIT_SHA" -t "$IMAGE_NAME:latest" . --push
 
-deploy-hetzner:
-  stage: deploy
-  image: alpine/helm:latest
+deploy:
+  stage: delivery
+  image: alpine:latest
   needs:
-    - build-dockerhub
+    - build-image
   rules:
     # Deploy only after merge (push pipeline) to master
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
