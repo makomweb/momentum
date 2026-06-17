@@ -41,8 +41,11 @@ COPY --from=builder /app/public/assets /app/public/assets
 # Copy pre-built Tailwind CSS from builder (used by TailwindCssAssetCompiler)
 COPY --from=builder /app/var/tailwind /app/var/tailwind
 
-# Copy app files (but not .env - it's gitignored and provided via env vars in production)
+# Copy app files (including .env.example which will be used as .env in production)
 COPY app /app
+
+# Create .env from .env.example (in production, all values come from environment variables)
+RUN cp /app/.env.example /app/.env
 
 ENTRYPOINT ["frankenphp"]
 CMD ["run", "--config", "/app/Caddyfile"]
