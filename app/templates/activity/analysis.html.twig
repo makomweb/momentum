@@ -1,320 +1,320 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Momentum - Activity - Analysis</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+{% extends "base.html.twig" %}
+
+{% block title %}Momentum - Activity - Analysis{% endblock %}
+
+{% block body_class %}class="bg-gray-50 flex flex-col min-h-screen"{% endblock %}
+
+{% block head_scripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
-    {% include 'components/_header.html.twig' %}
+{% endblock %}
 
-    <div class="flex-grow space-y-4 p-6">
-        <!-- Activity Header -->
-        <div>
-            <h2 class="text-2xl font-bold mb-1">{{ metaData.getActivityName() }}</h2>
-            <div class="text-sm text-gray-600">{{ metaData.getStartDateLocalTimeFormatted() }}</div>
-        </div>
+{% block body %}
+{% include 'components/_header.html.twig' %}
 
-        <!-- Stats -->
-        {% include 'activity/_stats.html.twig' with { metaData: metaData, activityData: activityData } %}
-
-        <!-- Training Zones -->
-        <div>
-            <h2 class="text-2xl font-bold mb-2">Training Zones</h2>
-            <p class="text-sm text-gray-600 mb-4">
-                <span class="font-semibold">Zone Validation:</span>
-                Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.
-            </p>
-
-            {% if metaData.usesPaceZones() and paceZoneSessions | length > 0 %}
-               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                    {% if metaData.isRun() %}
-                       <div>
-                           {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
-                       </div>
-                   {% endif %}
-                  <div>
-                      {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
-                  </div>
-                  <div>
-                      {% include 'activity/_pace_zones.html.twig' with { paceStats: paceStats } %}
-                  </div>
-                  <div>
-                      {% include 'activity/_pace_zone_transitions.html.twig' with { paceZoneSessions: paceZoneSessions } %}
-                  </div>
-               </div>
-
-            {% elseif not metaData.usesPaceZones() and heartRateZoneSessions | length > 0 %}
-               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                   <div>
-                       {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
-                   </div>
-                   {% if metaData.isRun() %}
-                       <div>
-                           {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
-                       </div>
-                   {% endif %}
-               </div>
-
-            {% elseif app.user.getTreshold().isZero() %}
-                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-                    To see zone analysis, please configure your threshold pace in your profile settings.
-                </div>
-            {% endif %}
-        </div>
-        <!-- Charts -->
-        {% if not activityData.hasAnyData() %}
-            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-                No data available for analysis. This activity may not have complete stream data.
-            </div>
-        {% else %}
-            {% if activityData.hasVelocityData() %}
-                <div>
-                    <h3 class="text-2xl font-bold mb-3">{{ metaData.getVelocityChartTitle() }}</h3>
-                    <div class="h-80 bg-white rounded border p-4">
-                        <canvas id="velocityChart"></canvas>
-                    </div>
-                </div>
-            {% endif %}
-
-            {% if activityData.hasHeartRateData() %}
-                <div>
-                    <h3 class="text-2xl font-bold mb-3">Heart Rate Over Time</h3>
-                    <div class="h-80 bg-white rounded border p-4">
-                        <canvas id="heartRateChart"></canvas>
-                    </div>
-                </div>
-            {% endif %}
-        {% endif %}
+<div class="flex-grow space-y-4 p-4">
+    <!-- Activity Header -->
+    <div>
+        <h2 class="text-2xl font-bold mb-1">{{ metaData.getActivityName() }}</h2>
+        <div class="text-sm text-gray-600">{{ metaData.getStartDateLocalTimeFormatted() }}</div>
     </div>
 
-    <script>
-        const zoneBackgroundPlugin = {
-            id: 'zoneBackground',
-            afterDatasetsDraw(chart) {
-                if (!chart.data.zoneColors || chart.data.zoneColors.length === 0) return;
+    <!-- Stats -->
+    {% include 'activity/_stats.html.twig' with { metaData: metaData, activityData: activityData } %}
 
-                const ctx = chart.ctx;
-                const xScale = chart.scales.x;
-                const yScale = chart.scales.y;
-                const chartArea = chart.chartArea;
-                const labels = chart.data.labels;
+    <!-- Training Zones -->
+    <div>
+        <h2 class="text-2xl font-bold mb-2">Training Zones</h2>
+        <p class="text-sm text-gray-600 mb-4">
+            <span class="font-semibold">Zone Validation:</span>
+            Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.
+        </p>
 
-                chart.data.zoneColors.forEach(zone => {
-                    const startIdx = labels.findIndex(label => label >= zone.startTime);
-                    const endIdx = labels.findIndex(label => label > zone.endTime);
-                    
-                    if (startIdx === -1) return;
-                    
-                    const startPixel = startIdx < labels.length 
-                        ? xScale.getPixelForValue(startIdx)
-                        : chartArea.left;
-                    const endPixel = endIdx === -1 
-                        ? chartArea.right
-                        : xScale.getPixelForValue(endIdx);
-
-                    ctx.save();
-                    ctx.fillStyle = zone.color + '44';
-                    ctx.fillRect(
-                        Math.max(startPixel, chartArea.left),
-                        chartArea.top,
-                        Math.min(endPixel, chartArea.right) - Math.max(startPixel, chartArea.left),
-                        chartArea.bottom - chartArea.top
-                    );
-
-                    if (endPixel - startPixel > 40) {
-                        ctx.fillStyle = zone.color;
-                        ctx.font = '11px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(
-                            zone.name,
-                            (Math.max(startPixel, chartArea.left) + Math.min(endPixel, chartArea.right)) / 2,
-                            chartArea.top + 15
-                        );
-                    }
-                    ctx.restore();
-                });
-            }
-        };
-        
-        Chart.register(zoneBackgroundPlugin);
-        
-        {% if activityData.hasVelocityData() %}
-        const velocityCtx = document.getElementById('velocityChart').getContext('2d');
-        const velocityData = {
-            labels: [
-                {% for point in activityData.getVelocityRawPoints() %}
-                    '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
-                {% endfor %}
-            ],
-            datasets: [
-                {
-                    label: 'Velocity',
-                    data: [
-                        {% for point in activityData.getVelocityRawPoints() %}
-                            {{ point.value }}{{ not loop.last ? ',' : '' }}
-                        {% endfor %}
-                    ],
-                    borderColor: 'rgba(102, 126, 234, 0.5)',
-                    backgroundColor: 'rgba(102, 126, 234, 0.08)',
-                    borderWidth: 1.5,
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 0,
-                    pointHoverRadius: 6
-                },
-                {
-                    label: 'EMA-{{ activityData.getMovingAveragePeriod() }}',
-                    data: [
-                        {% for point in activityData.getVelocityAveragePoints() %}
-                            {{ point.value }}{{ not loop.last ? ',' : '' }}
-                        {% endfor %}
-                    ],
-                    borderColor: '#e74c3c',
-                    backgroundColor: 'rgba(231, 76, 60, 0)',
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: false,
-                    pointRadius: 0,
-                    pointHoverRadius: 6
-                }
-            ]
-        };
-        
         {% if metaData.usesPaceZones() and paceZoneSessions | length > 0 %}
-            velocityData.zoneColors = [
-                {% for session in paceZoneSessions %}
-                    {
-                        name: '{{ session.zone.value }}',
-                        startTime: '{{ session.start.format('H:i:s') }}',
-                        endTime: '{{ session.end.format('H:i:s') }}',
-                        color: '{{ session.zone.getColor() }}'
-                    }{{ not loop.last ? ',' : '' }}
-                {% endfor %}
-            ];
-        {% endif %}
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                {% if metaData.isRun() %}
+                   <div>
+                       {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
+                   </div>
+               {% endif %}
+              <div>
+                  {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
+              </div>
+              <div>
+                  {% include 'activity/_pace_zones.html.twig' with { paceStats: paceStats } %}
+              </div>
+              <div>
+                  {% include 'activity/_pace_zone_transitions.html.twig' with { paceZoneSessions: paceZoneSessions } %}
+              </div>
+           </div>
 
-        new Chart(velocityCtx, {
-            type: 'line',
-            data: velocityData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: { padding: 15, font: { size: 13, weight: 600 } }
-                    },
-                    zoneBackground: {}
-                },
-                scales: {
-                    y: {
-                        {% if metaData.useInverseScale() %}
-                        reverse: true,
-                        min: {{ metaData.getChartYAxisMinValue() }},
-                        max: {{ metaData.getChartYAxisMaxValue() }},
-                        {% else %}
-                        min: 0,
-                        {% endif %}
-                        ticks: { font: { size: 12 } },
-                        title: {
-                            display: true,
-                            text: '{{ metaData.getChartYAxisLabel() }}',
-                            font: { size: 13, weight: 600 }
-                        }
-                    },
-                    x: {
-                        ticks: { font: { size: 12 } },
-                        title: {
-                            display: true,
-                            text: 'Time (HH:MM:SS)',
-                            font: { size: 13, weight: 600 }
-                        }
-                    }
-                }
-            }
-        });
+        {% elseif not metaData.usesPaceZones() and heartRateZoneSessions | length > 0 %}
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+               <div>
+                   {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
+               </div>
+               {% if metaData.isRun() %}
+                   <div>
+                       {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
+                   </div>
+               {% endif %}
+           </div>
+
+        {% elseif app.user.getTreshold().isZero() %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                To see zone analysis, please configure your threshold pace in your profile settings.
+            </div>
+        {% endif %}
+    </div>
+    <!-- Charts -->
+    {% if not activityData.hasAnyData() %}
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+            No data available for analysis. This activity may not have complete stream data.
+        </div>
+    {% else %}
+        {% if activityData.hasVelocityData() %}
+            <div>
+                <h3 class="text-2xl font-bold mb-3">{{ metaData.getVelocityChartTitle() }}</h3>
+                <div class="h-80 bg-white border-gray-200 rounded border p-4">
+                    <canvas id="velocityChart"></canvas>
+                </div>
+            </div>
         {% endif %}
 
         {% if activityData.hasHeartRateData() %}
-        const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
-        const heartRateData = {
-            labels: [
-                {% for point in activityData.getHeartRatePoints() %}
-                    '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
-                {% endfor %}
-            ],
-            datasets: [{
-                label: 'Heart Rate (bpm)',
+            <div>
+                <h3 class="text-2xl font-bold mb-3">Heart Rate Over Time</h3>
+                <div class="h-80 bg-white border-gray-200 rounded border p-4">
+                    <canvas id="heartRateChart"></canvas>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<script>
+    const zoneBackgroundPlugin = {
+        id: 'zoneBackground',
+        afterDatasetsDraw(chart) {
+            if (!chart.data.zoneColors || chart.data.zoneColors.length === 0) return;
+
+            const ctx = chart.ctx;
+            const xScale = chart.scales.x;
+            const yScale = chart.scales.y;
+            const chartArea = chart.chartArea;
+            const labels = chart.data.labels;
+
+            chart.data.zoneColors.forEach(zone => {
+                const startIdx = labels.findIndex(label => label >= zone.startTime);
+                const endIdx = labels.findIndex(label => label > zone.endTime);
+                
+                if (startIdx === -1) return;
+                
+                const startPixel = startIdx < labels.length 
+                    ? xScale.getPixelForValue(startIdx)
+                    : chartArea.left;
+                const endPixel = endIdx === -1 
+                    ? chartArea.right
+                    : xScale.getPixelForValue(endIdx);
+
+                ctx.save();
+                ctx.fillStyle = zone.color + '44';
+                ctx.fillRect(
+                    Math.max(startPixel, chartArea.left),
+                    chartArea.top,
+                    Math.min(endPixel, chartArea.right) - Math.max(startPixel, chartArea.left),
+                    chartArea.bottom - chartArea.top
+                );
+
+                if (endPixel - startPixel > 40) {
+                    ctx.fillStyle = zone.color;
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(
+                        zone.name,
+                        (Math.max(startPixel, chartArea.left) + Math.min(endPixel, chartArea.right)) / 2,
+                        chartArea.top + 15
+                    );
+                }
+                ctx.restore();
+            });
+        }
+    };
+    
+    Chart.register(zoneBackgroundPlugin);
+    
+    {% if activityData.hasVelocityData() %}
+    const velocityCtx = document.getElementById('velocityChart').getContext('2d');
+    const velocityData = {
+        labels: [
+            {% for point in activityData.getVelocityRawPoints() %}
+                '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
+            {% endfor %}
+        ],
+        datasets: [
+            {
+                label: 'Velocity',
                 data: [
-                    {% for point in activityData.getHeartRatePoints() %}
+                    {% for point in activityData.getVelocityRawPoints() %}
                         {{ point.value }}{{ not loop.last ? ',' : '' }}
                     {% endfor %}
                 ],
-                borderColor: '#e74c3c',
-                backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                borderWidth: 2,
+                borderColor: 'rgba(102, 126, 234, 0.5)',
+                backgroundColor: 'rgba(102, 126, 234, 0.08)',
+                borderWidth: 1.5,
                 tension: 0.4,
                 fill: true,
                 pointRadius: 0,
                 pointHoverRadius: 6
-            }]
-        };
-        
-        {% if heartRateZoneSessions | length > 0 %}
-            heartRateData.zoneColors = [
-                {% for session in heartRateZoneSessions %}
-                    {
-                        name: '{{ session.zone.value }}',
-                        startTime: '{{ session.start.format('H:i:s') }}',
-                        endTime: '{{ session.end.format('H:i:s') }}',
-                        color: '{{ session.zone.getColor() }}'
-                    }{{ not loop.last ? ',' : '' }}
-                {% endfor %}
-            ];
-        {% endif %}
+            },
+            {
+                label: 'EMA-{{ activityData.getMovingAveragePeriod() }}',
+                data: [
+                    {% for point in activityData.getVelocityAveragePoints() %}
+                        {{ point.value }}{{ not loop.last ? ',' : '' }}
+                    {% endfor %}
+                ],
+                borderColor: '#e74c3c',
+                backgroundColor: 'rgba(231, 76, 60, 0)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: false,
+                pointRadius: 0,
+                pointHoverRadius: 6
+            }
+        ]
+    };
+    
+    {% if metaData.usesPaceZones() and paceZoneSessions | length > 0 %}
+        velocityData.zoneColors = [
+            {% for session in paceZoneSessions %}
+                {
+                    name: '{{ session.zone.value }}',
+                    startTime: '{{ session.start.format('H:i:s') }}',
+                    endTime: '{{ session.end.format('H:i:s') }}',
+                    color: '{{ session.zone.getColor() }}'
+                }{{ not loop.last ? ',' : '' }}
+            {% endfor %}
+        ];
+    {% endif %}
 
-        new Chart(heartRateCtx, {
-            type: 'line',
-            data: heartRateData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: { padding: 15, font: { size: 13, weight: 600 } }
-                    },
-                    zoneBackground: {}
+    new Chart(velocityCtx, {
+        type: 'line',
+        data: velocityData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { padding: 15, font: { size: 13, weight: 600 } }
                 },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        ticks: { font: { size: 12 } },
-                        title: {
-                            display: true,
-                            text: 'Heart Rate (bpm)',
-                            font: { size: 13, weight: 600 }
-                        }
-                    },
-                    x: {
-                        ticks: { font: { size: 12 } },
-                        title: {
-                            display: true,
-                            text: 'Time (HH:MM:SS)',
-                            font: { size: 13, weight: 600 }
-                        }
+                zoneBackground: {}
+            },
+            scales: {
+                y: {
+                    {% if metaData.useInverseScale() %}
+                    reverse: true,
+                    min: {{ metaData.getChartYAxisMinValue() }},
+                    max: {{ metaData.getChartYAxisMaxValue() }},
+                    {% else %}
+                    min: 0,
+                    {% endif %}
+                    ticks: { font: { size: 12 } },
+                    title: {
+                        display: true,
+                        text: '{{ metaData.getChartYAxisLabel() }}',
+                        font: { size: 13, weight: 600 }
+                    }
+                },
+                x: {
+                    ticks: { font: { size: 12 } },
+                    title: {
+                        display: true,
+                        text: 'Time (HH:MM:SS)',
+                        font: { size: 13, weight: 600 }
                     }
                 }
             }
-        });
-        {% endif %}
-    </script>
+        }
+    });
+    {% endif %}
 
-    {% include 'components/_footer.html.twig' %}
-</body>
-</html>
+    {% if activityData.hasHeartRateData() %}
+    const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
+    const heartRateData = {
+        labels: [
+            {% for point in activityData.getHeartRatePoints() %}
+                '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Heart Rate (bpm)',
+            data: [
+                {% for point in activityData.getHeartRatePoints() %}
+                    {{ point.value }}{{ not loop.last ? ',' : '' }}
+                {% endfor %}
+            ],
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 0,
+            pointHoverRadius: 6
+        }]
+    };
+    
+    {% if heartRateZoneSessions | length > 0 %}
+        heartRateData.zoneColors = [
+            {% for session in heartRateZoneSessions %}
+                {
+                    name: '{{ session.zone.value }}',
+                    startTime: '{{ session.start.format('H:i:s') }}',
+                    endTime: '{{ session.end.format('H:i:s') }}',
+                    color: '{{ session.zone.getColor() }}'
+                }{{ not loop.last ? ',' : '' }}
+            {% endfor %}
+        ];
+    {% endif %}
+
+    new Chart(heartRateCtx, {
+        type: 'line',
+        data: heartRateData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { padding: 15, font: { size: 13, weight: 600 } }
+                },
+                zoneBackground: {}
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: { font: { size: 12 } },
+                    title: {
+                        display: true,
+                        text: 'Heart Rate (bpm)',
+                        font: { size: 13, weight: 600 }
+                    }
+                },
+                x: {
+                    ticks: { font: { size: 12 } },
+                    title: {
+                        display: true,
+                        text: 'Time (HH:MM:SS)',
+                        font: { size: 13, weight: 600 }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+</script>
+
+{% include 'components/_footer.html.twig' %}
+{% endblock %}

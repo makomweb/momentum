@@ -1,14 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Momentum</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-indigo-500 to-purple-600 flex flex-col min-h-screen">
-    <main class="w-full max-w-sm mx-auto px-4 py-8 flex-grow flex items-center justify-center">
-        <div class="bg-white rounded-lg shadow-2xl w-full p-8 text-center">
+{% extends "base.html.twig" %}
+
+{% block title %}Login - Momentum{% endblock %}
+
+{% block body_class %}class="bg-gradient-to-br from-indigo-500 to-purple-600 flex flex-col min-h-screen"{% endblock %}
+
+{% block body %}
+<main class="flex-1 flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-sm">
+        <div class="bg-white rounded-lg shadow-2xl p-8 text-center">
             <img src="{{ asset('images/logo.png') }}" alt="Momentum logo" class="max-w-32 h-auto mx-auto mb-4">
             <h1 class="text-3xl font-bold mb-2">Momentum</h1>
             <p class="text-gray-600 mb-6">Analyze your Strava activities</p>
@@ -41,8 +40,8 @@
                 <p>We'll request access to your activities. Your data is used only for syncing your activities to Momentum.</p>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 
-    {% include 'components/_footer.html.twig' %}
-</body>
-</html>
+{% include 'components/_footer.html.twig' %}
+{% endblock %}
