@@ -1,4 +1,5 @@
 stages:
+  - install
   - qa
   - build
   - deploy
@@ -11,19 +12,59 @@ variables:
   IMAGE_NAME: "makomweb/momentum"
   IMAGE_PLATFORMS: "linux/amd64"
 
-qa:
-  stage: qa
-  image: php:8.4-cli
-  before_script:
-    - apt-get update && apt-get install -y git
-    - curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Install dependencies with composer
+composer-install:
+  stage: install
+  image: composer:latest
   script:
     - cd app
-    # Create .env from .env.example for composer post-install scripts
     - cp .env.example .env
-    # Install dependencies without running post-install scripts
     - composer install --no-interaction --prefer-dist --no-scripts
-    - composer qa
+  artifacts:
+    paths:
+      - app/vendor/
+      - app/.env
+    expire_in: 1 hour
+
+# Static Analysis with PHPStan
+phpstan:
+  stage: qa
+  image: php:8.4-cli
+  needs:
+    - composer-install
+  script:
+    - cd app
+    - vendor/bin/phpstan analyse --memory-limit=1G
+
+# Code Style with PHP-CS-Fixer
+php-cs-fixer:
+  stage: qa
+  image: php:8.4-cli
+  needs:
+    - composer-install
+  script:
+    - cd app
+    - vendor/bin/php-cs-fixer check
+
+# Unit Tests with PHPUnit
+phpunit:
+  stage: qa
+  image: php:8.4-cli
+  needs:
+    - composer-install
+  script:
+    - cd app
+    - bin/phpunit
+
+# Architecture Validation with Deptrac
+deptrac:
+  stage: qa
+  image: php:8.4-cli
+  needs:
+    - composer-install
+  script:
+    - cd app
+    - vendor/bin/deptrac analyse --report-uncovered
 
 build-dockerhub:
   stage: build
