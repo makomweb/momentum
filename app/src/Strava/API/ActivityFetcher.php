@@ -23,7 +23,7 @@ final readonly class ActivityFetcher
     public function fetch(
         int $stravaUserId,
         int $page = 1,
-        int $perPage = 200,
+        int $perPage = 30,
         ?int $after = null,
         ?int $before = null,
     ): array {

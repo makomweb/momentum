@@ -6,12 +6,14 @@ namespace App\Strava;
 
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityFetcher;
+use Psr\Log\LoggerInterface;
 
 final readonly class Synchronizer
 {
     public function __construct(
         private ActivityRepositoryInterface $repository,
         private ActivityFetcher $fetcher,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -20,26 +22,18 @@ final readonly class Synchronizer
      */
     public function sync(int $stravaUserId, ReportProgressInterface $progress): void
     {
-        $page = 0;
-        $pageSize = 200;
+        $page = 1;
         $last = $this->repository->findLastOrNull($stravaUserId);
 
-        if ($last) {
-            $progress->onStart($last);
-        }
+        $progress->onStart($last);
+
+        $after = $last
+            ? $last->getStartDateUniversalTime()->getTimestamp()
+            : new \DateTimeImmutable('2026-03-31 00:00:01Z')->getTimestamp();
 
         do {
-            $activities = $this->fetcher->fetch(
-                stravaUserId: $stravaUserId,
-                page: ++$page,
-                perPage: $pageSize,
-                // after: new \DateTimeImmutable('2026-01-01 00:00:01Z')->getTimestamp(),
-                after: $last
-                    ? $last->getStartDateUniversalTime()->getTimestamp()
-                    : new \DateTimeImmutable('2026-01-01 00:00:01Z')->getTimestamp()
-                // after: new \DateTimeImmutable('2022-03-08 00:00:01Z')->getTimestamp(),
-                // before: new \DateTimeImmutable('2023-01-01 00:00:01Z')->getTimestamp()
-            );
+            $activities = $this->tryFetch($stravaUserId, $page, $after);
+            ++$page;
 
             foreach ($activities as $activity) {
                 $existing = $this->repository->findOrNull($stravaUserId, $activity->getId());
@@ -55,5 +49,28 @@ final readonly class Synchronizer
         } while (!empty($activities));
 
         $progress->onFinish();
+    }
+
+    /**
+     * Fetch activities with pagination and time filtering.
+     *
+     * @return Activity[]
+     */
+    private function tryFetch(int $stravaUserId, int $page, int $after): array
+    {
+        try {
+            return $this->fetcher->fetch(stravaUserId: $stravaUserId, page: $page, after: $after);
+        } catch (\Throwable $ex) {
+            $this->logger->error(
+                sprintf('Fetching page %d after %s has failed due to %s (%s)',
+                    $page,
+                    \DateTimeImmutable::createFromTimestamp($after)->format(\DateTimeImmutable::RFC2822),
+                    $ex->getMessage(),
+                    get_class($ex)
+                )
+            );
+
+            return [];
+        }
     }
 }
