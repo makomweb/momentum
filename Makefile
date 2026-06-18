@@ -48,6 +48,7 @@ composer-install:
 
 maintain:
 	@echo "Running composer update -W..."
+	docker compose run --rm composer show --outdated
 	docker compose run --rm composer update -W
 
 composer-update: maintain
