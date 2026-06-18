@@ -92,7 +92,6 @@ deploy:
   rules:
     # Deploy only after merge (push pipeline) to master
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
-      when: manual
   environment:
     name: production
     kubernetes:
