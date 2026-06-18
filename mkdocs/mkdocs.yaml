@@ -15,4 +15,7 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Home: ./index.md
-  - Architecture: ./architecture/index.md
+  - Architecture:
+      - Overview: ./architecture/index.md
+      - Deptrac Validation: ./architecture/deptrac.md
+      - Design Patterns: ./architecture/patterns.md
