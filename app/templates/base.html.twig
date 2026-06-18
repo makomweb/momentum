@@ -24,7 +24,7 @@
         {% block body %}{% endblock %}
         
         {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
+            {{ importmap('app') }}
             <script type="module">
                 import 'app';
             </script>
