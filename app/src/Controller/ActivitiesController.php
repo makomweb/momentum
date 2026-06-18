@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\ActivityRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -17,7 +18,7 @@ final class ActivitiesController extends AbstractController
     {
     }
 
-    #[Route('/activities', name: 'activities', methods: ['GET'])]
+    #[Route('/activities', name: 'activities_index', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function index(): Response
     {
@@ -34,5 +35,17 @@ final class ActivitiesController extends AbstractController
             'activities' => $activities,
             'isConfigured' => $isConfigured,
         ]);
+    }
+
+    #[Route('/activities', name: 'activities_clear', methods: ['DELETE'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function clear(): JsonResponse
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $this->activityRepository->wipe($user->getStravaId());
+
+        return $this->json(['message' => 'cleard all activites', 'strava_user_id' => $user->getStravaId()]);
     }
 }

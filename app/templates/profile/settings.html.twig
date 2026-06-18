@@ -65,7 +65,10 @@
                     <button type="submit" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold rounded transition">
                         Save settings
                     </button>
-                    <a href="{{ path('activities') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm font-semibold rounded transition text-center no-underline">
+                    <button type="button" onclick="resetCache()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded transition">
+                        Reset cache
+                    </button>
+                    <a href="{{ path('activities_index') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm font-semibold rounded transition text-center no-underline">
                         Back to activities
                     </a>
                 </div>
@@ -83,4 +86,30 @@
 </main>
 
 {% include 'components/_footer.html.twig' %}
+
+<script>
+function resetCache() {
+    if (confirm('Are you sure you want to reset the cache? This will delete all cached activities.')) {
+        fetch('{{ path("activities_clear") }}', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Failed to reset cache');
+        })
+        .then(data => {
+            alert('Cache reset successfully');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error resetting cache: ' + error.message);
+        });
+    }
+}
+</script>
 {% endblock %}

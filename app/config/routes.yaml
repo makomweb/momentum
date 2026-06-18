@@ -16,4 +16,4 @@ root_shortcut:
     path: /
     controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
     defaults:
-        route: 'activities'
+        route: 'activities_index'
