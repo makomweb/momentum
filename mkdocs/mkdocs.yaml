@@ -19,3 +19,4 @@ nav:
       - Overview: ./architecture/index.md
       - Deptrac Validation: ./architecture/deptrac.md
       - Design Patterns: ./architecture/patterns.md
+      - Strava API Flow: ./architecture/strava-flow.md
