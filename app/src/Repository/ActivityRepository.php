@@ -90,4 +90,16 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
     {
         return Activity::fromRawData($entity->getData());
     }
+
+    public function wipe(int $stravaUserId): void
+    {
+        /** @var ActivityEntity[] $entities */
+        $entities = $this->findBy(['stravaUserId' => $stravaUserId]);
+
+        foreach ($entities as $entity) {
+            $this->getEntityManager()->remove($entity);
+        }
+
+        $this->getEntityManager()->flush();
+    }
 }
