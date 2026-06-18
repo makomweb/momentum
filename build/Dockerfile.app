@@ -22,6 +22,9 @@ RUN APP_ENV=prod bin/console tailwind:build --minify
 # Compile Asset Mapper (generates hashed CSS/JS files in public/assets/)
 RUN APP_ENV=prod bin/console asset-map:compile
 
+# Generate importmap.json from importmap.php entries
+RUN APP_ENV=prod bin/console importmap:install
+
 FROM dunglas/frankenphp:latest
 
 WORKDIR /app
