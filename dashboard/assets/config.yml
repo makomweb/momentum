@@ -8,11 +8,11 @@ theme: default
 
 services:
   - name: "Application"
-    icon: "fas fa-shoe-prints"
+    icon: "fas fa-desktop"
     items:
       - name: "Application"
         subtitle: "Symfony + MySQL"
-        icon: "fas fa-desktop"
+        icon: "fa-brands fa-symfony"
         url: "http://localhost:8080"
         target: "_blank"
       - name: "Profiler"
@@ -37,6 +37,10 @@ services:
         subtitle: "Strava"
         icon: "fa-brands fa-strava"
         url: "https://www.strava.com/settings/api"
+      - name: "API Documentation"
+        subtitle: "Strava"
+        icon: "fa-brands fa-strava"
+        url: "https://developers.strava.com/docs/reference/"
       - name: "Documentation"
         subtitle: "MKDocs"
         icon: "fas fa-diagram-project"

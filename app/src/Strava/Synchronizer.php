@@ -28,11 +28,13 @@ final readonly class Synchronizer
         $progress->onStart($last);
 
         $after = $last
-            ? $last->getStartDateUniversalTime()->getTimestamp()
-            : new \DateTimeImmutable('2026-03-31 00:00:01Z')->getTimestamp();
+            ? $last->getStartDateUniversalTime()
+            : new \DateTimeImmutable('2026-03-31 00:00:01Z');
+
+        $this->logger->info(sprintf('Fetch all activities after %s', $after->format(\DateTimeImmutable::RFC2822)));
 
         do {
-            $activities = $this->tryFetch($stravaUserId, $page, $after);
+            $activities = $this->tryFetch($stravaUserId, $page, $after->getTimestamp());
             ++$page;
 
             foreach ($activities as $activity) {

@@ -25,6 +25,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
 
     public function onSkip(Activity $activity): void
     {
+        $this->logger->info(sprintf('Activity %s already in database present', $activity));
     }
 
     public function onSuccess(Activity $activity): void
