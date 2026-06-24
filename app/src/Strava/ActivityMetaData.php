@@ -125,8 +125,7 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Swim' => 10,
-            'Walk' => 15,
+            'Run', 'Swim', 'Walk' => 15,
             'Hike' => 20,
             default => 0,
         };
