@@ -1,7 +1,7 @@
 <div class="bg-white border border-gray-200 rounded p-4 flex flex-col lg:h-full overflow-hidden" style="max-height: 15rem;">
     <h3 class="text-sm font-semibold mb-3 flex-shrink-0">Heart Rate Zones</h3>
     <div class="space-y-2 overflow-y-auto flex-grow">
-        {% for stat in hrStats %}
+        {% for stat in hr_stats %}
             {% set zone = stat.zone %}
             {% set percentage = stat.duration_percentage %}
             <div>

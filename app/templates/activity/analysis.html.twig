@@ -14,12 +14,12 @@
 <div class="flex-grow space-y-4 p-4">
     <!-- Activity Header -->
     <div>
-        <h2 class="text-2xl font-bold mb-1">{{ metaData.getActivityName() }}</h2>
-        <div class="text-sm text-gray-600">{{ metaData.getStartDateLocalTimeFormatted() }}</div>
+        <h2 class="text-2xl font-bold mb-1">{{ meta_data.getActivityName() }}</h2>
+        <div class="text-sm text-gray-600">{{ meta_data.getStartDateLocalTimeFormatted() }}</div>
     </div>
 
     <!-- Stats -->
-    {% include 'activity/_stats.html.twig' with { metaData: metaData, activityData: activityData } %}
+    {% include 'activity/_stats.html.twig' with { meta_data: meta_data, activity_data: activity_data } %}
 
     <!-- Training Zones -->
     <div>
@@ -29,30 +29,30 @@
             Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.
         </p>
 
-        {% if metaData.usesPaceZones() and paceZoneSessions | length > 0 %}
+        {% if meta_data.usesPaceZones() and pace_zone_sessions | length > 0 %}
            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                {% if metaData.isRun() %}
+                {% if meta_data.isRun() %}
                    <div>
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
                    </div>
                {% endif %}
               <div>
-                  {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
+                  {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
               </div>
               <div>
-                  {% include 'activity/_pace_zones.html.twig' with { paceStats: paceStats } %}
+                  {% include 'activity/_pace_zones.html.twig' with { pace_stats: pace_stats } %}
               </div>
               <div>
-                  {% include 'activity/_pace_zone_transitions.html.twig' with { paceZoneSessions: paceZoneSessions } %}
+                  {% include 'activity/_pace_zone_transitions.html.twig' with { pace_zone_sessions: pace_zone_sessions } %}
               </div>
            </div>
 
-        {% elseif not metaData.usesPaceZones() and heartRateZoneSessions | length > 0 %}
+        {% elseif not meta_data.usesPaceZones() and heart_rate_zone_sessions | length > 0 %}
            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                <div>
-                   {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
+                   {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
                </div>
-               {% if metaData.isRun() %}
+               {% if meta_data.isRun() %}
                    <div>
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
                    </div>
@@ -66,21 +66,21 @@
         {% endif %}
     </div>
     <!-- Charts -->
-    {% if not activityData.hasAnyData() %}
+    {% if not activity_data.hasAnyData() %}
         <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
             No data available for analysis. This activity may not have complete stream data.
         </div>
     {% else %}
-        {% if activityData.hasVelocityData() %}
+        {% if activity_data.hasVelocityData() %}
             <div>
-                <h3 class="text-2xl font-bold mb-3">{{ metaData.getVelocityChartTitle() }}</h3>
+                <h3 class="text-2xl font-bold mb-3">{{ meta_data.getVelocityChartTitle() }}</h3>
                 <div class="h-80 bg-white border-gray-200 rounded border p-4">
                     <canvas id="velocityChart"></canvas>
                 </div>
             </div>
         {% endif %}
 
-        {% if activityData.hasHeartRateData() %}
+        {% if activity_data.hasHeartRateData() %}
             <div>
                 <h3 class="text-2xl font-bold mb-3">Heart Rate Over Time</h3>
                 <div class="h-80 bg-white border-gray-200 rounded border p-4">
@@ -142,11 +142,11 @@
     
     Chart.register(zoneBackgroundPlugin);
     
-    {% if activityData.hasVelocityData() %}
+    {% if activity_data.hasVelocityData() %}
     const velocityCtx = document.getElementById('velocityChart').getContext('2d');
     const velocityData = {
         labels: [
-            {% for point in activityData.getVelocityRawPoints() %}
+            {% for point in activity_data.getVelocityRawPoints() %}
                 '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
             {% endfor %}
         ],
@@ -154,7 +154,7 @@
             {
                 label: 'Velocity',
                 data: [
-                    {% for point in activityData.getVelocityRawPoints() %}
+                    {% for point in activity_data.getVelocityRawPoints() %}
                         {{ point.value }}{{ not loop.last ? ',' : '' }}
                     {% endfor %}
                 ],
@@ -167,9 +167,9 @@
                 pointHoverRadius: 6
             },
             {
-                label: 'EMA-{{ activityData.getMovingAveragePeriod() }}',
+                label: 'EMA-{{ activity_data.getMovingAveragePeriod() }}',
                 data: [
-                    {% for point in activityData.getVelocityAveragePoints() %}
+                    {% for point in activity_data.getVelocityAveragePoints() %}
                         {{ point.value }}{{ not loop.last ? ',' : '' }}
                     {% endfor %}
                 ],
@@ -184,9 +184,9 @@
         ]
     };
     
-    {% if metaData.usesPaceZones() and paceZoneSessions | length > 0 %}
+    {% if meta_data.usesPaceZones() and pace_zone_sessions | length > 0 %}
         velocityData.zoneColors = [
-            {% for session in paceZoneSessions %}
+            {% for session in pace_zone_sessions %}
                 {
                     name: '{{ session.zone.value }}',
                     startTime: '{{ session.start.format('H:i:s') }}',
@@ -213,17 +213,17 @@
             },
             scales: {
                 y: {
-                    {% if metaData.useInverseScale() %}
+                    {% if meta_data.useInverseScale() %}
                     reverse: true,
-                    min: {{ metaData.getChartYAxisMinValue() }},
-                    max: {{ metaData.getChartYAxisMaxValue() }},
+                    min: {{ meta_data.getChartYAxisMinValue() }},
+                    max: {{ meta_data.getChartYAxisMaxValue() }},
                     {% else %}
                     min: 0,
                     {% endif %}
                     ticks: { font: { size: 12 } },
                     title: {
                         display: true,
-                        text: '{{ metaData.getChartYAxisLabel() }}',
+                        text: '{{ meta_data.getChartYAxisLabel() }}',
                         font: { size: 13, weight: 600 }
                     }
                 },
@@ -240,18 +240,18 @@
     });
     {% endif %}
 
-    {% if activityData.hasHeartRateData() %}
+    {% if activity_data.hasHeartRateData() %}
     const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
     const heartRateData = {
         labels: [
-            {% for point in activityData.getHeartRatePoints() %}
+            {% for point in activity_data.getHeartRatePoints() %}
                 '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
             {% endfor %}
         ],
         datasets: [{
             label: 'Heart Rate (bpm)',
             data: [
-                {% for point in activityData.getHeartRatePoints() %}
+                {% for point in activity_data.getHeartRatePoints() %}
                     {{ point.value }}{{ not loop.last ? ',' : '' }}
                 {% endfor %}
             ],
@@ -265,9 +265,9 @@
         }]
     };
     
-    {% if heartRateZoneSessions | length > 0 %}
+    {% if heart_rate_zone_sessions | length > 0 %}
         heartRateData.zoneColors = [
-            {% for session in heartRateZoneSessions %}
+            {% for session in heart_rate_zone_sessions %}
                 {
                     name: '{{ session.zone.value }}',
                     startTime: '{{ session.start.format('H:i:s') }}',
