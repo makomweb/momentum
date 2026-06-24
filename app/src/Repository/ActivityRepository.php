@@ -103,8 +103,12 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
         $this->getEntityManager()->flush();
     }
 
-    public function findById(int $id): ?ActivityEntity
+    public function findByStravaActivityId(int $stravaActivityId): ?ActivityEntity
     {
-        return $this->find($id);
+        $entity = $this->findOneBy([
+            'stravaActivityId' => $stravaActivityId,
+        ]);
+
+        return $entity;
     }
 }

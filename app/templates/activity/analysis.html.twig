@@ -423,7 +423,7 @@
         generateButton.classList.add('hidden');
         document.getElementById('loadingState').classList.remove('hidden');
 
-        fetch(`/api/activities/${activityId}/share`, {
+        fetch(`/activity/${activityId}/share`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

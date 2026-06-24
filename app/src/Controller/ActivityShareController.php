@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Api;
+namespace App\Controller;
 
 use App\Momentum\AthleteInterface;
 use App\Repository\ActivityRepository;
@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/activities', name: 'api_activities_')]
+#[Route('/activity', name: 'activity_')]
 final class ActivityShareController extends AbstractController
 {
     public function __construct(

@@ -24,7 +24,7 @@ final class ShareController extends AbstractController
     ) {
     }
 
-    #[Route('/share/{token}', name: 'activity', methods: ['GET'], requirements: ['token' => '[a-z0-9.]+'])]
+    #[Route('/share/{token}', name: 'activity', methods: ['GET'], requirements: ['token' => '[a-z0-9:.]+'])]
     public function view_shared_activity(string $token): Response
     {
         try {
@@ -35,7 +35,7 @@ final class ShareController extends AbstractController
             ], new Response(status: Response::HTTP_GONE));
         }
 
-        $activity = $this->activityRepository->findById($activityId);
+        $activity = $this->activityRepository->findByStravaActivityId($activityId);
 
         if (null === $activity) {
             return $this->render('share/not_found.html.twig', [], new Response(status: Response::HTTP_NOT_FOUND));
