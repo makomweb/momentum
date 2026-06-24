@@ -87,6 +87,7 @@ final class ProfileSettingsController extends AbstractController
         return $this->render('profile/settings.html.twig', [
             'treshold' => $treshold,
             'maxHeartRate' => $maxHeartRate,
+            'profile_picture' => $user->getProfilePictureMedium(),
             'csrf_token' => $this->csrfTokenManager->getToken('profile_settings')->getValue(),
         ]);
     }

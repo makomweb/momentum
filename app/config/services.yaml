@@ -62,5 +62,12 @@ services:
               arguments:
                 - '%env(CACHE_URL)%'
 
+    # Expose app version to Twig templates
+    App\Twig\GlobalVariables:
+        arguments:
+            $version: '%app.version%'
+        tags:
+            - { name: twig.extension }
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

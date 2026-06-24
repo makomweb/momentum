@@ -2,5 +2,5 @@ apiVersion: v2
 name: momentum
 description: Momentum running activity tracker with Strava integration
 type: application
-version: 0.1.0
-appVersion: 0.1.0
+version: 0.9.1
+appVersion: 0.9.1
