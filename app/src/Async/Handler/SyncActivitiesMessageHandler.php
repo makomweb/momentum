@@ -10,6 +10,8 @@ use App\Strava\API\TokenExpiredException;
 use App\Strava\Synchronizer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 #[AsMessageHandler]
 final readonly class SyncActivitiesMessageHandler
@@ -18,16 +20,14 @@ final readonly class SyncActivitiesMessageHandler
         private LoggerInterface $logger,
         private Synchronizer $synchronizer,
         private Client $stravaClient,
+        private CacheInterface $cache,
     ) {
     }
 
     public function __invoke(SyncActivitiesMessage $message): void
     {
-        $this->trySync($message->stravaUserId);
-    }
+        $stravaUserId = $message->stravaUserId;
 
-    private function trySync(int $stravaUserId): void
-    {
         $this->logger->info(sprintf('Syncing activities for user "%d"', $stravaUserId));
 
         $adapter = new ReportProgressAdapter($this->logger);
@@ -37,6 +37,13 @@ final readonly class SyncActivitiesMessageHandler
         } catch (TokenExpiredException $ex) {
             $this->tryRefreshTokenFor($stravaUserId);
             throw $ex;
+        } finally {
+            $this->cache->delete($message->getStatusCacheKey());
+            $this->cache->get($message->getStatusCacheKey(), function (ItemInterface $item): string {
+                $item->expiresAfter(10);
+
+                return 'complete';
+            });
         }
     }
 

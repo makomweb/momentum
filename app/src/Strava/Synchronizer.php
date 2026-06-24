@@ -29,7 +29,7 @@ final readonly class Synchronizer
 
         $after = $last
             ? $last->getStartDateUniversalTime()
-            : new \DateTimeImmutable('2026-03-31 00:00:01Z');
+            : new \DateTimeImmutable('2026-05-31 00:00:01Z');
 
         $this->logger->info(sprintf('Fetch all activities after %s', $after->format(\DateTimeImmutable::RFC2822)));
 

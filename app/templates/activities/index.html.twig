@@ -10,7 +10,7 @@
 <div class="flex-grow space-y-4 p-4">
     <div class="flex items-center justify-between">
         <h2 class="text-2xl font-bold">Recent Activities</h2>
-        <button class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-semibold" id="syncButton" onclick="syncActivities()">
+        <button class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-semibold" id="syncButton" onclick="handleSync()">
             <span id="syncIcon">↻</span>
             <span id="syncText">Sync from Strava</span>
         </button>
@@ -47,7 +47,7 @@
                 <div class="text-5xl mb-3 opacity-50">📭</div>
                 <h3 class="text-lg font-semibold mb-1">No activities yet</h3>
                 <p class="text-gray-600 mb-4 text-sm">Click the "Sync from Strava" button to fetch your activities</p>
-                <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium" onclick="syncActivities()">
+                <button class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-medium" onclick="handleSync()">
                     Sync Now
                 </button>
             </div>
@@ -58,34 +58,45 @@
 {% include 'components/_footer.html.twig' %}
 
 <script>
-    async function syncActivities() {
+    async function handleSync() {
         const button = document.getElementById('syncButton');
         const icon = document.getElementById('syncIcon');
         const text = document.getElementById('syncText');
 
         button.disabled = true;
-        icon.style.display = 'inline-block';
         icon.classList.add('animate-spin');
         text.textContent = 'Syncing...';
 
         try {
-            const response = await fetch('/sync', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Sync failed');
+            // Trigger sync
+            const syncResponse = await fetch('/sync', { method: 'POST' });
+            
+            if (!syncResponse.ok) {
+                throw new Error('Failed to start sync');
             }
 
+            const data = await syncResponse.json();
+            const jobId = data.jobId;
+
+            // Listen for completion via SSE
+            const eventSource = new EventSource(`/sync/status/${jobId}`);
+
+            eventSource.addEventListener('sync-complete', () => {
+                eventSource.close();
+                // Reload page to show new activities
+                window.location.reload();
+            });
+
+            eventSource.onerror = () => {
+                eventSource.close();
+                button.disabled = false;
+                icon.classList.remove('animate-spin');
+                text.textContent = 'Sync from Strava';
+            };
         } catch (error) {
             console.error('Sync error:', error);
-        } finally {
             button.disabled = false;
             icon.classList.remove('animate-spin');
-            icon.style.display = 'inline';
             text.textContent = 'Sync from Strava';
         }
     }

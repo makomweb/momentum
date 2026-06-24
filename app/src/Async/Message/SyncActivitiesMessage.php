@@ -8,12 +8,24 @@ use App\Momentum\AthleteInterface;
 
 final readonly class SyncActivitiesMessage
 {
-    public function __construct(public int $stravaUserId)
-    {
+    public function __construct(
+        public int $stravaUserId,
+        public string $jobId,
+    ) {
     }
 
     public static function for(AthleteInterface $athlete): self
     {
-        return new self($athlete->getStravaId());
+        return new self($athlete->getStravaId(), uniqid('sync_activities_', true));
+    }
+
+    public static function createStatusCacheKey(string $jobId): string
+    {
+        return sprintf('sync_activities_status_%s', $jobId);
+    }
+
+    public function getStatusCacheKey(): string
+    {
+        return self::createStatusCacheKey($this->jobId);
     }
 }
