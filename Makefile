@@ -1,6 +1,5 @@
 .PHONY: help build init symfony laravel up hint shell down composer-install maintain composer-update composer-require caddyfile logs open docker-push
 
-
 help:
 	@echo "Available targets:"
 	@echo "  boot                  Build images, install dependencies, start the stack, init database"

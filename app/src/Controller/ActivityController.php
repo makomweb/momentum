@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRateZone;
 use App\Momentum\PaceZone;
@@ -30,61 +29,42 @@ final class ActivityController extends AbstractController
     public function __construct(
         private ActivityRepository $activityRepository,
         private ActivityStreamCache $streamCache,
+        private AthleteInterface $athlete,
     ) {
-    }
-
-    #[Route('/latest', name: 'analysis', methods: ['GET'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function analyzeLatestActivity(): Response
-    {
-        $user = $this->getUser();
-        assert($user instanceof User);
-
-        $activity = $this->activityRepository->findLastOrNull($user->getStravaId());
-
-        if (null === $activity) {
-            return $this->render('activity/analysis_empty.html.twig');
-        }
-
-        return $this->renderResponse($user, $activity->getId());
     }
 
     #[Route('/{id}', name: 'analysis_by_id', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function analyzeActivityById(int $id): Response
     {
-        $user = $this->getUser();
-        assert($user instanceof User);
-
-        return $this->renderResponse($user, $id);
-    }
-
-    private function renderResponse(User $user, int $stravaActivityId): Response
-    {
-        $activity = $this->activityRepository->findOrNull($user->getStravaId(), $stravaActivityId);
+        $activity = $this->activityRepository->findOrNull($this->athlete->getStravaId(), $id);
 
         if (null === $activity) {
-            return $this->render('activity/analysis_empty.html.twig');
+            return $this->render('activity/analysis_empty.html.twig', [
+                'profile_picture' => $this->athlete->getProfilePicture(),
+            ]);
         }
 
         try {
             $stream = $this->streamCache->get(
-                $user->getStravaId(),
+                $this->athlete->getStravaId(),
                 $activity->getId()
             );
         } catch (\Exception) {
             return $this->render('activity/analysis_no_stream.html.twig', [
                 'activity_name' => $activity->getName(),
+                'profile_picture' => $this->athlete->getProfilePicture(),
             ]);
         }
 
         if (!$stream->hasData()) {
             return $this->render('activity/analysis_no_stream.html.twig', [
                 'activity_name' => $activity->getName(),
+                'profile_picture' => $this->athlete->getProfilePicture(),
             ]);
         }
 
-        $data = self::createActivityData($user, $activity, $stream);
+        $data = $this->createActivityData($activity, $stream);
 
         return $this->render('activity/analysis.html.twig', $data);
     }
@@ -100,12 +80,12 @@ final class ActivityController extends AbstractController
      *     hrStats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      * }
      */
-    private static function createActivityData(User $user, Activity $activity, ActivityStream $stream): array
+    private function createActivityData(Activity $activity, ActivityStream $stream): array
     {
         $activityData = new ActivityData($activity, $stream);
         $metaData = $activityData->getMetaData();
 
-        $sessions = self::createZoneSessions($user, $activity, $stream);
+        $sessions = self::createZoneSessions($this->athlete, $activity, $stream);
         $heartRateZoneSessions = $sessions->getHeartRateSessions();
         $paceZoneSessions = $sessions->getPaceZoneSessions();
 
@@ -122,6 +102,7 @@ final class ActivityController extends AbstractController
         $hrStatsArray = $hrStats->toArray($totalHrSeconds);
 
         return [
+            'profile_picture' => $this->athlete->getProfilePicture(),
             'activityData' => $activityData,
             'metaData' => $metaData,
             'metrics' => $metrics,

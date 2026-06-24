@@ -22,6 +22,11 @@ trait AthleteFactory
                 return 123;
             }
 
+            public function getName(): string
+            {
+                throw new \Exception('Not implemented');
+            }
+
             public function getTreshold(): Pace
             {
                 return $this->threshold;
@@ -30,6 +35,21 @@ trait AthleteFactory
             public function getMaxHeartRate(): HeartRate
             {
                 return $this->maxHeartRate;
+            }
+
+            public function getProfilePicture(): string
+            {
+                throw new \Exception('Not implemented');
+            }
+
+            public function isConfigured(): bool
+            {
+                throw new \Exception('Not implemented');
+            }
+
+            public function toArray(): array
+            {
+                throw new \Exception('Not implemented');
             }
         };
     }

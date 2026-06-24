@@ -16,7 +16,7 @@
         </button>
     </div>
 
-    {% if not isConfigured %}
+    {% if not is_configured %}
         <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 flex gap-3">
             <div class="text-xl flex-shrink-0">⚠️</div>
             <div class="flex-grow">
@@ -28,13 +28,13 @@
         </div>
     {% endif %}
 
-    <div class="{% if not isConfigured %}opacity-50 pointer-events-none{% endif %}">
+    <div class="{% if not is_configured %}opacity-50 pointer-events-none{% endif %}">
         {% if activities is not empty %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="activitiesContainer">
                 {% for activity in activities %}
                     <div class="relative">
                         {% include 'activity/_card.html.twig' %}
-                        {% if not isConfigured %}
+                        {% if not is_configured %}
                             <div class="absolute inset-0 flex items-center justify-center bg-white/70 rounded">
                                 <small class="text-gray-600 font-semibold text-center px-2">Configure profile to analyze</small>
                             </div>

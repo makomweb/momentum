@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\User;
+use App\Momentum\AthleteInterface;
 use App\Repository\ActivityRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,26 +14,21 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class ActivitiesController extends AbstractController
 {
-    public function __construct(private ActivityRepository $activityRepository)
-    {
+    public function __construct(
+        private ActivityRepository $activityRepository,
+        private AthleteInterface $athlete,
+    ) {
     }
 
     #[Route('/activities', name: 'activities_index', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function index(): Response
     {
-        $user = $this->getUser();
-        assert($user instanceof User);
-
-        $activities = $this->activityRepository->findRecentByStravaUser($user->getStravaId(), 20);
-
-        $isConfigured = !$user->getTreshold()->isZero() && $user->getMaxHeartRate()->isValid();
+        $activities = $this->activityRepository->findRecentByStravaUser($this->athlete->getStravaId(), 20);
 
         return $this->render('activities/index.html.twig', [
-            'name' => $user->getName(),
-            'strava_user_id' => $user->getStravaId(),
+            ...$this->athlete->toArray(),
             'activities' => $activities,
-            'isConfigured' => $isConfigured,
         ]);
     }
 
@@ -41,11 +36,8 @@ final class ActivitiesController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function clear(): JsonResponse
     {
-        $user = $this->getUser();
-        assert($user instanceof User);
+        $this->activityRepository->wipe($this->athlete->getStravaId());
 
-        $this->activityRepository->wipe($user->getStravaId());
-
-        return $this->json(['message' => 'cleard all activites', 'strava_user_id' => $user->getStravaId()]);
+        return $this->json(['message' => 'cleared all activites', 'strava_user_id' => $this->athlete->getStravaId()]);
     }
 }
