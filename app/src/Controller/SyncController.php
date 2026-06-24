@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Async\Message\SyncActivitiesMessage;
-use App\Entity\User;
+use App\Momentum\AthleteInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,6 +17,7 @@ final class SyncController extends AbstractController
 {
     public function __construct(
         private MessageBusInterface $bus,
+        private AthleteInterface $athlete,
     ) {
     }
 
@@ -24,10 +25,7 @@ final class SyncController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function sync(): JsonResponse
     {
-        $user = $this->getUser();
-        assert($user instanceof User);
-
-        $this->bus->dispatch(SyncActivitiesMessage::for($user));
+        $this->bus->dispatch(SyncActivitiesMessage::for($this->athlete));
 
         return $this->json([
             'status' => 'syncing',
