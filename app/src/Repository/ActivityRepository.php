@@ -102,4 +102,9 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
 
         $this->getEntityManager()->flush();
     }
+
+    public function findById(int $id): ?ActivityEntity
+    {
+        return $this->find($id);
+    }
 }
