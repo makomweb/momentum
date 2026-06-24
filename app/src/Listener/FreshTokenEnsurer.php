@@ -25,20 +25,28 @@ final class FreshTokenEnsurer
 
     public function __invoke(RequestEvent $event): void
     {
-        if ($event->isMainRequest()) {
-            $request = $event->getRequest();
-            if (!$this->isFullyAuthenticated($request)) {
-                $token = $this->tokenStorage->getToken();
-                if ($token instanceof RememberMeToken) {
-                    $user = $token->getUser();
-                    if ($user instanceof User) {
-                        try {
-                            $this->client->refreshTokenFor($user->getStravaId());
-                            self::setRedirect($event, $request);
-                        } catch (\Exception) {
-                            /* Token exchange failed - let it pass through, error handling will catch it. */
-                        }
-                    }
+        if (!$event->isMainRequest()) {
+            return;
+        }
+
+        $request = $event->getRequest();
+        $token = $this->tokenStorage->getToken();
+
+        if (!self::isFullyAuthenticated($request, $token)) {
+            $this->redirectWhenAuthenticated($event, $request, $token);
+        }
+    }
+
+    private function redirectWhenAuthenticated(RequestEvent $event, Request $request, ?TokenInterface $token): void
+    {
+        if ($token instanceof RememberMeToken) {
+            $user = $token->getUser();
+            if ($user instanceof User) {
+                try {
+                    $this->client->refreshTokenFor($user->getStravaId());
+                    self::setRedirect($event, $request);
+                } catch (\Exception) {
+                    /* Token exchange failed - let it pass through, error handling will catch it. */
                 }
             }
         }
@@ -48,21 +56,16 @@ final class FreshTokenEnsurer
     {
         $event->setResponse(
             new RedirectResponse(
-                $request->headers->get('referer') ??
+                // $request->headers->get('referer') ??
                 $request->getBasePath().'/activities'
             )
         );
     }
 
-    private function isFullyAuthenticated(Request $request): bool
+    private static function isFullyAuthenticated(Request $request, ?TokenInterface $token): bool
     {
-        if ($request->hasSession()) {
-            $token = $this->tokenStorage->getToken();
-            if ($token instanceof TokenInterface) {
-                return in_array('IS_AUTHENTICATED_FULLY', $token->getRoleNames(), strict: true);
-            }
-        }
-
-        return false;
+        return $request->hasSession() && $token instanceof TokenInterface
+            ? in_array('IS_AUTHENTICATED_FULLY', $token->getRoleNames(), strict: true)
+            : false;
     }
 }
