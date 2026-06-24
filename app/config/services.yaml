@@ -7,6 +7,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.secret: '%env(APP_SECRET)%'
     app.version: '%env(APP_VERSION)%'
     strava_client_id: '%env(string:STRAVA_CLIENT_ID)%'
     strava_client_secret: '%env(string:STRAVA_CLIENT_SECRET)%'
@@ -68,6 +69,11 @@ services:
             $version: '%app.version%'
         tags:
             - { name: twig.extension }
+
+    # Inject app secret to ActivityShareTokenGenerator
+    App\Strava\ActivityShareTokenGenerator:
+        arguments:
+            $appSecret: '%app.secret%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

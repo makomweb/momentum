@@ -66,6 +66,7 @@ final class ActivityController extends AbstractController
 
     /**
      * @return array{
+     *     activity_id: int,
      *     meta_data: ActivityMetaData,
      *     metrics: TrainingMetrics,
      *     pace_zone_sessions: array<ZoneSession>,
@@ -79,6 +80,7 @@ final class ActivityController extends AbstractController
         $activityData = new ActivityData($this->athlete, $activity, $stream);
 
         return [
+            'activity_id' => $activity->getId(),
             'profile_picture' => $this->athlete->getProfilePicture(),
             ...$activityData->toArray(),
         ];

@@ -2,7 +2,7 @@
 
 namespace App\Tests\Integration;
 
-use App\Strava\Service\ActivityShareTokenGenerator;
+use App\Strava\ActivityShareTokenGenerator;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;

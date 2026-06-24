@@ -6,8 +6,8 @@ namespace App\Controller;
 
 use App\Momentum\ActivityBragMessage;
 use App\Repository\ActivityRepository;
+use App\Strava\ActivityShareTokenGenerator;
 use App\Strava\ActivityStreamCache;
-use App\Strava\Service\ActivityShareTokenGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;

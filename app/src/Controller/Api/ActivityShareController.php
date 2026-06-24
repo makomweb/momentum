@@ -6,7 +6,7 @@ namespace App\Controller\Api;
 
 use App\Momentum\AthleteInterface;
 use App\Repository\ActivityRepository;
-use App\Strava\Service\ActivityShareTokenGenerator;
+use App\Strava\ActivityShareTokenGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

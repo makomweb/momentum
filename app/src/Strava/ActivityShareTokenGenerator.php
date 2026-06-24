@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Strava\Service;
+namespace App\Strava;
 
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
