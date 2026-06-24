@@ -8,8 +8,10 @@ use App\Momentum\AthleteInterface;
 
 final readonly class SyncActivitiesMessage
 {
-    public function __construct(public int $stravaUserId)
-    {
+    public function __construct(
+        public int $stravaUserId,
+        public ?string $jobId = null,
+    ) {
     }
 
     public static function for(AthleteInterface $athlete): self
