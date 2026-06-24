@@ -39,7 +39,7 @@ class SyncActivitiesCommand extends Command
 
         $io->title(sprintf('Syncing activities for Strava user %d', $stravaUserId));
 
-        $message = new SyncActivitiesMessage($stravaUserId);
+        $message = new SyncActivitiesMessage($stravaUserId, uniqid('sync_activities_', true));
         $this->bus->dispatch($message);
 
         $output->writeln('<info>✓ Message dispatched to async queue</info>');

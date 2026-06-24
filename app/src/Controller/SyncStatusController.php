@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Async\Message\SyncActivitiesMessage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -38,9 +39,10 @@ final class SyncStatusController extends AbstractController
             $startTime = time();
             $timeout = 300; // 5 minutes timeout
 
+            $cacheKey = SyncActivitiesMessage::createStatusCacheKey($jobId);
+
             while ((time() - $startTime) < $timeout) {
                 // Check if sync is complete by trying to get the item
-                $cacheKey = "sync_status_{$jobId}";
                 $status = $this->cache->get($cacheKey, function (ItemInterface $item): string {
                     $item->expiresAfter(0);
 
@@ -63,7 +65,7 @@ final class SyncStatusController extends AbstractController
             }
 
             // Cleanup
-            $this->cache->delete("sync_status_{$jobId}");
+            $this->cache->delete($cacheKey);
         });
 
         $response->headers->set('Content-Type', 'text/event-stream');

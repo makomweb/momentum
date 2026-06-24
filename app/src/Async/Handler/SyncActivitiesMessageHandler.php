@@ -26,11 +26,8 @@ final readonly class SyncActivitiesMessageHandler
 
     public function __invoke(SyncActivitiesMessage $message): void
     {
-        $this->trySync($message->stravaUserId, $message->jobId);
-    }
+        $stravaUserId = $message->stravaUserId;
 
-    private function trySync(int $stravaUserId, ?string $jobId = null): void
-    {
         $this->logger->info(sprintf('Syncing activities for user "%d"', $stravaUserId));
 
         $adapter = new ReportProgressAdapter($this->logger);
@@ -41,17 +38,12 @@ final readonly class SyncActivitiesMessageHandler
             $this->tryRefreshTokenFor($stravaUserId);
             throw $ex;
         } finally {
-            // Mark sync as complete so SSE stream can notify client
-            if ($jobId) {
-                $cacheKey = "sync_status_{$jobId}";
-                $this->cache->delete($cacheKey);
-                // Create a key that persists briefly so SSE stream can detect completion
-                $this->cache->get($cacheKey, function (ItemInterface $item): string {
-                    $item->expiresAfter(10);
+            $this->cache->delete($message->getStatusCacheKey());
+            $this->cache->get($message->getStatusCacheKey(), function (ItemInterface $item): string {
+                $item->expiresAfter(10);
 
-                    return 'complete';
-                });
-            }
+                return 'complete';
+            });
         }
     }
 

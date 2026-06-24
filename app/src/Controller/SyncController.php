@@ -28,25 +28,20 @@ final class SyncController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function sync(): JsonResponse
     {
-        $jobId = uniqid('sync_', true);
+        $message = SyncActivitiesMessage::for($this->athlete);
 
-        // Mark sync as in progress
-        $this->cache->get("sync_status_{$jobId}", function (ItemInterface $item): string {
+        $this->cache->get($message->getStatusCacheKey(), function (ItemInterface $item): string {
             $item->expiresAfter(300);
 
             return 'pending';
         });
 
-        $message = new SyncActivitiesMessage(
-            stravaUserId: $this->athlete->getStravaId(),
-            jobId: $jobId,
-        );
         $this->bus->dispatch($message);
 
         return $this->json([
             'status' => 'syncing',
             'message' => 'Sync started in background',
-            'jobId' => $jobId,
+            'jobId' => $message->jobId,
         ], Response::HTTP_ACCEPTED);
     }
 }
