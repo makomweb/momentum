@@ -27,6 +27,11 @@ final readonly class ActivityMetaData
         return $this->activity->getName();
     }
 
+    public function getStartDateLocalTime(): \DateTimeImmutable
+    {
+        return $this->activity->getStartDateLocalTime();
+    }
+
     /**
      * @return array{
      *  elapsed_time: \DateInterval,

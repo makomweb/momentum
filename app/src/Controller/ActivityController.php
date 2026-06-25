@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Momentum\ActivityBragMessage;
 use App\Momentum\ActivityShareToken;
 use App\Momentum\ActivityShareTokenException;
 use App\Momentum\AthleteInterface;
@@ -35,7 +34,6 @@ final class ActivityController extends AbstractController
         private ActivityRepository $activityRepository,
         private ActivityStreamCache $streamCache,
         private ActivityShareToken $shareToken,
-        private ActivityBragMessage $bragMessage,
         private AthleteInterface $athlete,
         private UserRepository $users,
     ) {
@@ -140,8 +138,6 @@ final class ActivityController extends AbstractController
             ]);
         }
 
-        $message = $this->bragMessage->generate($activity->data);
-
         $user = $this->users->findByStravaId($stravaUserId);
         assert($user instanceof User);
 
@@ -157,7 +153,7 @@ final class ActivityController extends AbstractController
 
             public function getName(): string
             {
-                throw new \Exception('Not implemented');
+                return $this->user->getName();
             }
 
             public function getTreshold(): Pace
@@ -190,15 +186,14 @@ final class ActivityController extends AbstractController
 
         $data = [
             ...$activity->data,
-            'message' => $message,
             'moving_time' => $activity->getMovingTime(),
             'average_velocity' => $activity->getAverageVelocityAsStringable(),
             'start_date' => $activity->getStartDateLocalTime(),
+            'meta_data' => $analysisData['meta_data'],
             'hr_stats' => $analysisData['hr_stats'],
             'pace_stats' => $analysisData['pace_stats'],
+            'user' => $user,
         ];
-
-        dump('brag', ['activity' => $activity, 'data' => $data]);
 
         return $this->render('share/activity.html.twig', $data);
     }
