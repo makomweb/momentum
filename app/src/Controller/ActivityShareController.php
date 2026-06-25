@@ -27,8 +27,10 @@ final class ActivityShareController extends AbstractController
 
     #[Route('/{id}/share', name: 'share', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function generate_share(int $id, Request $request): JsonResponse
+    public function generate(int $id, Request $request): JsonResponse
     {
+        $stravaUserId = $this->athlete->getStravaId();
+
         $activity = $this->activityRepository->findOrNull($this->athlete->getStravaId(), $id);
 
         if (null === $activity) {
@@ -43,12 +45,11 @@ final class ActivityShareController extends AbstractController
             return $this->json(['error' => 'expiresIn must be between 1 and 365 days'], Response::HTTP_BAD_REQUEST);
         }
 
-        $result = $this->tokenGenerator->generate($activity->getId(), $expiryDays);
+        $token = $this->tokenGenerator->generate($stravaUserId, $activity->getId(), $expiryDays);
 
         return $this->json([
-            'token' => $result['token'],
-            'expiresAt' => $result['expiresAt']->format(\DateTimeInterface::ATOM),
-            'shareUrl' => $this->generateUrl('share_activity', ['token' => $result['token']], UrlGeneratorInterface::ABSOLUTE_URL),
+            ...$token,
+            'share_url' => $this->generateUrl('share_activity', $token, UrlGeneratorInterface::ABSOLUTE_URL),
         ]);
     }
 }

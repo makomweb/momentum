@@ -4,101 +4,122 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\Assert\Assert;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Generates and validates signed tokens for sharing activities.
  * Tokens are stateless and encode: activity_id + expiry_timestamp.
+ * TODO: Rename to ActivityTokenGenerator.
  */
-final class ActivityShareTokenGenerator
+final readonly class ActivityShareTokenGenerator
 {
     private const int DEFAULT_EXPIRY_DAYS = 30;
 
-    public function __construct(private readonly string $appSecret)
+    public function __construct(private string $appSecret)
     {
     }
 
     /**
      * Generate a shareable token for an activity.
      *
-     * @param int $activityId The database activity ID
-     * @param int $expiryDays Number of days until token expires (default: 30)
+     * @param int $stravaActivityId The database activity ID
+     * @param int $expiryDays       Number of days until token expires (default: 30)
      *
-     * @return array{token: string, expiresAt: \DateTimeImmutable}
+     * @return array{
+     *  token: string,
+     *  expires_at: string,
+     *  signature: string,
+     * }
      */
-    public function generate(int $activityId, int $expiryDays = self::DEFAULT_EXPIRY_DAYS): array
+    public function generate(int $stravaUserId, int $stravaActivityId, int $expiryDays = self::DEFAULT_EXPIRY_DAYS): array
     {
-        $now = new \DateTimeImmutable('UTC');
-        $expiresAt = $now->add(\DateInterval::createFromDateString("{$expiryDays} days"));
-
-        $payload = $this->encode_payload($activityId, $expiresAt->getTimestamp());
-        $signature = $this->sign_payload($payload);
-        $token = "{$payload}.".$signature;
+        $data = self::encode($stravaUserId, $stravaActivityId, $expiryDays);
+        $token = $data['token'];
+        $expiresAt = $data['expires_at'];
 
         return [
             'token' => $token,
-            'expiresAt' => $expiresAt,
+            'expires_at' => $expiresAt->format(\DateTimeInterface::ATOM),
+            'signature' => hash_hmac('sha256', $token, $this->appSecret),
         ];
     }
 
     /**
-     * Validate and extract activity ID from a token.
+     * Validate and extract parts from a token.
      *
-     * @param string $token The share token
-     *
-     * @return int The activity ID if valid
-     *
-     * @throws AccessDeniedHttpException If token is invalid or expired
+     * @return array{
+     *  strava_user_id: int,
+     *  strava_activity_id: int,
+     *  expires_at: int
+     * }
      */
-    public function validate(string $token): int
+    public function validate(string $raw): array
     {
-        $parts = explode('.', $token);
-        if (2 !== count($parts)) {
-            throw new AccessDeniedHttpException('Invalid share token format.');
-        }
+        $parts = explode('.', $raw);
 
-        [$payload, $signature] = $parts;
+        Assert::that(3 === count($parts), 'Invalid payload format.');
 
-        // Verify signature
-        $expectedSignature = $this->sign_payload($payload);
-        if (!hash_equals($expectedSignature, $signature)) {
-            throw new AccessDeniedHttpException('Invalid or tampered share token.');
-        }
+        [$token, $signature, $_] = $parts;
 
-        // Decode payload and verify expiry
-        [$activityId, $expiryTimestamp] = $this->decode_payload($payload);
+        $expectedSignature = hash_hmac('sha256', $token, $this->appSecret);
 
-        if ($expiryTimestamp < time()) {
-            throw new AccessDeniedHttpException('This share link has expired.');
-        }
+        Assert::that(
+            hash_equals($expectedSignature, $signature),
+            new AccessDeniedHttpException('Invalid or tampered share token.')
+        );
 
-        return $activityId;
-    }
+        $decoded = self::decode($token);
 
-    private function encode_payload(int $activityId, int $expiryTimestamp): string
-    {
-        // Create a compact encoding: activityId:expiryTimestamp (base36)
-        return base_convert((string) $activityId, 10, 36).':'.base_convert((string) $expiryTimestamp, 10, 36);
+        Assert::that(
+            $decoded['expires_at'] >= time(),
+            new AccessDeniedHttpException('This share link has expired.')
+        );
+
+        return $decoded;
     }
 
     /**
-     * @return array{0: int, 1: int}
+     * @return array{
+     *  token: string,
+     *  expires_at: \DateTimeImmutable
+     * }
      */
-    private function decode_payload(string $payload): array
+    private static function encode(int $stravaUserId, int $stravaActivityId, int $expiryDays): array
     {
-        $parts = explode(':', $payload);
-        if (2 !== count($parts)) {
-            throw new AccessDeniedHttpException('Invalid payload format.');
-        }
+        $now = new \DateTimeImmutable('UTC');
+        $expiresAt = $now->add(\DateInterval::createFromDateString("{$expiryDays} days"));
 
-        $activityId = (int) base_convert($parts[0], 36, 10);
-        $expiryTimestamp = (int) base_convert($parts[1], 36, 10);
+        $token = sprintf(
+            '%s.%s.%s',
+            base_convert((string) $stravaUserId, 10, 36),
+            base_convert((string) $stravaActivityId, 10, 36),
+            base_convert((string) $expiresAt->getTimestamp(), 10, 36)
+        );
 
-        return [$activityId, $expiryTimestamp];
+        return [
+            'token' => $token,
+            'expires_at' => $expiresAt,
+        ];
     }
 
-    private function sign_payload(string $payload): string
+    /**
+     * @return array{
+     *  strava_user_id: int,
+     *  strava_activity_id: int,
+     *  expires_at: int
+     * }
+     */
+    private static function decode(string $payload): array
     {
-        return hash_hmac('sha256', $payload, $this->appSecret);
+        $parts = explode('.', $payload);
+
+        Assert::that(3 === count($parts), 'Invalid payload format.');
+
+        return [
+            'strava_user_id' => (int) base_convert($parts[0], 36, 10),
+            'strava_activity_id' => (int) base_convert($parts[1], 36, 10),
+            'expires_at' => (int) base_convert($parts[2], 36, 10),
+        ];
     }
 }

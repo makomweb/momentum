@@ -28,14 +28,14 @@ final class ShareController extends AbstractController
     public function view_shared_activity(string $token): Response
     {
         try {
-            $activityId = $this->tokenGenerator->validate($token);
+            $result = $this->tokenGenerator->validate($token);
         } catch (AccessDeniedHttpException $e) {
             return $this->render('share/expired.html.twig', [
                 'message' => $e->getMessage(),
             ], new Response(status: Response::HTTP_GONE));
         }
 
-        $activity = $this->activityRepository->findByStravaActivityId($activityId);
+        $activity = $this->activityRepository->findByStravaActivityId($result['strava_activity_id']);
 
         if (null === $activity) {
             return $this->render('share/not_found.html.twig', [], new Response(status: Response::HTTP_NOT_FOUND));
