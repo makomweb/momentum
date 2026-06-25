@@ -27,11 +27,6 @@ final readonly class ActivityMetaData
         return $this->activity->getName();
     }
 
-    public function getStartDateLocalTimeFormatted(): string
-    {
-        return $this->activity->getStartDateLocalTimeFormatted();
-    }
-
     /**
      * @return array{
      *  elapsed_time: \DateInterval,

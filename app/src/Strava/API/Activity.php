@@ -102,11 +102,6 @@ final readonly class Activity implements \Stringable
             );
     }
 
-    public function getStartDateLocalTimeFormatted(): string
-    {
-        return $this->getStartDateLocalTime()->format('D M d, y · H:i');
-    }
-
     public function getElapsedTime(): \DateInterval
     {
         $seconds = $this->data['elapsed_time'];

@@ -141,7 +141,7 @@ final class ActivityController extends AbstractController
             'message' => $message,
             'moving_time' => $activity->getMovingTime(),
             'average_velocity' => $activity->getAverageVelocityAsStringable(),
-            'start_date' => $activity->getStartDateLocalTimeFormatted(),
+            'start_date' => $activity->getStartDateLocalTime(),
         ]);
     }
 

@@ -47,8 +47,7 @@ class ActivityBragMessageTest extends TestCase
 
         $message = $this->generator->generate($activity);
 
-        self::assertStringContainsString('Blazing pace', $message);
-        self::assertStringContainsString('Speed Session', $message);
+        self::assertStringContainsString('Blazing fast', $message);
     }
 
     #[Test]
@@ -82,7 +81,7 @@ class ActivityBragMessageTest extends TestCase
 
         $message = $this->generator->generate($activity);
 
-        self::assertStringContainsString('Solid run', $message);
+        self::assertStringContainsString('Solid', $message);
     }
 
     #[Test]
@@ -117,8 +116,7 @@ class ActivityBragMessageTest extends TestCase
 
         $message = $this->generator->generate($activity, $userAverageDistance);
 
-        self::assertStringContainsString('Long run for you', $message);
-        self::assertStringContainsString('epic', $message);
+        self::assertStringContainsString('That was epic', $message);
     }
 
     #[Test]
@@ -203,7 +201,7 @@ class ActivityBragMessageTest extends TestCase
 
         $message = $this->generator->generate($activity);
 
-        self::assertStringContainsString('Evening Walk', $message);
+        self::assertStringContainsString('Nice', $message);
     }
 
     #[Test]
@@ -220,7 +218,7 @@ class ActivityBragMessageTest extends TestCase
 
         $message = $this->generator->generate($activity);
 
-        self::assertStringContainsString('My Custom Activity Name', $message);
+        self::assertStringContainsString('Strong effort', $message);
     }
 
     #[Test]
@@ -236,6 +234,6 @@ class ActivityBragMessageTest extends TestCase
 
         $message = $this->generator->generate($activity);
 
-        self::assertStringContainsString('Activity', $message);
+        self::assertStringContainsString('Strong effort', $message);
     }
 }

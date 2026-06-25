@@ -95,7 +95,7 @@
                 <div class="stat-value">{{ "%.2f"|format(distance / 1000) }} km</div>
             </div>
             <div class="stat">
-                <div class="stat-label">Pace</div>
+                <div class="stat-label">Avg. Pace</div>
                 <div class="stat-value">{{ average_velocity }}</div>
             </div>
             <div class="stat">
@@ -104,7 +104,7 @@
             </div>
         </div>
 
-        <div class="date">{{ start_date }}</div>
+        <div class="date">{{ start_date|format_local_date_time }}</div>
     </div>
 </body>
 </html>

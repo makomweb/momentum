@@ -68,11 +68,11 @@ final class ActivityBragMessage
 
         // Steady pace (5:30 - 7:00)
         if ($paceValue < 7.0) {
-            return '✨ Solid run!';
+            return '✨ Solid!';
         }
 
         // Default encouraging message
-        return '✓ Nice run!';
+        return '✓ Nice!';
     }
 
     private static function generate_ride_message(float $distance, float $averageSpeed): string
