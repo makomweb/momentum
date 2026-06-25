@@ -29,19 +29,20 @@ final readonly class ActivityShareTokenGenerator
      * @return array{
      *  token: string,
      *  expires_at: string,
-     *  signature: string,
      * }
      */
     public function generate(int $stravaUserId, int $stravaActivityId, int $expiryDays = self::DEFAULT_EXPIRY_DAYS): array
     {
         $data = self::encode($stravaUserId, $stravaActivityId, $expiryDays);
-        $token = $data['token'];
+        $payload = $data['token'];
         $expiresAt = $data['expires_at'];
+
+        $signature = hash_hmac('sha256', $payload, $this->appSecret);
+        $token = "{$payload}.{$signature}";
 
         return [
             'token' => $token,
             'expires_at' => $expiresAt->format(\DateTimeInterface::ATOM),
-            'signature' => hash_hmac('sha256', $token, $this->appSecret),
         ];
     }
 
@@ -58,18 +59,19 @@ final readonly class ActivityShareTokenGenerator
     {
         $parts = explode('.', $raw);
 
-        Assert::that(3 === count($parts), 'Invalid payload format.');
+        Assert::that(4 === count($parts), new AccessDeniedHttpException('Invalid share token format.'));
 
-        [$token, $signature, $_] = $parts;
+        [$userIdPart, $activityIdPart, $expiryPart, $signature] = $parts;
+        $payload = "{$userIdPart}.{$activityIdPart}.{$expiryPart}";
 
-        $expectedSignature = hash_hmac('sha256', $token, $this->appSecret);
+        $expectedSignature = hash_hmac('sha256', $payload, $this->appSecret);
 
         Assert::that(
             hash_equals($expectedSignature, $signature),
             new AccessDeniedHttpException('Invalid or tampered share token.')
         );
 
-        $decoded = self::decode($token);
+        $decoded = self::decode($payload);
 
         Assert::that(
             $decoded['expires_at'] >= time(),
