@@ -68,7 +68,7 @@
             margin-bottom: 8px;
         }
         .stat-value {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
             color: #333;
         }
@@ -100,7 +100,7 @@
             </div>
             <div class="stat">
                 <div class="stat-label">Time</div>
-                <div class="stat-value">{{ moving_time.format('%h:%I') }}</div>
+                <div class="stat-value">{{ moving_time | format_moving_time }}</div>
             </div>
         </div>
 
