@@ -6,7 +6,9 @@ namespace App\Momentum;
 
 final readonly class ZoneSession implements \Stringable
 {
-    // TODO: Make ctor private!
+    /**
+     * @deprecated Only for test purposes. Use ZoneSession::open() instead!
+     */
     public function __construct(
         public PaceZone|HeartRateZone $zone,
         public \DateTimeImmutable $start,

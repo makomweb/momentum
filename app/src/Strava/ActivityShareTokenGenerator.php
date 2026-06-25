@@ -9,8 +9,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Generates and validates signed tokens for sharing activities.
- * Tokens are stateless and encode: activity_id + expiry_timestamp.
- * TODO: Rename to ActivityTokenGenerator.
+ * Tokens are stateless and encode: strava_user_id + strava_activity_id + expiry_timestamp.
  */
 final readonly class ActivityShareTokenGenerator
 {
@@ -22,9 +21,6 @@ final readonly class ActivityShareTokenGenerator
 
     /**
      * Generate a shareable token for an activity.
-     *
-     * @param int $stravaActivityId The database activity ID
-     * @param int $expiryDays       Number of days until token expires (default: 30)
      *
      * @return array{
      *  token: string,
@@ -40,6 +36,14 @@ final readonly class ActivityShareTokenGenerator
         $signature = hash_hmac('sha256', $payload, $this->appSecret);
         $token = "{$payload}.{$signature}";
 
+        dump('generate', [
+            'strava_user_id' => $stravaUserId,
+            'strava_activity_id' => $stravaActivityId,
+            'expiry_days' => $expiryDays,
+            'data' => $data,
+            'token' => $token
+        ]);
+
         return [
             'token' => $token,
             'expires_at' => $expiresAt->format(\DateTimeInterface::ATOM),
@@ -52,7 +56,7 @@ final readonly class ActivityShareTokenGenerator
      * @return array{
      *  strava_user_id: int,
      *  strava_activity_id: int,
-     *  expires_at: int
+     *  expires_at: \DateTimeImmutable
      * }
      */
     public function validate(string $raw): array
@@ -74,9 +78,18 @@ final readonly class ActivityShareTokenGenerator
         $decoded = self::decode($payload);
 
         Assert::that(
-            $decoded['expires_at'] >= time(),
+            $decoded['expires_at']->getTimestamp() >= time(),
             new AccessDeniedHttpException('This share link has expired.')
         );
+
+        dump('validate', [
+            'raw' => $raw,
+            'parts' => $parts,
+            'payload' => $payload,
+            'signature' => $signature,
+            'expected_signature' => $expectedSignature,
+            'decoded' => $decoded,
+        ]);
 
         return $decoded;
     }
@@ -109,7 +122,7 @@ final readonly class ActivityShareTokenGenerator
      * @return array{
      *  strava_user_id: int,
      *  strava_activity_id: int,
-     *  expires_at: int
+     *  expires_at: \DateTimeImmutable
      * }
      */
     private static function decode(string $payload): array
@@ -121,7 +134,7 @@ final readonly class ActivityShareTokenGenerator
         return [
             'strava_user_id' => (int) base_convert($parts[0], 36, 10),
             'strava_activity_id' => (int) base_convert($parts[1], 36, 10),
-            'expires_at' => (int) base_convert($parts[2], 36, 10),
+            'expires_at' => \DateTimeImmutable::createFromTimestamp((int) base_convert($parts[2], 36, 10)),
         ];
     }
 }
