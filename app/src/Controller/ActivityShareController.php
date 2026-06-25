@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Momentum\ActivityShareToken;
 use App\Momentum\AthleteInterface;
 use App\Repository\ActivityRepository;
-use App\Strava\ActivityShareTokenGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +21,7 @@ final class ActivityShareController extends AbstractController
 {
     public function __construct(
         private ActivityRepository $activityRepository,
-        private ActivityShareTokenGenerator $tokenGenerator,
+        private ActivityShareToken $shareToken,
         private AthleteInterface $athlete,
     ) {
     }
@@ -46,7 +46,7 @@ final class ActivityShareController extends AbstractController
             return $this->json(['error' => 'expires_in must be between 1 and 365 days'], Response::HTTP_BAD_REQUEST);
         }
 
-        $data = $this->tokenGenerator->generate($stravaUserId, $activity->getId(), $expiryDays);
+        $data = $this->shareToken->generate($stravaUserId, $activity->getId(), $expiryDays);
 
         return $this->json([
             ...$data,

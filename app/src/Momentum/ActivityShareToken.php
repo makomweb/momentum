@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Strava;
+namespace App\Momentum;
 
 use App\Momentum\Assert\Assert;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Generates and validates signed tokens for sharing activities.
  * Tokens are stateless and encode: strava_user_id + strava_activity_id + expiry_timestamp.
  */
-final readonly class ActivityShareTokenGenerator
+final readonly class ActivityShareToken
 {
     private const int DEFAULT_EXPIRY_DAYS = 30;
 
@@ -36,14 +35,6 @@ final readonly class ActivityShareTokenGenerator
         $signature = hash_hmac('sha256', $payload, $this->appSecret);
         $token = "{$payload}.{$signature}";
 
-        dump('generate', [
-            'strava_user_id' => $stravaUserId,
-            'strava_activity_id' => $stravaActivityId,
-            'expiry_days' => $expiryDays,
-            'data' => $data,
-            'token' => $token
-        ]);
-
         return [
             'token' => $token,
             'expires_at' => $expiresAt->format(\DateTimeInterface::ATOM),
@@ -63,7 +54,7 @@ final readonly class ActivityShareTokenGenerator
     {
         $parts = explode('.', $raw);
 
-        Assert::that(4 === count($parts), new AccessDeniedHttpException('Invalid share token format.'));
+        Assert::that(4 === count($parts), new ActivityShareTokenException('Invalid share token format.'));
 
         [$userIdPart, $activityIdPart, $expiryPart, $signature] = $parts;
         $payload = "{$userIdPart}.{$activityIdPart}.{$expiryPart}";
@@ -72,24 +63,15 @@ final readonly class ActivityShareTokenGenerator
 
         Assert::that(
             hash_equals($expectedSignature, $signature),
-            new AccessDeniedHttpException('Invalid or tampered share token.')
+            new ActivityShareTokenException('Invalid or tampered share token.')
         );
 
         $decoded = self::decode($payload);
 
         Assert::that(
             $decoded['expires_at']->getTimestamp() >= time(),
-            new AccessDeniedHttpException('This share link has expired.')
+            new ActivityShareTokenException('This share link has expired.')
         );
-
-        dump('validate', [
-            'raw' => $raw,
-            'parts' => $parts,
-            'payload' => $payload,
-            'signature' => $signature,
-            'expected_signature' => $expectedSignature,
-            'decoded' => $decoded,
-        ]);
 
         return $decoded;
     }

@@ -2,24 +2,24 @@
 
 namespace App\Tests\Integration;
 
-use App\Strava\ActivityShareTokenGenerator;
+use App\Momentum\ActivityShareToken;
+use App\Momentum\ActivityShareTokenException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class ActivityShareTokenGeneratorTest extends TestCase
+class ActivityShareTokenTest extends TestCase
 {
-    private ActivityShareTokenGenerator $generator;
+    private ActivityShareToken $shareToken;
 
     protected function setUp(): void
     {
-        $this->generator = new ActivityShareTokenGenerator('test-secret-key-for-testing');
+        $this->shareToken = new ActivityShareToken('test-secret-key-for-testing');
     }
 
     #[Test]
     public function generates_valid_token(): void
     {
-        $result = $this->generator->generate(stravaUserId: 123, stravaActivityId: 456);
+        $result = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 456);
 
         self::assertArrayHasKey('token', $result);
         self::assertArrayHasKey('expires_at', $result);
@@ -28,7 +28,7 @@ class ActivityShareTokenGeneratorTest extends TestCase
     #[Test]
     public function token_format_is_valid(): void
     {
-        $result = $this->generator->generate(stravaUserId: 123, stravaActivityId: 456);
+        $result = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 456);
 
         // Token should have format: userId.activityId.expiresAt.signature
         $parts = explode('.', $result['token']);
@@ -38,9 +38,9 @@ class ActivityShareTokenGeneratorTest extends TestCase
     #[Test]
     public function generated_token_validates_successfully(): void
     {
-        $result = $this->generator->generate(stravaUserId: 123, stravaActivityId: 456);
+        $result = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 456);
 
-        $decoded = $this->generator->validate($result['token']);
+        $decoded = $this->shareToken->validate($result['token']);
 
         self::assertEquals(456, $decoded['strava_activity_id']);
     }
@@ -49,7 +49,7 @@ class ActivityShareTokenGeneratorTest extends TestCase
     public function expiry_defaults_to_30_days(): void
     {
         $now = new \DateTimeImmutable('UTC');
-        $result = $this->generator->generate(stravaUserId: 123, stravaActivityId: 456);
+        $result = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 456);
 
         $expectedExpiry = $now->add(\DateInterval::createFromDateString('30 days'));
         $actualExpiry = \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $result['expires_at']);
@@ -64,7 +64,7 @@ class ActivityShareTokenGeneratorTest extends TestCase
     public function respects_custom_expiry_days(): void
     {
         $now = new \DateTimeImmutable('UTC');
-        $result = $this->generator->generate(stravaUserId: 123, stravaActivityId: 789, expiryDays: 7);
+        $result = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 789, expiryDays: 7);
 
         $expectedExpiry = $now->add(\DateInterval::createFromDateString('7 days'));
         $actualExpiry = \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $result['expires_at']);
@@ -78,15 +78,15 @@ class ActivityShareTokenGeneratorTest extends TestCase
     #[Test]
     public function rejects_invalid_token_format(): void
     {
-        self::expectException(AccessDeniedHttpException::class);
+        self::expectException(ActivityShareTokenException::class);
 
-        $this->generator->validate('invalid-token-no-dot');
+        $this->shareToken->validate('invalid-token-no-dot');
     }
 
     #[Test]
     public function rejects_tampered_token(): void
     {
-        $result = $this->generator->generate(stravaUserId: 123, stravaActivityId: 456);
+        $result = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 456);
         $token = $result['token'];
 
         // Tamper with the token by changing part of it
@@ -94,10 +94,10 @@ class ActivityShareTokenGeneratorTest extends TestCase
         $parts[0] = 'tampered';
         $tamperedToken = implode('.', $parts);
 
-        self::expectException(AccessDeniedHttpException::class);
+        self::expectException(ActivityShareTokenException::class);
         self::expectExceptionMessage('Invalid or tampered share token.');
 
-        $this->generator->validate($tamperedToken);
+        $this->shareToken->validate($tamperedToken);
     }
 
     #[Test]
@@ -119,33 +119,33 @@ class ActivityShareTokenGeneratorTest extends TestCase
         $signature = hash_hmac('sha256', $payload, 'test-secret-key-for-testing');
         $fullToken = "{$payload}.{$signature}";
 
-        self::expectException(AccessDeniedHttpException::class);
+        self::expectException(ActivityShareTokenException::class);
         self::expectExceptionMessage('This share link has expired.');
 
-        $this->generator->validate($fullToken);
+        $this->shareToken->validate($fullToken);
     }
 
     #[Test]
     public function tokens_with_different_secrets_are_incompatible(): void
     {
-        $generator1 = new ActivityShareTokenGenerator('secret-key-1');
-        $generator2 = new ActivityShareTokenGenerator('secret-key-2');
+        $shareToken1 = new ActivityShareToken('secret-key-1');
+        $shareToken2 = new ActivityShareToken('secret-key-2');
 
-        $result = $generator1->generate(stravaUserId: 123, stravaActivityId: 456);
+        $result = $shareToken1->generate(stravaUserId: 123, stravaActivityId: 456);
 
-        self::expectException(AccessDeniedHttpException::class);
+        self::expectException(ActivityShareTokenException::class);
         self::expectExceptionMessage('Invalid or tampered share token.');
 
-        $generator2->validate($result['token']);
+        $shareToken2->validate($result['token']);
     }
 
     #[Test]
     public function same_activity_generates_different_tokens(): void
     {
-        $token1 = $this->generator->generate(stravaUserId: 123, stravaActivityId: 456)['token'];
+        $token1 = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 456)['token'];
         // Sleep 1 second to ensure different timestamp
         sleep(1);
-        $token2 = $this->generator->generate(stravaUserId: 123, stravaActivityId: 456)['token'];
+        $token2 = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 456)['token'];
 
         // Tokens should be different (different expiry timestamps)
         self::assertNotEquals($token1, $token2);
@@ -154,11 +154,11 @@ class ActivityShareTokenGeneratorTest extends TestCase
     #[Test]
     public function validates_multiple_tokens_independently(): void
     {
-        $result1 = $this->generator->generate(stravaUserId: 123, stravaActivityId: 111);
-        $result2 = $this->generator->generate(stravaUserId: 123, stravaActivityId: 222);
+        $result1 = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 111);
+        $result2 = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: 222);
 
-        $decoded1 = $this->generator->validate($result1['token']);
-        $decoded2 = $this->generator->validate($result2['token']);
+        $decoded1 = $this->shareToken->validate($result1['token']);
+        $decoded2 = $this->shareToken->validate($result2['token']);
 
         self::assertEquals(111, $decoded1['strava_activity_id']);
         self::assertEquals(222, $decoded2['strava_activity_id']);
@@ -170,8 +170,8 @@ class ActivityShareTokenGeneratorTest extends TestCase
         $testIds = [1, 42, 999, 12345, 999999];
 
         foreach ($testIds as $id) {
-            $result = $this->generator->generate(stravaUserId: 123, stravaActivityId: $id);
-            $decoded = $this->generator->validate($result['token']);
+            $result = $this->shareToken->generate(stravaUserId: 123, stravaActivityId: $id);
+            $decoded = $this->shareToken->validate($result['token']);
 
             self::assertEquals($id, $decoded['strava_activity_id'], "Activity ID $id was not preserved");
         }
@@ -180,17 +180,17 @@ class ActivityShareTokenGeneratorTest extends TestCase
     #[Test]
     public function rejects_empty_token(): void
     {
-        self::expectException(AccessDeniedHttpException::class);
+        self::expectException(ActivityShareTokenException::class);
 
-        $this->generator->validate('....');
+        $this->shareToken->validate('....');
     }
 
     #[Test]
     public function rejects_malformed_payload(): void
     {
-        self::expectException(AccessDeniedHttpException::class);
+        self::expectException(ActivityShareTokenException::class);
 
         // Token with wrong number of parts
-        $this->generator->validate('a.b.c');
+        $this->shareToken->validate('a.b.c');
     }
 }
