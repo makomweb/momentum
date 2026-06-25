@@ -1,4 +1,4 @@
-<a href="{{ path('activity_analysis_by_id', { id: activity.stravaActivityId }) }}" class="block no-underline">
+<a href="{{ path('activity_analyze', { id: activity.stravaActivityId }) }}" class="block no-underline">
     <div class="bg-white rounded border border-gray-200 p-2 flex flex-col h-full" data-activity-card data-activity-type="{{ activity.data.type | lower }}">
         <div class="flex items-start justify-between gap-1 mb-3 rounded p-2 {{ activity.data.type | activity_bg_color }}">
             <div class="flex-grow min-w-0">

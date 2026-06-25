@@ -27,9 +27,9 @@ final readonly class ActivityMetaData
         return $this->activity->getName();
     }
 
-    public function getStartDateLocalTimeFormatted(): string
+    public function getStartDateLocalTime(): \DateTimeImmutable
     {
-        return $this->activity->getStartDateLocalTimeFormatted();
+        return $this->activity->getStartDateLocalTime();
     }
 
     /**
@@ -125,8 +125,7 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Swim' => 10,
-            'Walk' => 15,
+            'Run', 'Swim', 'Walk' => 15,
             'Hike' => 20,
             default => 0,
         };

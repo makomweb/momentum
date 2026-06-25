@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Strava\API;
 
 use App\Momentum\Assert\Assert;
+use App\Momentum\PaceUnit;
+use App\Momentum\SpeedUnit;
 use App\Momentum\Velocity;
 
 final readonly class Activity implements \Stringable
@@ -100,11 +102,6 @@ final readonly class Activity implements \Stringable
             );
     }
 
-    public function getStartDateLocalTimeFormatted(): string
-    {
-        return $this->getStartDateLocalTime()->format('D M d, y · H:i');
-    }
-
     public function getElapsedTime(): \DateInterval
     {
         $seconds = $this->data['elapsed_time'];
@@ -142,6 +139,18 @@ final readonly class Activity implements \Stringable
     public function getAverageVelocity(): Velocity
     {
         return new Velocity($this->data['average_speed']);
+    }
+
+    public function getAverageVelocityAsStringable(): \Stringable
+    {
+        $type = $this->data['type'];
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike' => $this->getAverageVelocity()->asPace(),
+            'Swim' => $this->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
+            'Ride' => $this->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
+            default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
+        };
     }
 
     public function __toString(): string

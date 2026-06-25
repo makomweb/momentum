@@ -41,11 +41,9 @@ final class ActivityRepository extends ServiceEntityRepository implements Activi
             ['startDate' => 'DESC']
         );
 
-        if ($entity instanceof ActivityEntity) {
-            return self::fromEntity($entity);
-        }
-
-        return null;
+        return $entity instanceof ActivityEntity
+            ? self::fromEntity($entity)
+            : null;
     }
 
     public function persist(int $stravaUserId, Activity $activity): void

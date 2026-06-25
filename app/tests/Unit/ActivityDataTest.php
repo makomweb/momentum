@@ -2,6 +2,9 @@
 
 namespace App\Tests\Unit;
 
+use App\Momentum\HeartRate;
+use App\Momentum\Pace;
+use App\Momentum\PaceUnit;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamFactory;
 use App\Strava\API\Activity;
@@ -14,6 +17,8 @@ use Symfony\Component\Serializer\Serializer;
 
 class ActivityDataTest extends TestCase
 {
+    use AthleteFactory;
+
     #[Test]
     public function format_moving_time_should_work(): void
     {
@@ -55,6 +60,7 @@ class ActivityDataTest extends TestCase
         );
 
         return new ActivityData(
+            self::createAthlete(new Pace(5.00, PaceUnit::MINUTES_PER_KILOMETER), new HeartRate(180)),
             Activity::fromRawData($data),
             $factory->fromJsonFile($filePath)
         );

@@ -12,14 +12,96 @@
 {% include 'components/_header.html.twig' %}
 
 <div class="flex-grow space-y-4 p-4">
-    <!-- Activity Header -->
-    <div>
-        <h2 class="text-2xl font-bold mb-1">{{ metaData.getActivityName() }}</h2>
-        <div class="text-sm text-gray-600">{{ metaData.getStartDateLocalTimeFormatted() }}</div>
+    <!-- Activity Header with Share Button -->
+    <div class="flex items-start justify-between">
+        <div>
+            <h2 class="text-2xl font-bold mb-1">{{ meta_data.getActivityName() }}</h2>
+            <div class="text-sm text-gray-600">{{ meta_data.getStartDateLocalTime()|format_local_date_time }}</div>
+        </div>
+        <button
+            id="shareButton"
+            onclick="openShareModal({{ activity_id }})"
+            class="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors flex items-center gap-2 text-sm font-medium"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
+            Share
+        </button>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold">Share Activity</h3>
+                    <button onclick="closeShareModal()" class="text-gray-500 hover:text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div id="expiresInSelection">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Link expires in
+                        </label>
+                        <select id="expiryDays" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="7">7 days</option>
+                            <option value="30" selected>30 days</option>
+                            <option value="60">60 days</option>
+                            <option value="365">1 year</option>
+                        </select>
+                    </div>
+
+                    <div id="shareContent" class="hidden space-y-3">
+                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <p class="text-xs text-gray-600 mb-2">Share Link</p>
+                            <div class="flex items-center gap-2">
+                                <input
+                                    id="shareLink"
+                                    type="text"
+                                    readonly
+                                    class="flex-1 px-3 py-2 bg-white border border-gray-200 rounded text-sm font-mono"
+                                />
+                                <button
+                                    onclick="copyToClipboard()"
+                                    class="px-3 py-2 bg-sky-500 text-white rounded hover:bg-sky-600 transition-colors text-sm font-medium"
+                                >
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-600 mb-1">Expires</p>
+                            <p id="expiryDate" class="text-sm font-medium text-gray-900"></p>
+                        </div>
+                    </div>
+
+                    <div id="loadingState" class="flex items-center justify-center py-4 gap-2">
+                        <span class="text-gray-600">Generating share link...</span>
+                    </div>
+
+                    <button
+                        id="generateButton"
+                        onclick="generateShareLink()"
+                        class="w-full px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors font-medium"
+                    >
+                        Generate Link
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Stats -->
-    {% include 'activity/_stats.html.twig' with { metaData: metaData, activityData: activityData } %}
+    {% include 'activity/_stats.html.twig' with { meta_data: meta_data, activity_data: activity_data } %}
 
     <!-- Training Zones -->
     <div>
@@ -29,30 +111,30 @@
             Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.
         </p>
 
-        {% if metaData.usesPaceZones() and paceZoneSessions | length > 0 %}
+        {% if meta_data.usesPaceZones() and pace_zone_sessions | length > 0 %}
            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                {% if metaData.isRun() %}
+                {% if meta_data.isRun() %}
                    <div>
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
                    </div>
                {% endif %}
               <div>
-                  {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
+                  {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
               </div>
               <div>
-                  {% include 'activity/_pace_zones.html.twig' with { paceStats: paceStats } %}
+                  {% include 'activity/_pace_zones.html.twig' with { pace_stats: pace_stats } %}
               </div>
               <div>
-                  {% include 'activity/_pace_zone_transitions.html.twig' with { paceZoneSessions: paceZoneSessions } %}
+                  {% include 'activity/_pace_zone_transitions.html.twig' with { pace_zone_sessions: pace_zone_sessions } %}
               </div>
            </div>
 
-        {% elseif not metaData.usesPaceZones() and heartRateZoneSessions | length > 0 %}
+        {% elseif not meta_data.usesPaceZones() and heart_rate_zone_sessions | length > 0 %}
            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                <div>
-                   {% include 'activity/_heart_rate_zones.html.twig' with { hrStats: hrStats } %}
+                   {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
                </div>
-               {% if metaData.isRun() %}
+               {% if meta_data.isRun() %}
                    <div>
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
                    </div>
@@ -66,21 +148,21 @@
         {% endif %}
     </div>
     <!-- Charts -->
-    {% if not activityData.hasAnyData() %}
+    {% if not activity_data.hasAnyData() %}
         <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
             No data available for analysis. This activity may not have complete stream data.
         </div>
     {% else %}
-        {% if activityData.hasVelocityData() %}
+        {% if activity_data.hasVelocityData() %}
             <div>
-                <h3 class="text-2xl font-bold mb-3">{{ metaData.getVelocityChartTitle() }}</h3>
+                <h3 class="text-2xl font-bold mb-3">{{ meta_data.getVelocityChartTitle() }}</h3>
                 <div class="h-80 bg-white border-gray-200 rounded border p-4">
                     <canvas id="velocityChart"></canvas>
                 </div>
             </div>
         {% endif %}
 
-        {% if activityData.hasHeartRateData() %}
+        {% if activity_data.hasHeartRateData() %}
             <div>
                 <h3 class="text-2xl font-bold mb-3">Heart Rate Over Time</h3>
                 <div class="h-80 bg-white border-gray-200 rounded border p-4">
@@ -142,11 +224,11 @@
     
     Chart.register(zoneBackgroundPlugin);
     
-    {% if activityData.hasVelocityData() %}
+    {% if activity_data.hasVelocityData() %}
     const velocityCtx = document.getElementById('velocityChart').getContext('2d');
     const velocityData = {
         labels: [
-            {% for point in activityData.getVelocityRawPoints() %}
+            {% for point in activity_data.getVelocityRawPoints() %}
                 '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
             {% endfor %}
         ],
@@ -154,7 +236,7 @@
             {
                 label: 'Velocity',
                 data: [
-                    {% for point in activityData.getVelocityRawPoints() %}
+                    {% for point in activity_data.getVelocityRawPoints() %}
                         {{ point.value }}{{ not loop.last ? ',' : '' }}
                     {% endfor %}
                 ],
@@ -167,9 +249,9 @@
                 pointHoverRadius: 6
             },
             {
-                label: 'EMA-{{ activityData.getMovingAveragePeriod() }}',
+                label: 'EMA-{{ activity_data.getMovingAveragePeriod() }}',
                 data: [
-                    {% for point in activityData.getVelocityAveragePoints() %}
+                    {% for point in activity_data.getVelocityAveragePoints() %}
                         {{ point.value }}{{ not loop.last ? ',' : '' }}
                     {% endfor %}
                 ],
@@ -184,9 +266,9 @@
         ]
     };
     
-    {% if metaData.usesPaceZones() and paceZoneSessions | length > 0 %}
+    {% if meta_data.usesPaceZones() and pace_zone_sessions | length > 0 %}
         velocityData.zoneColors = [
-            {% for session in paceZoneSessions %}
+            {% for session in pace_zone_sessions %}
                 {
                     name: '{{ session.zone.value }}',
                     startTime: '{{ session.start.format('H:i:s') }}',
@@ -213,17 +295,17 @@
             },
             scales: {
                 y: {
-                    {% if metaData.useInverseScale() %}
+                    {% if meta_data.useInverseScale() %}
                     reverse: true,
-                    min: {{ metaData.getChartYAxisMinValue() }},
-                    max: {{ metaData.getChartYAxisMaxValue() }},
+                    min: {{ meta_data.getChartYAxisMinValue() }},
+                    max: {{ meta_data.getChartYAxisMaxValue() }},
                     {% else %}
                     min: 0,
                     {% endif %}
                     ticks: { font: { size: 12 } },
                     title: {
                         display: true,
-                        text: '{{ metaData.getChartYAxisLabel() }}',
+                        text: '{{ meta_data.getChartYAxisLabel() }}',
                         font: { size: 13, weight: 600 }
                     }
                 },
@@ -240,18 +322,18 @@
     });
     {% endif %}
 
-    {% if activityData.hasHeartRateData() %}
+    {% if activity_data.hasHeartRateData() %}
     const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
     const heartRateData = {
         labels: [
-            {% for point in activityData.getHeartRatePoints() %}
+            {% for point in activity_data.getHeartRatePoints() %}
                 '{{ point.timestamp }}'{{ not loop.last ? ',' : '' }}
             {% endfor %}
         ],
         datasets: [{
             label: 'Heart Rate (bpm)',
             data: [
-                {% for point in activityData.getHeartRatePoints() %}
+                {% for point in activity_data.getHeartRatePoints() %}
                     {{ point.value }}{{ not loop.last ? ',' : '' }}
                 {% endfor %}
             ],
@@ -265,9 +347,9 @@
         }]
     };
     
-    {% if heartRateZoneSessions | length > 0 %}
+    {% if heart_rate_zone_sessions | length > 0 %}
         heartRateData.zoneColors = [
-            {% for session in heartRateZoneSessions %}
+            {% for session in heart_rate_zone_sessions %}
                 {
                     name: '{{ session.zone.value }}',
                     startTime: '{{ session.start.format('H:i:s') }}',
@@ -314,6 +396,78 @@
         }
     });
     {% endif %}
+
+    // Share modal functions
+    function openShareModal(activityId) {
+        document.getElementById('shareModal').classList.remove('hidden');
+        document.getElementById('shareLink').value = '';
+        document.getElementById('expiryDate').textContent = '';
+        document.getElementById('shareContent').classList.add('hidden');
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('generateButton').classList.remove('hidden');
+    }
+
+    function closeShareModal() {
+        document.getElementById('shareModal').classList.add('hidden');
+    }
+
+    function generateShareLink() {
+        const activityId = {{ activity_id }};
+        const expiryDays = document.getElementById('expiryDays').value;
+        const generateButton = document.getElementById('generateButton');
+
+        generateButton.classList.add('hidden');
+        document.getElementById('loadingState').classList.remove('hidden');
+
+        fetch(`/activity/${activityId}/share`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ expires_in: parseInt(expiryDays) })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to generate share link');
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('shareLink').value = data.share_url;
+            document.getElementById('expiryDate').textContent = new Date(data.expires_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('shareContent').classList.remove('hidden');
+            document.getElementById('expiresInSelection').classList.add('hidden');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to generate share link');
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('generateButton').classList.remove('hidden');
+        });
+    }
+
+    function copyToClipboard() {
+        const shareLink = document.getElementById('shareLink');
+        shareLink.select();
+        document.execCommand('copy');
+
+        const copyButton = event.target;
+        const originalText = copyButton.textContent;
+        copyButton.textContent = 'Copied!';
+        setTimeout(() => {
+            copyButton.textContent = originalText;
+        }, 2000);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('shareModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeShareModal();
+        }
+    });
 </script>
 
 {% include 'components/_footer.html.twig' %}

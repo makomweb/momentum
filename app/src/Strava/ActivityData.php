@@ -5,9 +5,17 @@ declare(strict_types=1);
 namespace App\Strava;
 
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\Assert\Assert;
+use App\Momentum\AthleteInterface;
+use App\Momentum\HeartRateZone;
 use App\Momentum\PaceUnit;
+use App\Momentum\PaceZone;
 use App\Momentum\SpeedUnit;
+use App\Momentum\TrainingMetrics;
 use App\Momentum\Velocity;
+use App\Momentum\ZoneSession;
+use App\Momentum\ZoneSessions;
+use App\Momentum\ZoneStatistics;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
 
@@ -15,8 +23,11 @@ final class ActivityData
 {
     private const MOVING_AVERAGE_PERIOD = 50;
 
-    public function __construct(private Activity $activity, private ActivityStream $stream)
-    {
+    public function __construct(
+        private AthleteInterface $athlete,
+        private Activity $activity,
+        private ActivityStream $stream,
+    ) {
     }
 
     public function getMetaData(): ActivityMetaData
@@ -187,6 +198,47 @@ final class ActivityData
         return Velocity::max($velocities);
     }
 
+    /**
+     * @return array{
+     *     meta_data: ActivityMetaData,
+     *     metrics: TrainingMetrics,
+     *     pace_zone_sessions: array<ZoneSession>,
+     *     heart_rate_zone_sessions: array<ZoneSession>,
+     *     pace_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
+     *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
+     * }
+     */
+    public function toArray(): array
+    {
+        $metaData = $this->getMetaData();
+
+        $sessions = $this->createZoneSessions();
+        $heartRateZoneSessions = $sessions->getHeartRateSessions();
+        $paceZoneSessions = $sessions->getPaceZoneSessions();
+
+        $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
+        $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
+        $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
+
+        // Use zone session totals instead of moving_time
+        // This ensures percentages always aggregate to 100%
+        $totalPaceSeconds = array_sum(array_map(fn ($s) => $s->getSeconds(), $paceZoneSessions));
+        $totalHrSeconds = array_sum(array_map(fn ($s) => $s->getSeconds(), $heartRateZoneSessions));
+
+        $paceStatsArray = $paceStats->toArray($totalPaceSeconds);
+        $hrStatsArray = $hrStats->toArray($totalHrSeconds);
+
+        return [
+            'activity_data' => $this,
+            'meta_data' => $metaData,
+            'metrics' => $metrics,
+            'pace_zone_sessions' => $paceZoneSessions,
+            'pace_stats' => $paceStatsArray,
+            'heart_rate_zone_sessions' => $heartRateZoneSessions,
+            'hr_stats' => $hrStatsArray,
+        ];
+    }
+
     private function convertVelocity(Velocity $velocity): float
     {
         $type = $this->activity->data['type'];
@@ -197,5 +249,20 @@ final class ActivityData
             'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR)->value,
             default => 0.0,
         };
+    }
+
+    private function createZoneSessions(): ZoneSessions
+    {
+        Assert::that(!$this->athlete->getTreshold()->isZero(), 'Please configure a treshold!');
+        Assert::that($this->athlete->getMaxHeartRate()->isValid(), 'Please configure a max. heart rate!');
+
+        $startDate = $this->activity->getStartDateLocalTime();
+        $dataPoints = iterator_to_array($this->stream->yield($startDate, 50));
+
+        return ZoneSessions::create(
+            $this->athlete,
+            $this->activity->getEndDateLocalTime(),
+            $dataPoints
+        );
     }
 }
