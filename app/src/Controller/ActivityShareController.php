@@ -45,11 +45,11 @@ final class ActivityShareController extends AbstractController
             return $this->json(['error' => 'expiresIn must be between 1 and 365 days'], Response::HTTP_BAD_REQUEST);
         }
 
-        $token = $this->tokenGenerator->generate($stravaUserId, $activity->getId(), $expiryDays);
+        $data = $this->tokenGenerator->generate($stravaUserId, $activity->getId(), $expiryDays);
 
         return $this->json([
-            ...$token,
-            'share_url' => $this->generateUrl('share_activity', $token, UrlGeneratorInterface::ABSOLUTE_URL),
+            ...$data,
+            'share_url' => $this->generateUrl('share_activity', ['token' => $data['token']], UrlGeneratorInterface::ABSOLUTE_URL),
         ]);
     }
 }
