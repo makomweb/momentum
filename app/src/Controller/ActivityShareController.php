@@ -15,6 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+// TODO: Consolidate this controller with ShareController + BragMessage!
 #[Route('/activity', name: 'activity_')]
 final class ActivityShareController extends AbstractController
 {
