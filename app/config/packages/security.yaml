@@ -42,7 +42,7 @@ security:
         - { path: ^/health/, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/about, roles: PUBLIC_ACCESS }
-        - { path: ^/share/, roles: PUBLIC_ACCESS }
+        - { path: ^/activity/view/, roles: PUBLIC_ACCESS }
         - { path: ^/authorize-strava, roles: PUBLIC_ACCESS }
         - { path: ^/exchange-token, roles: PUBLIC_ACCESS }
         - { path: ^/logout, roles: IS_AUTHENTICATED_REMEMBERED }

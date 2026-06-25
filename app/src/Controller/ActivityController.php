@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Momentum\ActivityBragMessage;
+use App\Momentum\ActivityShareToken;
+use App\Momentum\ActivityShareTokenException;
 use App\Momentum\AthleteInterface;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\ZoneSession;
@@ -14,8 +17,11 @@ use App\Strava\ActivityStreamCache;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/activity', name: 'activity_')]
@@ -24,13 +30,15 @@ final class ActivityController extends AbstractController
     public function __construct(
         private ActivityRepository $activityRepository,
         private ActivityStreamCache $streamCache,
+        private ActivityShareToken $shareToken,
+        private ActivityBragMessage $bragMessage,
         private AthleteInterface $athlete,
     ) {
     }
 
-    #[Route('/{id}', name: 'analysis_by_id', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'analyze', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function analyzeActivityById(int $id): Response
+    public function analyze(int $id): Response
     {
         $activity = $this->activityRepository->findOrNull($this->athlete->getStravaId(), $id);
 
@@ -59,9 +67,85 @@ final class ActivityController extends AbstractController
             ]);
         }
 
-        $data = $this->createData($activity, $stream);
+        $data = $this->createAnalysisData($activity, $stream);
 
         return $this->render('activity/analysis.html.twig', $data);
+    }
+
+    #[Route('/{id}/share', name: 'share', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function share(int $id, Request $request): JsonResponse
+    {
+        $activity = $this->activityRepository->findOrNull($this->athlete->getStravaId(), $id);
+
+        if (null === $activity) {
+            return $this->json(['error' => 'Activity not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $data = $request->getPayload();
+        $expiryDays = (int) $data->get('expires_in', 30);
+
+        // Validate expiry days (between 1 and 365)
+        if ($expiryDays < 1 || $expiryDays > 365) {
+            return $this->json(['error' => 'expires_in must be between 1 and 365 days'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $shareData = $this->shareToken->generate($this->athlete->getStravaId(), $activity->getId(), $expiryDays);
+
+        return $this->json([
+            ...$shareData,
+            'share_url' => $this->generateUrl('activity_view', ['token' => $shareData['token']], UrlGeneratorInterface::ABSOLUTE_URL),
+        ]);
+    }
+
+    #[Route('/view/{token}', name: 'view', methods: ['GET'], requirements: ['token' => '[a-z0-9:.]+'])]
+    public function view(string $token): Response
+    {
+        try {
+            $result = $this->shareToken->validate($token);
+        } catch (ActivityShareTokenException $e) {
+            return $this->render('share/expired.html.twig', [
+                'message' => $e->getMessage(),
+            ], new Response(status: Response::HTTP_GONE));
+        }
+
+        $activity = $this->activityRepository->findByStravaActivityId($result['strava_activity_id']);
+
+        if (null === $activity) {
+            return $this->render('share/not_found.html.twig', [], new Response(status: Response::HTTP_NOT_FOUND));
+        }
+
+        $activityData = $activity->getData();
+        $activityName = $activityData['name'];
+
+        try {
+            $stream = $this->streamCache->get(
+                $activity->getStravaUserId(),
+                $activity->getId()
+            );
+        } catch (\Exception) {
+            return $this->render('share/no_stream.html.twig', [
+                'activity_name' => $activityName,
+            ]);
+        }
+
+        if (!$stream->hasData()) {
+            return $this->render('share/no_stream.html.twig', [
+                'activity_name' => $activityName,
+            ]);
+        }
+
+        $message = $this->bragMessage->generate($activityData);
+
+        return $this->render('share/activity.html.twig', [
+            'activity_name' => $activityData['name'],
+            'message' => $message,
+            'distance' => $activityData['distance'],
+            'moving_time' => $activity->getMovingTime(),
+            'average_velocity' => $activity->getAverageVelocityAsStringable(),
+            'start_date' => $activity->getStartDateFormatted(),
+            'type' => $activityData['type'],
+        ]);
     }
 
     /**
@@ -75,7 +159,7 @@ final class ActivityController extends AbstractController
      *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      * }
      */
-    private function createData(Activity $activity, ActivityStream $stream): array
+    private function createAnalysisData(Activity $activity, ActivityStream $stream): array
     {
         $activityData = new ActivityData($this->athlete, $activity, $stream);
 
