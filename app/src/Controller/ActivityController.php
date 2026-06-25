@@ -109,42 +109,39 @@ final class ActivityController extends AbstractController
             ], new Response(status: Response::HTTP_GONE));
         }
 
-        $activity = $this->activityRepository->findByStravaActivityId($result['strava_activity_id']);
+        $stravaUserId = $result['strava_user_id'];
+        $stravaActivityId = $result['strava_activity_id'];
+
+        $activity = $this->activityRepository->findOrNull($stravaUserId, $stravaActivityId);
 
         if (null === $activity) {
             return $this->render('share/not_found.html.twig', [], new Response(status: Response::HTTP_NOT_FOUND));
         }
 
-        $activityData = $activity->getData();
-        $activityName = $activityData['name'];
+        dump('brag', ['activity' => $activity]);
 
         try {
-            $stream = $this->streamCache->get(
-                $activity->getStravaUserId(),
-                $activity->getId()
-            );
+            $stream = $this->streamCache->get($stravaUserId, $stravaActivityId);
         } catch (\Exception) {
             return $this->render('share/no_stream.html.twig', [
-                'activity_name' => $activityName,
+                'activity_name' => $activity->getName(),
             ]);
         }
 
         if (!$stream->hasData()) {
             return $this->render('share/no_stream.html.twig', [
-                'activity_name' => $activityName,
+                'activity_name' => $activity->getName(),
             ]);
         }
 
-        $message = $this->bragMessage->generate($activityData);
+        $message = $this->bragMessage->generate($activity->data);
 
         return $this->render('share/activity.html.twig', [
-            'activity_name' => $activityData['name'],
+            ...$activity->data,
             'message' => $message,
-            'distance' => $activityData['distance'],
             'moving_time' => $activity->getMovingTime(),
             'average_velocity' => $activity->getAverageVelocityAsStringable(),
-            'start_date' => $activity->getStartDateFormatted(),
-            'type' => $activityData['type'],
+            'start_date' => $activity->getStartDateLocalTimeFormatted(),
         ]);
     }
 

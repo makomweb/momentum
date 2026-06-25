@@ -19,9 +19,9 @@ final readonly class ActivityStreamCache
     ) {
     }
 
-    public function get(int $stravaUserId, int $activityId): ActivityStream
+    public function get(int $stravaUserId, int $stravaActivityId): ActivityStream
     {
-        $fileName = self::getFileName($stravaUserId, $activityId);
+        $fileName = self::getFileName($stravaUserId, $stravaActivityId);
 
         if ($this->filesystem->has($fileName)) {
             $json = $this->filesystem->read($fileName);
@@ -29,15 +29,15 @@ final readonly class ActivityStreamCache
             return $this->serializer->deserialize($json, ActivityStream::class, 'json');
         }
 
-        $stream = $this->downloader->download($stravaUserId, $activityId);
-        $this->set($stravaUserId, $activityId, $stream);
+        $stream = $this->downloader->download($stravaUserId, $stravaActivityId);
+        $this->set($stravaUserId, $stravaActivityId, $stream);
 
         return $stream;
     }
 
-    private function set(int $stravaUserId, int $activityId, ActivityStream $stream): void
+    private function set(int $stravaUserId, int $stravaActivityId, ActivityStream $stream): void
     {
-        $fileName = self::getFileName($stravaUserId, $activityId);
+        $fileName = self::getFileName($stravaUserId, $stravaActivityId);
 
         Assert::that(
             !$this->filesystem->has($fileName),
@@ -49,9 +49,9 @@ final readonly class ActivityStreamCache
         $this->filesystem->write($fileName, $json);
     }
 
-    public function clear(int $stravaUserId, int $activityId): void
+    public function clear(int $stravaUserId, int $stravaActivityId): void
     {
-        $fileName = self::getFileName($stravaUserId, $activityId);
+        $fileName = self::getFileName($stravaUserId, $stravaActivityId);
 
         Assert::that($this->filesystem->has($fileName),
             sprintf(
@@ -63,8 +63,8 @@ final readonly class ActivityStreamCache
         $this->filesystem->delete($fileName);
     }
 
-    private static function getFileName(int $stravaUserId, int $activityId): string
+    private static function getFileName(int $stravaUserId, int $stravaActivityId): string
     {
-        return sprintf('activity_stream_%d_%d.json', $stravaUserId, $activityId);
+        return sprintf('activity_stream_%d_%d.json', $stravaUserId, $stravaActivityId);
     }
 }
