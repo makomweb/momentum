@@ -39,11 +39,11 @@ final class ActivityShareController extends AbstractController
         }
 
         $data = $request->getPayload();
-        $expiryDays = (int) $data->get('expiresIn', 30);
+        $expiryDays = (int) $data->get('expires_in', 30);
 
         // Validate expiry days (between 1 and 365)
         if ($expiryDays < 1 || $expiryDays > 365) {
-            return $this->json(['error' => 'expiresIn must be between 1 and 365 days'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => 'expires_in must be between 1 and 365 days'], Response::HTTP_BAD_REQUEST);
         }
 
         $data = $this->tokenGenerator->generate($stravaUserId, $activity->getId(), $expiryDays);

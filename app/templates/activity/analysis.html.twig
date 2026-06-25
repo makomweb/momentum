@@ -428,7 +428,7 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ expiresIn: parseInt(expiryDays) })
+            body: JSON.stringify({ expires_in: parseInt(expiryDays) })
         })
         .then(response => {
             if (!response.ok) throw new Error('Failed to generate share link');
