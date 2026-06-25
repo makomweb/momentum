@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Momentum\ActivityBragMessage;
 use App\Momentum\ActivityShareToken;
 use App\Momentum\ActivityShareTokenException;
 use App\Momentum\AthleteInterface;
+use App\Momentum\HeartRate;
+use App\Momentum\Pace;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\ZoneSession;
 use App\Repository\ActivityRepository;
+use App\Repository\UserRepository;
 use App\Strava\ActivityData;
 use App\Strava\ActivityMetaData;
 use App\Strava\ActivityStreamCache;
@@ -33,6 +37,7 @@ final class ActivityController extends AbstractController
         private ActivityShareToken $shareToken,
         private ActivityBragMessage $bragMessage,
         private AthleteInterface $athlete,
+        private UserRepository $users,
     ) {
     }
 
@@ -67,7 +72,7 @@ final class ActivityController extends AbstractController
             ]);
         }
 
-        $data = $this->createAnalysisData($activity, $stream);
+        $data = self::createAnalysisData($this->athlete, $activity, $stream);
 
         return $this->render('activity/analysis.html.twig', $data);
     }
@@ -118,10 +123,11 @@ final class ActivityController extends AbstractController
             return $this->render('share/not_found.html.twig', [], new Response(status: Response::HTTP_NOT_FOUND));
         }
 
-        dump('brag', ['activity' => $activity]);
-
         try {
-            $stream = $this->streamCache->get($stravaUserId, $stravaActivityId);
+            $stream = $this->streamCache->get(
+                $stravaUserId,
+                $activity->getId()
+            );
         } catch (\Exception) {
             return $this->render('share/no_stream.html.twig', [
                 'activity_name' => $activity->getName(),
@@ -136,13 +142,65 @@ final class ActivityController extends AbstractController
 
         $message = $this->bragMessage->generate($activity->data);
 
-        return $this->render('share/activity.html.twig', [
+        $user = $this->users->findByStravaId($stravaUserId);
+        assert($user instanceof User);
+
+        $athlete = new class($user) implements AthleteInterface {
+            public function __construct(private User $user)
+            {
+            }
+
+            public function getStravaId(): int
+            {
+                throw new \Exception('Not implemented');
+            }
+
+            public function getName(): string
+            {
+                throw new \Exception('Not implemented');
+            }
+
+            public function getTreshold(): Pace
+            {
+                return $this->user->getTreshold();
+            }
+
+            public function getMaxHeartRate(): HeartRate
+            {
+                return $this->user->getMaxHeartRate();
+            }
+
+            public function getProfilePicture(): string
+            {
+                return $this->user->getProfilePictureMedium();
+            }
+
+            public function isConfigured(): bool
+            {
+                throw new \Exception('Not implemented');
+            }
+
+            public function toArray(): array
+            {
+                throw new \Exception('Not implemented');
+            }
+        };
+
+        $analysisData = self::createAnalysisData($athlete, $activity, $stream);
+
+        $data = [
             ...$activity->data,
             'message' => $message,
             'moving_time' => $activity->getMovingTime(),
             'average_velocity' => $activity->getAverageVelocityAsStringable(),
             'start_date' => $activity->getStartDateLocalTime(),
-        ]);
+            'hr_stats' => $analysisData['hr_stats'],
+            'pace_stats' => $analysisData['pace_stats'],
+        ];
+
+        dump('brag', ['activity' => $activity, 'data' => $data]);
+
+        return $this->render('share/activity.html.twig', $data);
     }
 
     /**
@@ -156,13 +214,13 @@ final class ActivityController extends AbstractController
      *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      * }
      */
-    private function createAnalysisData(Activity $activity, ActivityStream $stream): array
+    private static function createAnalysisData(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): array
     {
-        $activityData = new ActivityData($this->athlete, $activity, $stream);
+        $activityData = new ActivityData($athlete, $activity, $stream);
 
         return [
             'activity_id' => $activity->getId(),
-            'profile_picture' => $this->athlete->getProfilePicture(),
+            'profile_picture' => $athlete->getProfilePicture(),
             ...$activityData->toArray(),
         ];
     }
