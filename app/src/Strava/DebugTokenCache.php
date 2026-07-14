@@ -22,13 +22,9 @@ final readonly class DebugTokenCache implements TokenCacheInterface
     {
         $path = $this->directory.DIRECTORY_SEPARATOR.sprintf('%d', $stravaUserId);
 
-        var_dump(['context' => __METHOD__, 'path' => $path]);
-
         Assert::that(file_exists($path), new MissingTokenException($stravaUserId));
 
         $data = file_get_contents($path);
-
-        var_dump(['content' => $data]);
 
         return $this->serializer->deserialize($data, Token::class, 'json');
     }
@@ -38,8 +34,6 @@ final readonly class DebugTokenCache implements TokenCacheInterface
         $data = $this->serializer->serialize($token, 'json', []);
 
         $path = $this->directory.DIRECTORY_SEPARATOR.sprintf('%d', $token->athlete->id);
-
-        var_dump(['context' => __METHOD__, 'path' => $path]);
 
         $result = file_put_contents($path, $data);
 

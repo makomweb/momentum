@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class AuthTest extends WebTestCase
 {
     #[Test]
-    public function download_token(): void
+    public function refresh_token_should_work(): void
     {
         $client = self::getContainer()->get(Client::class);
         assert($client instanceof Client);
