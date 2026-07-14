@@ -72,23 +72,21 @@ logs:
 
 sa:
 	@echo "Run static code analysis..."
-	docker compose run --rm composer sa
+	docker compose exec -it app vendor/bin/phpstan analyse --memory-limit=1G
 
 cs:
 	@echo "Fix code style..."
-	docker compose run --rm composer cs
+	docker compose exec -it app vendor/bin/php-cs-fixer fix
 
 test:
 	@echo "Run tests..."
-	docker compose run --rm composer test
+	docker compose exec -it app bin/phpunit
 
 arch:
 	@echo "Run architecture tests..."
-	docker compose run --rm composer arch
+	docker compose exec -it app vendor/bin/deptrac  analyse --report-uncovered
 
-qa:
-	@echo "Run QA scripts..."
-	docker compose run --rm composer qa
+qa: sa cs test arch
 
 cc: clear
 clear: cache-clear cache-pool-clear
