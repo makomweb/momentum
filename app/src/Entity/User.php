@@ -54,13 +54,14 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->maxHeartRate = 0;
     }
 
+    // TODO: Rename to fromAthlete()!
     public static function fromStravaUser(Athlete $athlete): self
     {
         return new self(
-            $athlete->getId(),
+            $athlete->id,
             $athlete->getName(),
-            $athlete->getProfile(),
-            $athlete->getProfileMedium()
+            $athlete->profile,
+            $athlete->profileMedium
         );
     }
 

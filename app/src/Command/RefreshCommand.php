@@ -35,7 +35,7 @@ class RefreshCommand extends Command
 
         try {
             $token = $this->refresh($input);
-            $io->success(sprintf('Token for "%s" refreshed ✅', $token->getAthlete()));
+            $io->success(sprintf('Token for "%s" refreshed ✅', $token->athlete));
 
             return Command::SUCCESS;
         } catch (\Throwable $ex) {

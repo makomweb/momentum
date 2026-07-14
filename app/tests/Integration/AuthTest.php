@@ -17,9 +17,7 @@ class AuthTest extends WebTestCase
         $client = self::getContainer()->get(Client::class);
         assert($client instanceof Client);
 
-        $code = 'a865b6e8cd18ab8306ccf17bd81a1586bd4fd997';
-
-        $token = $client->requestToken($code);
+        $token = $client->refreshTokenFor(14417573);
 
         self::assertInstanceOf(Token::class, $token);
     }

@@ -29,29 +29,29 @@ class TokenTest extends TestCase
             ],
         ];
 
-        $token = new Token($data);
+        $token = Token::fromData($data);
 
-        self::assertEquals(TokenType::BEARER, $token->getTokenType());
-        self::assertNotEmpty($token->getAccessToken());
-        self::assertNotEmpty($token->getRefreshToken());
+        self::assertEquals(TokenType::BEARER, $token->tokenType);
+        self::assertNotEmpty($token->accessToken);
+        self::assertNotEmpty($token->refreshToken);
         self::assertEquals(
             0,
             date_diff(
                 \DateTimeImmutable::createFromTimestamp(1776340597),
-                $token->getExpiresAt()
+                $token->expiresAt
             )->days
         );
         self::assertEquals(
             6 * 60 * 60 /* 6 hours) */,
-            $token->getExpiresIn()
+            $token->expiresInSeconds
         );
 
-        $athlete = $token->getAthlete();
+        $athlete = $token->athlete;
 
-        self::assertEquals(334455, $athlete->getId());
+        self::assertEquals(334455, $athlete->id);
         self::assertEquals('Max Mustermann', $athlete->getName());
-        self::assertEquals('http://example.com/image.png', $athlete->getProfile());
-        self::assertEquals('http://example.com/image-medium.png', $athlete->getProfileMedium());
-        self::assertEquals(Gender::MALE, $athlete->getGender());
+        self::assertEquals('http://example.com/image.png', $athlete->profile);
+        self::assertEquals('http://example.com/image-medium.png', $athlete->profileMedium);
+        self::assertEquals(Gender::MALE, $athlete->sex);
     }
 }

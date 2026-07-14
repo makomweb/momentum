@@ -31,7 +31,7 @@ final readonly class TokenCache implements TokenCacheInterface
 
     public function saveToken(Token $token): void
     {
-        $item = $this->pool->getItem(strval($token->getAthlete()->getId()));
+        $item = $this->pool->getItem(strval($token->athlete->id));
         $item->set($token);
         $this->pool->save($item);
     }

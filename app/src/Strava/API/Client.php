@@ -39,7 +39,7 @@ final readonly class Client
          */
         $data = $response->toArray();
 
-        $token = new Token($data);
+        $token = Token::fromData($data);
 
         $this->cache->saveToken($token);
 
@@ -61,7 +61,7 @@ final readonly class Client
      */
     private function refreshToken(Token $token): Token
     {
-        $refreshToken = $token->getRefreshToken();
+        $refreshToken = $token->refreshToken;
 
         Assert::that(!empty($refreshToken), 'No refresh token available!');
 

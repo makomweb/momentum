@@ -6,6 +6,47 @@ namespace App\Strava\API;
 
 final readonly class Token
 {
+    public function __construct(
+        public TokenType $tokenType,
+        public \DateTimeImmutable $expiresAt,
+        public int $expiresInSeconds,
+        public string $accessToken,
+        public string $refreshToken,
+        public Athlete $athlete,
+    ) {
+    }
+
+    /**
+     * @return array{
+     *  token_type: string,
+     *  expires_at: int,
+     *  expires_in: int,
+     *  access_token: string,
+     *  refresh_token: string,
+     *  athlete: array{
+     *   id: int,
+     *   username: string,
+     *   firstname: string,
+     *   lastname: string,
+     *   sex: string,
+     *   premium: bool,
+     *   profile_medium: string,
+     *   profile: string
+     *  }
+     * }
+     */
+    public function toArray(): array
+    {
+        return [
+            'token_type' => $this->tokenType->value,
+            'expires_at' => $this->expiresAt->getTimestamp(),
+            'expires_in' => $this->expiresInSeconds,
+            'access_token' => $this->accessToken,
+            'refresh_token' => $this->refreshToken,
+            'athlete' => $this->athlete->toArray(),
+        ];
+    }
+
     /**
      * @param array{
      *  token_type: string,
@@ -25,8 +66,16 @@ final readonly class Token
      *  }
      * } $data
      */
-    public function __construct(private array $data)
+    public static function fromData(array $data): self
     {
+        return new self(
+            TokenType::from($data['token_type']),
+            \DateTimeImmutable::createFromTimestamp($data['expires_at']),
+            $data['expires_in'],
+            $data['access_token'],
+            $data['refresh_token'],
+            Athlete::fromData($data['athlete'])
+        );
     }
 
     /**
@@ -40,55 +89,23 @@ final readonly class Token
      */
     public function withData(array $data): self
     {
-        return new self([
-            ...$this->data,
+        return self::fromData([
+            ...$this->toArray(),
             ...$data,
         ]);
-    }
-
-    public function getTokenType(): TokenType
-    {
-        return TokenType::from($this->data['token_type']);
     }
 
     public function getAuthHeaderValue(): string
     {
         return sprintf(
             '%s %s',
-            $this->getTokenType()->value,
-            $this->getAccessToken()
-        );
-    }
-
-    public function getAccessToken(): string
-    {
-        return $this->data['access_token'];
-    }
-
-    public function getRefreshToken(): string
-    {
-        return $this->data['refresh_token'];
-    }
-
-    public function getExpiresAt(): \DateTimeImmutable
-    {
-        return \DateTimeImmutable::createFromTimestamp(
-            $this->data['expires_at']
+            $this->tokenType->value,
+            $this->accessToken
         );
     }
 
     public function isExpired(): bool
     {
-        return $this->getExpiresAt() < new \DateTimeImmutable();
-    }
-
-    public function getExpiresIn(): int
-    {
-        return $this->data['expires_in'];
-    }
-
-    public function getAthlete(): Athlete
-    {
-        return new Athlete($this->data['athlete']);
+        return $this->expiresAt < new \DateTimeImmutable();
     }
 }
