@@ -1,0 +1,11 @@
+FROM squidfunk/mkdocs-material:latest
+
+# Install Java runtime and PlantUML using Alpine package manager
+RUN apk add --no-cache \
+    openjdk11-jre \
+    plantuml
+
+# Install Python PlantUML markdown extension
+RUN pip install plantuml-markdown
+
+
