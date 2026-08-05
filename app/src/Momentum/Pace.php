@@ -12,6 +12,13 @@ final readonly class Pace implements \Stringable
     ) {
     }
 
+    public static function fromSecondsPerKilometer(int $secondsPerKilometer): self
+    {
+        return $secondsPerKilometer > 0
+            ? new self($secondsPerKilometer / 60, PaceUnit::MINUTES_PER_KILOMETER)
+            : Pace::ZERO();
+    }
+
     public static function fromMetersPerSecond(float $metersPerSecond): self
     {
         return $metersPerSecond < 0.1
@@ -43,6 +50,11 @@ final readonly class Pace implements \Stringable
             PaceUnit::MINUTES_PER_100_METERS == $unit => new self($this->value / 10, $unit),
             PaceUnit::MINUTES_PER_KILOMETER == $unit => new self($this->value * 10, $unit),
         };
+    }
+
+    public function multiply(float $factor): self
+    {
+        return new self($this->value * $factor, $this->unit);
     }
 
     public function __toString(): string

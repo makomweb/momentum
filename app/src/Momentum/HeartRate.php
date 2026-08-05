@@ -25,6 +25,11 @@ final readonly class HeartRate implements \Stringable
         return HeartRateZone::calculate($this->bpm, $max->bpm);
     }
 
+    public function multiply(float $factor): self
+    {
+        return new self(intval($this->bpm * $factor));
+    }
+
     public function __toString(): string
     {
         return sprintf('%d bpm', $this->bpm);
