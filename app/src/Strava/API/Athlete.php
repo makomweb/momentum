@@ -6,6 +6,18 @@ namespace App\Strava\API;
 
 final readonly class Athlete implements \Stringable
 {
+    public function __construct(
+        public int $id,
+        public string $username,
+        public string $firstname,
+        public string $lastname,
+        public Gender $sex,
+        public bool $premium,
+        public string $profileMedium,
+        public string $profile,
+    ) {
+    }
+
     /**
      * @param array{
      *  id: int,
@@ -18,42 +30,53 @@ final readonly class Athlete implements \Stringable
      *  profile: string
      * } $data
      */
-    public function __construct(private array $data)
+    public static function fromData(array $data): self
     {
+        return new self(
+            $data['id'],
+            $data['username'],
+            $data['firstname'],
+            $data['lastname'],
+            Gender::from($data['sex']),
+            $data['premium'],
+            $data['profile_medium'],
+            $data['profile'],
+        );
     }
 
-    public function getId(): int
+    /**
+     * @return array{
+     *  id: int,
+     *  username: string,
+     *  firstname: string,
+     *  lastname: string,
+     *  sex: string,
+     *  premium: bool,
+     *  profile_medium: string,
+     *  profile: string
+     * }
+     */
+    public function toArray(): array
     {
-        return $this->data['id'];
-    }
-
-    public function getUsername(): string
-    {
-        return $this->data['username'];
+        return [
+            'id' => $this->id,
+            'username' => $this->username,
+            'firstname' => $this->firstname,
+            'lastname' => $this->lastname,
+            'sex' => $this->sex->value,
+            'premium' => $this->premium,
+            'profile_medium' => $this->profileMedium,
+            'profile' => $this->profile,
+        ];
     }
 
     public function getName(): string
     {
-        return $this->data['firstname'].' '.$this->data['lastname'];
-    }
-
-    public function getGender(): Gender
-    {
-        return Gender::tryFrom($this->data['sex']) ?? Gender::UNKNOWN;
-    }
-
-    public function getProfile(): string
-    {
-        return $this->data['profile'];
-    }
-
-    public function getProfileMedium(): string
-    {
-        return $this->data['profile_medium'];
+        return $this->firstname.' '.$this->lastname;
     }
 
     public function __toString(): string
     {
-        return sprintf('%s (Strava-ID: %d)', $this->getName(), $this->getId());
+        return sprintf('%s (Strava-ID: %d)', $this->getName(), $this->id);
     }
 }

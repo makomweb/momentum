@@ -20,3 +20,6 @@ nav:
       - Deptrac Validation: ./architecture/deptrac.md
       - Design Patterns: ./architecture/patterns.md
       - Strava API Flow: ./architecture/strava-flow.md
+  - Toolbox-Exception-Hierarchy:
+      - Before: ./architecture/before.md
+      - After: ./architecture/after.md

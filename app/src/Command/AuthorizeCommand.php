@@ -32,7 +32,7 @@ class AuthorizeCommand extends Command
 
         try {
             $token = $this->authorize($input, $output);
-            $io->success(sprintf('"%s" authorized ✅', $token->getAthlete()));
+            $io->success(sprintf('"%s" authorized ✅', $token->athlete));
 
             return Command::SUCCESS;
         } catch (\Throwable $ex) {

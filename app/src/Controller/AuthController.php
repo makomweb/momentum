@@ -22,7 +22,7 @@ final class AuthController extends AbstractController
     {
         // If fully authenticated, redirect to activities
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->redirectToRoute('activities');
+            return $this->redirectToRoute('activities_index');
         }
 
         // Show login page for unauthenticated users

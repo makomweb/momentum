@@ -104,7 +104,9 @@ services:
       - momentum
 
   mkdocs:
-    image: squidfunk/mkdocs-material:latest
+    build:
+      context: .
+      dockerfile: build/Dockerfile.mkdocs
     ports:
       - "8005:8000"
     volumes:
