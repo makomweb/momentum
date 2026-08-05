@@ -33,7 +33,9 @@ final readonly class DebugTokenCache implements TokenCacheInterface
     {
         $data = $this->serializer->serialize($token, 'json', []);
 
-        mkdir($this->directory, 0777, true);
+        if (!file_exists($this->directory)) {
+            mkdir($this->directory, 0777, true);
+        }
 
         $path = $this->directory.DIRECTORY_SEPARATOR.sprintf('%d', $token->athlete->id);
 
