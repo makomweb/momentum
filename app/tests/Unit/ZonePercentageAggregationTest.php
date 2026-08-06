@@ -70,8 +70,10 @@ final class ZonePercentageAggregationTest extends TestCase
             ]);
         }
 
+        $athlete = self::createAthlete($treshold, $maxHeartRate);
+
         $endTime = $startTime->add(new \DateInterval('PT'.((int) end($timeData)).'S'));
-        $zoneSessionsData = ZoneSessions::create(self::createAthlete($treshold, $maxHeartRate), $endTime, $dataPoints);
+        $zoneSessionsData = ZoneSessions::create($athlete, $endTime, $dataPoints);
 
         // Total time span of zone sessions (from first to last data point)
         $totalZoneSeconds = (int) end($timeData);  // 4781 seconds
@@ -84,7 +86,7 @@ final class ZonePercentageAggregationTest extends TestCase
         $hrSessions = $zoneSessionsData->getHeartRateSessions();
 
         // When using total zone seconds (correct for unit test):
-        $paceStatistics = ZoneStatistics::fromSessions($paceSessions, PaceZone::cases());
+        $paceStatistics = ZoneStatistics::fromSessions($athlete, $paceSessions, PaceZone::cases());
         $paceStatsArrayCorrect = $paceStatistics->toArray($totalZoneSeconds);
         $paceTotalPercentageCorrect = array_sum(array_column($paceStatsArrayCorrect, 'duration_percentage'));
 
@@ -92,7 +94,7 @@ final class ZonePercentageAggregationTest extends TestCase
         $paceStatsArrayWithBug = $paceStatistics->toArray($stravaMovingTime);
         $paceTotalPercentageWithBug = array_sum(array_column($paceStatsArrayWithBug, 'duration_percentage'));
 
-        $hrStatistics = ZoneStatistics::fromSessions($hrSessions, HeartRateZone::cases());
+        $hrStatistics = ZoneStatistics::fromSessions($athlete, $hrSessions, HeartRateZone::cases());
         $hrStatsArrayCorrect = $hrStatistics->toArray($totalZoneSeconds);
         $hrTotalPercentageCorrect = array_sum(array_column($hrStatsArrayCorrect, 'duration_percentage'));
 

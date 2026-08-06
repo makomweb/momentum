@@ -15,8 +15,10 @@ final readonly class ZoneStatistics
      * @param ZoneSession[]                 $sessions
      * @param array<HeartRateZone|PaceZone> $zones
      */
-    public static function fromSessions(array $sessions, array $zones): self
+    public static function fromSessions(AthleteInterface $athlete, array $sessions, array $zones): self
     {
+        $descriptions = new ZoneDescription($athlete);
+
         /** @var array<string, int> $empty */
         $empty = array_reduce(
             $zones,
@@ -25,8 +27,8 @@ final readonly class ZoneStatistics
              *
              * @return array<string, int>
              */
-            static function (array $carry, HeartRateZone|PaceZone $zone): array {
-                $carry[$zone->value] = 0;
+            static function (array $carry, HeartRateZone|PaceZone $zone) use ($descriptions): array {
+                $carry[$descriptions->getDescription($zone)] = 0;
 
                 return $carry;
             },
@@ -41,10 +43,11 @@ final readonly class ZoneStatistics
              *
              * @return array<string, int>
              */
-            static function (array $carry, ZoneSession $session): array {
+            static function (array $carry, ZoneSession $session) use ($descriptions): array {
+                $description = $descriptions->getDescription($session->zone);
                 /** @var int $value */
-                $value = $carry[$session->zone->value];
-                $carry[$session->zone->value] = $value + $session->getSeconds();
+                $value = $carry[$description];
+                $carry[$description] = $value + $session->getSeconds();
 
                 return $carry;
             },

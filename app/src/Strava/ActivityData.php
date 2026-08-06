@@ -217,8 +217,8 @@ final class ActivityData
         $paceZoneSessions = $sessions->getPaceZoneSessions();
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
-        $paceStats = ZoneStatistics::fromSessions($paceZoneSessions, PaceZone::cases());
-        $hrStats = ZoneStatistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
+        $paceStats = ZoneStatistics::fromSessions($this->athlete, $paceZoneSessions, PaceZone::cases());
+        $hrStats = ZoneStatistics::fromSessions($this->athlete, $heartRateZoneSessions, HeartRateZone::cases());
 
         // Use zone session totals instead of moving_time
         // This ensures percentages always aggregate to 100%

@@ -8,9 +8,22 @@ final readonly class ZoneDescription
 {
     public function __construct(private AthleteInterface $athlete)
     {
+        assert(!$athlete->getTreshold()->isZero(), 'Please configure a treshold!');
+        assert($athlete->getMaxHeartRate()->isValid(), 'Please configure a max. heart rate!');
     }
 
-    public function getHeartRateZoneDescription(HeartRateZone $zone): string
+    public function getDescription(HeartRateZone|PaceZone $zone): string
+    {
+        return $zone->value;
+
+        // if ($zone instanceof HeartRateZone) {
+        //     return $this->getHeartRateZoneDescription($zone);
+        // }
+
+        // return $this->getPaceZoneDescription($zone);
+    }
+
+    private function getHeartRateZoneDescription(HeartRateZone $zone): string
     {
         return match ($zone) {
             HeartRateZone::ZONE_5 => sprintf('%s >= %s', $zone->value, $this->athlete->getMaxHeartRate()->multiply(0.9)),
@@ -21,7 +34,7 @@ final readonly class ZoneDescription
         };
     }
 
-    public function getPaceZoneDescriptions(PaceZone $zone): string
+    private function getPaceZoneDescription(PaceZone $zone): string
     {
         return match ($zone) {
             PaceZone::ZONE_1 => sprintf('%s <= %s', $zone->value, $this->athlete->getTreshold()->multiply(1.29)),
