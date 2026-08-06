@@ -264,7 +264,6 @@
 
             <!-- Training Zones -->
             {% if meta_data.usesPaceZones() %}
-                <div class="zones-title">Training Zones</div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
                     {% include 'activity/_pace_zones.html.twig' with { pace_stats: pace_stats } %}
