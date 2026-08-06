@@ -51,18 +51,6 @@ services:
             $limiterPerIp: '@limiter.per_ip'
             $limiterGlobalBurst: '@limiter.global_burst'
 
-    # Redis session handler - stores sessions in Redis instead of filesystem
-    session.handler.redis:
-        class: Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler
-        arguments:
-            - !service
-              class: Redis
-              factory:
-                - Symfony\Component\Cache\Adapter\RedisAdapter
-                - 'createConnection'
-              arguments:
-                - '%env(CACHE_URL)%'
-
     # Expose app version to Twig templates
     App\Twig\GlobalVariables:
         arguments:
