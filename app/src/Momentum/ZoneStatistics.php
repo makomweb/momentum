@@ -6,7 +6,7 @@ namespace App\Momentum;
 
 final readonly class ZoneStatistics
 {
-    /** @param array<string, int> $statistics */
+    /** @param array<string, array{description: string, value: int}> $statistics */
     private function __construct(public array $statistics = [])
     {
     }
@@ -19,35 +19,42 @@ final readonly class ZoneStatistics
     {
         $descriptions = new ZoneDescription($athlete);
 
-        /** @var array<string, int> $empty */
+        /** @var array<string, array{description: string, value: int}> $empty */
         $empty = array_reduce(
             $zones,
             /**
-             * @param array<string, int> $carry
+             * @param array<string, array{description: string, value: int}> $carry
              *
-             * @return array<string, int>
+             * @return array<string, array{description: string, value: int}>
+             *
+             * @todo Simplify to ARROW Function!
              */
             static function (array $carry, HeartRateZone|PaceZone $zone) use ($descriptions): array {
-                $carry[$descriptions->getDescription($zone)] = 0;
+                $carry[$zone->value] = [
+                    'description' => $descriptions->getDescription($zone),
+                    'value' => 0,
+                ];
 
                 return $carry;
             },
             []
         );
 
-        /** @var array<string, int> $statistics */
+        /** @var array<string, array{description: string, value: int}> $statistics */
         $statistics = array_reduce(
             $sessions,
             /**
-             * @param array<string, int> $carry
+             * @param array<string, array{description: string, value: int}> $carry
              *
-             * @return array<string, int>
+             * @return array<string, array{description: string, value: int}>
              */
             static function (array $carry, ZoneSession $session) use ($descriptions): array {
-                $description = $descriptions->getDescription($session->zone);
-                /** @var int $value */
-                $value = $carry[$description];
-                $carry[$description] = $value + $session->getSeconds();
+                /** @var array{description: string, value: int} $zone */
+                $zone = $carry[$session->zone->value];
+                $carry[$session->zone->value] = [
+                    'description' => $descriptions->getDescription($session->zone),
+                    'value' => $zone['value'] + $session->getSeconds(),
+                ];
 
                 return $carry;
             },
@@ -60,6 +67,7 @@ final readonly class ZoneStatistics
     /**
      * @return array{
      *  zone: string,
+     *  description: string,
      *  duration_seconds: int,
      *  duration_percentage: float
      * }[]
@@ -72,15 +80,19 @@ final readonly class ZoneStatistics
     /**
      * @return \Generator<array{
      *  zone: string,
+     *  description: string,
      *  duration_seconds: int,
      *  duration_percentage: float
      * }>
      */
     private function yieldStatistics(int $total): \Generator
     {
-        foreach ($this->statistics as $zone => $duration) {
+        foreach ($this->statistics as $key => $zone) {
+            $duration = $zone['value'];
+
             yield [
-                'zone' => $zone,
+                'zone' => $key,
+                'description' => $zone['description'],
                 'duration_seconds' => $duration,
                 'duration_percentage' => round($total > 0 ? ($duration / $total) * 100 : 0.0, 2),
             ];

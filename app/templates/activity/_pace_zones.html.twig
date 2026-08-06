@@ -3,10 +3,11 @@
     <div class="space-y-2 overflow-y-auto flex-grow">
         {% for stat in pace_stats %}
             {% set zone = stat.zone %}
+            {% set description = stat.description %}
             {% set percentage = stat.duration_percentage %}
             <div>
                 <div class="flex justify-between items-start mb-1">
-                    <div class="text-xs font-semibold">{{ zone }}</div>
+                    <div class="text-xs font-semibold">{{ description }}</div>
                     <div class="text-xs font-bold" style="color: {{ zone | format_zone_color('pace') }};">{{ percentage | number_format(1, '.') }}%</div>
                 </div>
                 <div class="w-full bg-gray-200 rounded h-1.5">
