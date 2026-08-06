@@ -111,7 +111,7 @@
         </p>
 
         {% if meta_data.usesPaceZones() and pace_zone_sessions | length > 0 %}
-           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; align-items: stretch;">
                 {% if meta_data.isRun() %}
                    <div>
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
@@ -126,7 +126,7 @@
            </div>
 
         {% elseif not meta_data.usesPaceZones() and heart_rate_zone_sessions | length > 0 %}
-           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; align-items: stretch;">
                <div>
                    {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
                </div>
