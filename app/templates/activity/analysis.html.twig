@@ -111,27 +111,27 @@
         </p>
 
         {% if meta_data.usesPaceZones() and pace_zone_sessions | length > 0 %}
-           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
                 {% if meta_data.isRun() %}
-                   <div class="min-w-0">
+                   <div>
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
                    </div>
                {% endif %}
-              <div class="min-w-0">
+              <div>
                   {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
               </div>
-              <div class="min-w-0">
+              <div>
                   {% include 'activity/_pace_zones.html.twig' with { pace_stats: pace_stats } %}
               </div>
            </div>
 
         {% elseif not meta_data.usesPaceZones() and heart_rate_zone_sessions | length > 0 %}
-           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div class="min-w-0">
+           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+               <div>
                    {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
                </div>
                {% if meta_data.isRun() %}
-                   <div class="min-w-0">
+                   <div>
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
                    </div>
                {% endif %}
