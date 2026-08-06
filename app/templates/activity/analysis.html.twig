@@ -107,35 +107,31 @@
     <div>
         <h2 class="text-2xl font-bold mb-2">Training Zones</h2>
         <p class="text-sm text-gray-600 mb-4">
-            <span class="font-semibold">Zone Validation:</span>
-            Hard zones (Threshold, VO2max) are confirmed by heart rate data to eliminate false positives from brief pace spikes. Only confirmed zones feed the training calculations.
+            Your running effort is categorized into five training zones based on pace and heart rate data. Zones help optimize your training by ensuring you're working at the right intensity for your goals.
         </p>
 
         {% if meta_data.usesPaceZones() and pace_zone_sessions | length > 0 %}
-           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {% if meta_data.isRun() %}
-                   <div>
+                   <div class="min-w-0">
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
                    </div>
                {% endif %}
-              <div>
+              <div class="min-w-0">
                   {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
               </div>
-              <div>
+              <div class="min-w-0">
                   {% include 'activity/_pace_zones.html.twig' with { pace_stats: pace_stats } %}
-              </div>
-              <div>
-                  {% include 'activity/_pace_zone_transitions.html.twig' with { pace_zone_sessions: pace_zone_sessions } %}
               </div>
            </div>
 
         {% elseif not meta_data.usesPaceZones() and heart_rate_zone_sessions | length > 0 %}
-           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-               <div>
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div class="min-w-0">
                    {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
                </div>
                {% if meta_data.isRun() %}
-                   <div>
+                   <div class="min-w-0">
                        {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
                    </div>
                {% endif %}

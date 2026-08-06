@@ -3,7 +3,7 @@
         <div class="flex items-start justify-between gap-1 mb-3 rounded p-2 {{ activity.data.type | activity_bg_color }}">
             <div class="flex-grow min-w-0">
                 <h3 class="font-semibold truncate mb-0.5">{{ activity.data.name }}</h3>
-                <div class="text-gray-600 text-xs">{{ activity.getStartDateFormatted() }}</div>
+                <div class="text-gray-600 text-xs">{{ activity.getStartDateLocalTime()|format_local_date_time }}</div>
             </div>
             <span class="text-2xl flex-shrink-0">
                 {% set type_lower = activity.data.type | lower %}

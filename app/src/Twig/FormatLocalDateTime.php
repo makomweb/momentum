@@ -16,12 +16,8 @@ final class FormatLocalDateTime extends AbstractExtension
         ];
     }
 
-    public static function format(\DateTimeImmutable|\DateTime $dateTime, string $format = 'Y-m-d H:i:s'): string
+    public static function format(\DateTimeInterface $dateTime, string $format = 'D, d M Y · H:i'): string
     {
-        if (!$dateTime instanceof \DateTimeImmutable) {
-            $dateTime = \DateTimeImmutable::createFromMutable($dateTime);
-        }
-
         return $dateTime->format($format);
     }
 }
