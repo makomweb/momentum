@@ -238,7 +238,7 @@
 
         <!-- Content Section -->
         <div class="content-section">
-            <!-- Stats -->
+            <!-- Essentials: Metadata & Stats -->
             <div class="stats">
                 <div class="stat">
                     <div class="stat-label">Distance</div>
@@ -254,9 +254,16 @@
                 </div>
             </div>
 
-            <!-- Zones -->
+            <!-- Training Metrics -->
+            {% if metrics is defined and metrics %}
+                <div class="zones-title">Training Metrics</div>
+                <div>
+                    {% include 'activity/_metrics.html.twig' with { metrics: metrics } %}
+                </div>
+            {% endif %}
+
+            <!-- Training Zones -->
             {% if meta_data.usesPaceZones() %}
-                <div class="zones-title">Performance Zones</div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {% include 'activity/_heart_rate_zones.html.twig' with { hr_stats: hr_stats } %}
                     {% include 'activity/_pace_zones.html.twig' with { pace_stats: pace_stats } %}

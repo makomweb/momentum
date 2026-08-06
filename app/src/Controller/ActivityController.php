@@ -58,6 +58,7 @@ final class ActivityController extends AbstractController
             );
         } catch (\Exception) {
             return $this->render('activity/analysis_no_stream.html.twig', [
+                'activity_id' => $activity->getId(),
                 'activity_name' => $activity->getName(),
                 'profile_picture' => $this->athlete->getProfilePicture(),
             ]);
@@ -65,6 +66,7 @@ final class ActivityController extends AbstractController
 
         if (!$stream->hasData()) {
             return $this->render('activity/analysis_no_stream.html.twig', [
+                'activity_id' => $activity->getId(),
                 'activity_name' => $activity->getName(),
                 'profile_picture' => $this->athlete->getProfilePicture(),
             ]);

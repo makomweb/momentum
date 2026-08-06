@@ -140,11 +140,6 @@ final class Activity
         return $this->startDate->setTimezone(new \DateTimeZone($this->timezone));
     }
 
-    public function getStartDateFormatted(): string
-    {
-        return $this->getStartDateLocalTime()->format('D M d, y · H:i');
-    }
-
     public function getAverageVelocityAsStringable(): \Stringable
     {
         $type = $this->data['type'];
