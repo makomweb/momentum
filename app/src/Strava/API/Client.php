@@ -21,14 +21,14 @@ final readonly class Client
     {
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
             'headers' => [
-                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Content-Type' => 'application/json',
             ],
-            'body' => http_build_query([
+            'body' => [
                 'client_id' => $this->config->clientId,
                 'client_secret' => $this->config->clientSecret,
                 'code' => $code,
                 'grant_type' => 'authorization_code',
-            ]),
+            ],
         ]);
 
         /** @var array{
@@ -70,14 +70,14 @@ final readonly class Client
 
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
             'headers' => [
-                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Content-Type' => 'application/json',
             ],
-            'body' => http_build_query([
+            'body' => [
                 'client_id' => $this->config->clientId,
                 'client_secret' => $this->config->clientSecret,
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $refreshToken,
-            ]),
+            ],
         ]);
 
         /** @var array{
