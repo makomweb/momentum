@@ -20,12 +20,15 @@ final readonly class Client
     public function requestToken(string $code): Token
     {
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
-            'body' => [
+            'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+            'body' => http_build_query([
                 'client_id' => $this->config->clientId,
                 'client_secret' => $this->config->clientSecret,
                 'code' => $code,
                 'grant_type' => 'authorization_code',
-            ],
+            ]),
         ]);
 
         /** @var array{
@@ -66,12 +69,15 @@ final readonly class Client
         Assert::that(!empty($refreshToken), 'No refresh token available!');
 
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
-            'body' => [
+            'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+            'body' => http_build_query([
                 'client_id' => $this->config->clientId,
                 'client_secret' => $this->config->clientSecret,
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $refreshToken,
-            ],
+            ]),
         ]);
 
         /** @var array{
