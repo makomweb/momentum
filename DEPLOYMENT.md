@@ -199,7 +199,7 @@ New pods deployed with latest code
 
 1. Go to **GitLab Project > CI/CD > Pipelines**
 2. Find the pipeline for your merge to master
-3. Click **play button** on `deploy-hetzner` job
+3. Click **play button** on `deploy` job
 4. Wait for deployment to complete
 
 ### CI/CD Pipeline Configuration
