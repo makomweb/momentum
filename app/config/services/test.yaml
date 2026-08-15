@@ -1,0 +1,7 @@
+services:
+  App\Strava\DebugTokenCache:
+    arguments:
+      $directory: '%kernel.project_dir%/var/debug_token_cache'
+
+  App\Strava\API\TokenCacheInterface:
+    alias: App\Strava\DebugTokenCache

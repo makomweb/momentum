@@ -66,13 +66,8 @@ services:
     # Make Client service public for testing
     App\Strava\API\Client:
         public: true
-
-    App\Strava\DebugTokenCache:
-        arguments:
-            $directory: '%kernel.project_dir%/var/debug_token_cache'
-
     App\Strava\API\TokenCacheInterface:
-        alias: App\Strava\DebugTokenCache
+        alias: App\Strava\TokenCache
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
