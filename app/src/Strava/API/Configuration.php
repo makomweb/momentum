@@ -16,6 +16,8 @@ final readonly class Configuration
         public string $clientSecret,
         #[Autowire('%strava_redirect_uri%')]
         private string $redirectUri,
+        #[Autowire('%env(APP_SECRET)%')]
+        private string $appSecret,
     ) {
     }
 
@@ -35,5 +37,35 @@ final readonly class Configuration
         }
 
         return $url;
+    }
+
+    /**
+     * Generate a signed state parameter for CSRF protection.
+     * The state is signed with the app secret, so it can be verified without session storage.
+     */
+    public function generateSignedState(): string
+    {
+        $randomBytes = bin2hex(random_bytes(16));
+        $signature = hash_hmac('sha256', $randomBytes, $this->appSecret);
+
+        return $randomBytes.'.'.$signature;
+    }
+
+    /**
+     * Verify a signed state parameter.
+     * Returns true if the state is valid, false otherwise.
+     */
+    public function isStateValid(string $state): bool
+    {
+        $parts = explode('.', $state);
+        if (2 !== count($parts)) {
+            return false;
+        }
+
+        [$randomBytes, $signature] = $parts;
+
+        $expectedSignature = hash_hmac('sha256', $randomBytes, $this->appSecret);
+
+        return hash_equals($signature, $expectedSignature);
     }
 }

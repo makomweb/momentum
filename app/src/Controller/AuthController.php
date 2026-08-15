@@ -35,16 +35,17 @@ final class AuthController extends AbstractController
     #[Route('/authorize-strava', name: 'authorize_strava', methods: ['GET', 'POST'])]
     public function authorizeStrava(Request $request): Response
     {
-        // Generate OAuth state for CSRF protection
-        $state = bin2hex(random_bytes(16));
-        $request->getSession()->set('oauth_state', $state);
+        // Generate signed state for CSRF protection (no session needed)
+        $state = $this->configuration->generateSignedState();
 
         // Check if user wants to be remembered (check both _remember_me and remember_me for compatibility)
         $rememberMe = $request->request->getBoolean('_remember_me', false)
                    || $request->request->getBoolean('remember_me', false);
+
+        // Store remember_me choice in session (this is OK with SameSite=lax since it's same-origin)
         $request->getSession()->set('remember_me_choice', $rememberMe);
 
-        // Redirect to Strava OAuth
+        // Redirect to Strava OAuth with signed state
         return $this->redirect($this->configuration->getAuthorizationAddress($state));
     }
 

@@ -16,6 +16,11 @@ final readonly class Client
     ) {
     }
 
+    public function getConfiguration(): Configuration
+    {
+        return $this->config;
+    }
+
     /** Request a token (OAuth 2.0: exchange code with token) */
     public function requestToken(string $code): Token
     {
