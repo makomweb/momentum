@@ -39,20 +39,13 @@ final class StravaAuthenticator extends AbstractAuthenticator
             throw new AuthenticationException(sprintf('Strava auth failed: %s', $error));
         }
 
-        // Validate OAuth state for CSRF protection
+        // Validate OAuth state for CSRF protection (using signed state)
         $state = $request->query->get('state');
-        $session = $request->getSession();
-        $sessionState = $session->get('oauth_state');
-
         $stateStr = is_string($state) ? $state : '';
-        $sessionStateStr = is_string($sessionState) ? $sessionState : '';
 
-        if (!$sessionStateStr || !$stateStr || !hash_equals($sessionStateStr, $stateStr)) {
+        if (!$stateStr || !$this->client->getConfiguration()->isStateValid($stateStr)) {
             throw new AuthenticationException('Invalid OAuth state - CSRF protection failed');
         }
-
-        // Clear the state from session
-        $session->remove('oauth_state');
 
         // Get authorization code
         $code = $request->query->get('code');
@@ -75,6 +68,7 @@ final class StravaAuthenticator extends AbstractAuthenticator
             }
 
             // Store strava user ID in session for later use
+            $session = $request->getSession();
             $session->set('strava_user_id', $stravaUser->id);
 
             $badge = new RememberMeBadge();

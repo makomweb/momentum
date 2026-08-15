@@ -38,33 +38,41 @@ final class ActivityData
     /**
      * @return ActivityDataPoint[]
      */
-    public function getDataPoints(): array
+    public function getDataPoints(int $averagePeriod = self::MOVING_AVERAGE_PERIOD): array
     {
-        return iterator_to_array($this->yieldDataPoints());
-    }
-
-    /**
-     * @return \Generator<ActivityDataPoint>
-     */
-    private function yieldDataPoints(): \Generator
-    {
-        yield from $this->stream->yield($this->activity->getStartDateLocalTime(), self::MOVING_AVERAGE_PERIOD);
+        return iterator_to_array($this->yieldDataPoints($averagePeriod));
     }
 
     /**
      * @return array<array{timestamp: string, value: float}>
      */
-    public function getVelocityRawPoints(): array
+    public function getVelocityRawPoints(int $averagePeriod = self::MOVING_AVERAGE_PERIOD): array
     {
-        return iterator_to_array($this->yieldVelocityRawPoints());
+        return iterator_to_array($this->yieldVelocityRawPoints($averagePeriod));
+    }
+
+    /**
+     * @return array<array{timestamp: string, value: float}>
+     */
+    public function getVelocityAveragePoints(int $averagePeriod = self::MOVING_AVERAGE_PERIOD): array
+    {
+        return iterator_to_array($this->yieldVelocityAveragePoints($averagePeriod));
+    }
+
+    /**
+     * @return \Generator<ActivityDataPoint>
+     */
+    private function yieldDataPoints(int $averagePeriod): \Generator
+    {
+        yield from $this->stream->yield($this->activity->getStartDateLocalTime(), $averagePeriod);
     }
 
     /**
      * @return \Generator<array{timestamp: string, value: float}>
      */
-    private function yieldVelocityRawPoints(): \Generator
+    private function yieldVelocityRawPoints(int $averagePeriod): \Generator
     {
-        foreach ($this->yieldDataPoints() as $point) {
+        foreach ($this->yieldDataPoints($averagePeriod) as $point) {
             yield [
                 'timestamp' => $point->getTimestamp()->format('H:i:s'),
                 'value' => $point->hasVelocity()
@@ -75,19 +83,11 @@ final class ActivityData
     }
 
     /**
-     * @return array<array{timestamp: string, value: float}>
-     */
-    public function getVelocityAveragePoints(): array
-    {
-        return iterator_to_array($this->yieldVelocityAveragePoints());
-    }
-
-    /**
      * @return \Generator<array{timestamp: string, value: float}>
      */
-    private function yieldVelocityAveragePoints(): \Generator
+    private function yieldVelocityAveragePoints(int $averagePeriod): \Generator
     {
-        foreach ($this->yieldDataPoints() as $point) {
+        foreach ($this->yieldDataPoints($averagePeriod) as $point) {
             yield [
                 'timestamp' => $point->getTimestamp()->format('H:i:s'),
                 'value' => $point->hasVelocity()
@@ -110,7 +110,7 @@ final class ActivityData
      */
     private function yieldHeartRatePoints(): \Generator
     {
-        foreach ($this->yieldDataPoints() as $point) {
+        foreach ($this->yieldDataPoints(self::MOVING_AVERAGE_PERIOD) as $point) {
             yield [
                 'timestamp' => $point->getTimestamp()->format('H:i:s'),
                 'value' => $point->getHeartRate()->bpm,

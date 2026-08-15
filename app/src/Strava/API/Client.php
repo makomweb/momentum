@@ -16,10 +16,18 @@ final readonly class Client
     ) {
     }
 
+    public function getConfiguration(): Configuration
+    {
+        return $this->config;
+    }
+
     /** Request a token (OAuth 2.0: exchange code with token) */
     public function requestToken(string $code): Token
     {
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
             'body' => [
                 'client_id' => $this->config->clientId,
                 'client_secret' => $this->config->clientSecret,
@@ -66,6 +74,9 @@ final readonly class Client
         Assert::that(!empty($refreshToken), 'No refresh token available!');
 
         $response = $this->httpClient->request('POST', 'https://www.strava.com/oauth/token', [
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
             'body' => [
                 'client_id' => $this->config->clientId,
                 'client_secret' => $this->config->clientSecret,

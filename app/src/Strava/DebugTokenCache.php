@@ -43,4 +43,13 @@ final readonly class DebugTokenCache implements TokenCacheInterface
 
         Assert::that(false !== $result, sprintf('Unable to cache token for %d', $token->athlete->id));
     }
+
+    public function removeToken(int $stravaUserId): void
+    {
+        $path = $this->directory.DIRECTORY_SEPARATOR.sprintf('%d', $stravaUserId);
+
+        if (file_exists($path)) {
+            unlink($path);
+        }
+    }
 }
