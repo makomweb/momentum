@@ -13,32 +13,32 @@ use App\Momentum\Velocity;
 final readonly class ActivityStream
 {
     public function __construct(
-        public ?Series $times = null,
-        public ?Series $distances = null,
-        public ?Series $velocities = null,
-        public ?Series $heartrates = null,
+        public ?Series $time = null,
+        public ?Series $distance = null,
+        public ?Series $velocity = null,
+        public ?Series $heartrate = null,
         public ?Series $watts = null,
     ) {
     }
 
     public function hasHeartRateData(): bool
     {
-        return null !== $this->heartrates && $this->heartrates->getCount() > 0;
+        return null !== $this->heartrate && $this->heartrate->getCount() > 0;
     }
 
     public function hasTimeData(): bool
     {
-        return null !== $this->times && $this->times->getCount() > 0;
+        return null !== $this->time && $this->time->getCount() > 0;
     }
 
     public function hasDistanceData(): bool
     {
-        return null !== $this->distances && $this->distances->getCount() > 0;
+        return null !== $this->distance && $this->distance->getCount() > 0;
     }
 
     public function hasVelocityData(): bool
     {
-        return null !== $this->velocities && $this->velocities->getCount() > 0;
+        return null !== $this->velocity && $this->velocity->getCount() > 0;
     }
 
     public function hasWattData(): bool
@@ -61,16 +61,16 @@ final readonly class ActivityStream
     public function yield(\DateTimeImmutable $start, int $movingAveragePeriod): \Generator
     {
         assert($this->hasTimeData());
-        assert(!is_null($this->times));
+        assert(!is_null($this->time));
 
         $velocityAvg = $this->hasVelocityData() ? MovingAverage::create('velocity_avg', $start, $movingAveragePeriod) : null;
         $heartRateAvg = $this->hasHeartRateData() ? MovingAverage::create('heart_rate_avg', $start, $movingAveragePeriod) : null;
         $wattsAvg = $this->hasWattData() ? MovingAverage::create('watts_avg', $start, $movingAveragePeriod) : null;
 
-        $count = $this->times->getCount();
+        $count = $this->time->getCount();
 
         for ($i = 0; $i < $count; ++$i) {
-            $offset = $this->times->getDataPoint($i);
+            $offset = $this->time->getDataPoint($i);
             assert(is_int($offset));
 
             $timestamp = $start->add(
@@ -78,16 +78,16 @@ final readonly class ActivityStream
             );
 
             $distance = null;
-            if ($this->hasDistanceData() && null !== $this->distances) {
-                $distanceValue = $this->distances->getDataPoint($i);
+            if ($this->hasDistanceData() && null !== $this->distance) {
+                $distanceValue = $this->distance->getDataPoint($i);
                 assert(is_numeric($distanceValue));
                 $distance = $distanceValue;
             }
 
             $velocity = null;
             $velocityAvgValue = null;
-            if ($this->hasVelocityData() && null !== $this->velocities && null !== $velocityAvg) {
-                $velocityValue = $this->velocities->getDataPoint($i);
+            if ($this->hasVelocityData() && null !== $this->velocity && null !== $velocityAvg) {
+                $velocityValue = $this->velocity->getDataPoint($i);
                 assert(is_numeric($velocityValue));
                 $velocity = new Velocity($velocityValue);
                 $velocityAvg = $velocityAvg->with($velocityValue, $timestamp);
@@ -96,8 +96,8 @@ final readonly class ActivityStream
 
             $heartRate = null;
             $heartRateAvgValue = null;
-            if ($this->hasHeartRateData() && null !== $this->heartrates && null !== $heartRateAvg) {
-                $heartRateValue = $this->heartrates->getDataPoint($i);
+            if ($this->hasHeartRateData() && null !== $this->heartrate && null !== $heartRateAvg) {
+                $heartRateValue = $this->heartrate->getDataPoint($i);
                 assert(is_int($heartRateValue));
                 $heartRate = new HeartRate($heartRateValue);
                 $heartRateAvg = $heartRateAvg->with($heartRateValue, $timestamp);

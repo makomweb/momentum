@@ -22,9 +22,9 @@ class MovingAverageTest extends TestCase
         $stream = $factory->fromJsonFile($filePath);
 
         self::assertTrue($stream->hasVelocityData());
-        self::assertNotNull($stream->velocities);
-        self::assertNotNull($stream->times);
-        self::assertEquals(7887, $stream->velocities->getCount());
+        self::assertNotNull($stream->velocity);
+        self::assertNotNull($stream->time);
+        self::assertEquals(7887, $stream->velocity->getCount());
         self::assertNull($stream->watts);
 
         $this->stream = $stream;

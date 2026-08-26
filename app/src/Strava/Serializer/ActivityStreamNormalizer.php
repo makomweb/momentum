@@ -18,10 +18,10 @@ final class ActivityStreamNormalizer implements NormalizerInterface
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         return [
-            'times' => $object->times ? $this->normalizeSeries($object->times) : null,
-            'distances' => $object->distances ? $this->normalizeSeries($object->distances) : null,
-            'velocity' => $object->velocities ? $this->normalizeSeries($object->velocities) : null,
-            'heartrates' => $object->heartrates ? $this->normalizeSeries($object->heartrates) : null,
+            'time' => $object->time ? $this->normalizeSeries($object->time) : null,
+            'distance' => $object->distance ? $this->normalizeSeries($object->distance) : null,
+            'velocity' => $object->velocity ? $this->normalizeSeries($object->velocity) : null,
+            'heartrate' => $object->heartrate ? $this->normalizeSeries($object->heartrate) : null,
             'watts' => $object->watts ? $this->normalizeSeries($object->watts) : null,
         ];
     }
