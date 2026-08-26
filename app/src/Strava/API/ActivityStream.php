@@ -58,14 +58,14 @@ final readonly class ActivityStream
     /**
      * @return \Generator<ActivityDataPoint>
      */
-    public function yield(\DateTimeImmutable $start, int $movingAveragePeriod): \Generator
+    public function yield(\DateTimeImmutable $start, int $movingAveragePeriod, int $wattsAveragePeriod = 4): \Generator
     {
         assert($this->hasTimeData());
         assert(!is_null($this->time));
 
         $velocityAvg = $this->hasVelocityData() ? MovingAverage::create('velocity_avg', $start, $movingAveragePeriod) : null;
         $heartRateAvg = $this->hasHeartRateData() ? MovingAverage::create('heart_rate_avg', $start, $movingAveragePeriod) : null;
-        $wattsAvg = $this->hasWattData() ? MovingAverage::create('watts_avg', $start, $movingAveragePeriod) : null;
+        $wattsAvg = $this->hasWattData() ? MovingAverage::create('watts_avg', $start, $wattsAveragePeriod) : null;
 
         $count = $this->time->getCount();
 

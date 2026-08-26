@@ -10,6 +10,14 @@ final readonly class Power implements \Stringable
     {
     }
 
+    /**
+     * @param int[] $watts
+     */
+    public static function average(array $watts): self
+    {
+        return new self(empty($watts) ? 0 : (int) (array_sum($watts) / count($watts)));
+    }
+
     public static function ZERO(): self
     {
         return new self(0);

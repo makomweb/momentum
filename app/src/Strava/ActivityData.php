@@ -10,6 +10,7 @@ use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRateZone;
 use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
+use App\Momentum\Power;
 use App\Momentum\SpeedUnit;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\Velocity;
@@ -62,17 +63,17 @@ final class ActivityData
     /**
      * @return array<array{timestamp: string, value: int, value_smooth: int}>
      */
-    public function getWattPoints(int $averagePeriod = self::MOVING_AVERAGE_PERIOD): array
+    public function getWattPoints(): array
     {
-        return iterator_to_array($this->yieldWattsPoints($averagePeriod));
+        return iterator_to_array($this->yieldWattsPoints());
     }
 
     /**
      * @return \Generator<ActivityDataPoint>
      */
-    private function yieldDataPoints(int $averagePeriod): \Generator
+    private function yieldDataPoints(int $averagePeriod, int $wattsAveragePeriod = 4): \Generator
     {
-        yield from $this->stream->yield($this->activity->getStartDateLocalTime(), $averagePeriod);
+        yield from $this->stream->yield($this->activity->getStartDateLocalTime(), $averagePeriod, $wattsAveragePeriod);
     }
 
     /**
@@ -108,9 +109,9 @@ final class ActivityData
     /**
      * @return \Generator<array{timestamp: string, value: int, value_smooth: int}>
      */
-    private function yieldWattsPoints(int $averagePeriod): \Generator
+    private function yieldWattsPoints(): \Generator
     {
-        foreach ($this->yieldDataPoints($averagePeriod) as $point) {
+        foreach ($this->yieldDataPoints(self::MOVING_AVERAGE_PERIOD) as $point) {
             yield [
                 'timestamp' => $point->getTimestamp()->format('H:i:s'),
                 'value' => $point->getWatts()->watts,
@@ -218,6 +219,24 @@ final class ActivityData
         }
 
         return Velocity::max($velocities);
+    }
+
+    public function getPowerAverage(): Power
+    {
+        $points = $this->getDataPoints();
+        if (empty($points)) {
+            return Power::ZERO();
+        }
+
+        $watts = [];
+        foreach ($points as $point) {
+            $power = $point->getWatts();
+            if (!$power->isZero()) {
+                $watts[] = $power->watts;
+            }
+        }
+
+        return Power::average($watts);
     }
 
     /**
