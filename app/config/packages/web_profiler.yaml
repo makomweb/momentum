@@ -6,10 +6,8 @@ when@dev:
         profiler:
             enabled: true
             collect: true
-            collect_serializer_data: true
 
 when@test:
     framework:
         profiler:
             collect: false
-            collect_serializer_data: true
