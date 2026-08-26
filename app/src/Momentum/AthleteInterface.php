@@ -6,11 +6,13 @@ namespace App\Momentum;
 
 interface AthleteInterface
 {
-    public function getStravaId(): int;
+    public function getId(): int;
 
     public function getName(): string;
 
-    public function getTreshold(): Pace;
+    public function getRunTreshold(): Pace;
+
+    public function getCyclingTreshold(): Power;
 
     public function getMaxHeartRate(): HeartRate;
 
@@ -22,7 +24,8 @@ interface AthleteInterface
      * @return array{
      *  strava_user_id: int,
      *  name: string,
-     *  treshold: Pace,
+     *  run_treshold: Pace,
+     *  cycling_treshold: Power,
      *  max_heart_rate: HeartRate,
      *  profile_picture: string
      * }

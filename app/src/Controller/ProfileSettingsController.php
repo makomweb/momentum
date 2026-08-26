@@ -34,7 +34,7 @@ final class ProfileSettingsController extends AbstractController
         assert($user instanceof User);
 
         $errors = [];
-        $treshold = $user->getTreshold();
+        $treshold = $user->getRunTreshold();
         $maxHeartRate = $user->getMaxHeartRate();
 
         if ('POST' === $request->getMethod()) {
@@ -67,7 +67,7 @@ final class ProfileSettingsController extends AbstractController
             }
 
             if (empty($errors)) {
-                $user->setTreshold($treshold);
+                $user->setRunTreshold($treshold);
                 $user->setMaxHeartRate($maxHeartRate);
 
                 $this->entityManager->flush();

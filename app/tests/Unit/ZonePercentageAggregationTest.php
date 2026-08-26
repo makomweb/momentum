@@ -10,6 +10,7 @@ use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
+use App\Momentum\Power;
 use App\Momentum\Velocity;
 use App\Momentum\ZoneSessions;
 use App\Momentum\ZoneStatistics;
@@ -70,7 +71,7 @@ final class ZonePercentageAggregationTest extends TestCase
             ]);
         }
 
-        $athlete = self::createAthlete($treshold, $maxHeartRate);
+        $athlete = self::createAthlete($treshold, Power::Zero(), $maxHeartRate);
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) end($timeData)).'S'));
         $zoneSessionsData = ZoneSessions::create($athlete, $endTime, $dataPoints);

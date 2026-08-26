@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
+use App\Momentum\Power;
 use Symfony\Bundle\SecurityBundle\Security;
 
 final readonly class CurrentUser implements AthleteInterface
@@ -16,7 +17,7 @@ final readonly class CurrentUser implements AthleteInterface
     {
     }
 
-    public function getStravaId(): int
+    public function getId(): int
     {
         return $this->getUser()->getStravaId();
     }
@@ -28,7 +29,9 @@ final readonly class CurrentUser implements AthleteInterface
 
     public function isConfigured(): bool
     {
-        return !$this->getTreshold()->isZero() && $this->getMaxHeartRate()->isValid();
+        return !$this->getRunTreshold()->isZero()
+            && !$this->getCyclingTreshold()->isZero()
+            && $this->getMaxHeartRate()->isValid();
     }
 
     public function getMaxHeartRate(): HeartRate
@@ -36,9 +39,14 @@ final readonly class CurrentUser implements AthleteInterface
         return $this->getUser()->getMaxHeartRate();
     }
 
-    public function getTreshold(): Pace
+    public function getRunTreshold(): Pace
     {
-        return $this->getUser()->getTreshold();
+        return $this->getUser()->getRunTreshold();
+    }
+
+    public function getCyclingTreshold(): Power
+    {
+        return $this->getUser()->getCyclingTreshold();
     }
 
     public function getProfilePicture(): string
@@ -50,7 +58,8 @@ final readonly class CurrentUser implements AthleteInterface
      * @return array{
      *  strava_user_id: int,
      *  name: string,
-     *  treshold: Pace,
+     *  run_treshold: Pace,
+     *  cycling_treshold: Power,
      *  max_heart_rate: HeartRate,
      *  profile_picture: string
      * }
@@ -58,9 +67,10 @@ final readonly class CurrentUser implements AthleteInterface
     public function toArray(): array
     {
         return [
-            'strava_user_id' => $this->getStravaId(),
+            'strava_user_id' => $this->getId(),
             'name' => $this->getName(),
-            'treshold' => $this->getTreshold(),
+            'run_treshold' => $this->getRunTreshold(),
+            'cycling_treshold' => $this->getCyclingTreshold(),
             'max_heart_rate' => $this->getMaxHeartRate(),
             'profile_picture' => $this->getProfilePicture(),
             'is_configured' => $this->isConfigured(),

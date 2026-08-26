@@ -253,7 +253,7 @@ final class ActivityData
 
     private function createZoneSessions(): ZoneSessions
     {
-        Assert::that(!$this->athlete->getTreshold()->isZero(), 'Please configure a treshold!');
+        Assert::that(!$this->athlete->getRunTreshold()->isZero(), 'Please configure a treshold!');
         Assert::that($this->athlete->getMaxHeartRate()->isValid(), 'Please configure a max. heart rate!');
 
         $startDate = $this->activity->getStartDateLocalTime();

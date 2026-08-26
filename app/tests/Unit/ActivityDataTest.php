@@ -5,6 +5,7 @@ namespace App\Tests\Unit;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
+use App\Momentum\Power;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamFactory;
 use App\Strava\API\Activity;
@@ -60,7 +61,7 @@ class ActivityDataTest extends TestCase
         );
 
         return new ActivityData(
-            self::createAthlete(new Pace(5.00, PaceUnit::MINUTES_PER_KILOMETER), new HeartRate(180)),
+            self::createAthlete(new Pace(5.00, PaceUnit::MINUTES_PER_KILOMETER), Power::ZERO(), new HeartRate(180)),
             Activity::fromRawData($data),
             $factory->fromJsonFile($filePath)
         );

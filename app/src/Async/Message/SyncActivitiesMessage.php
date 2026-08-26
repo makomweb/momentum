@@ -16,7 +16,7 @@ final readonly class SyncActivitiesMessage
 
     public static function for(AthleteInterface $athlete): self
     {
-        return new self($athlete->getStravaId(), uniqid('sync_activities_', true));
+        return new self($athlete->getId(), uniqid('sync_activities_', true));
     }
 
     public static function createStatusCacheKey(string $jobId): string
