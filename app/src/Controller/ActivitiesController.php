@@ -24,7 +24,7 @@ final class ActivitiesController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function index(): Response
     {
-        $activities = $this->activityRepository->findRecentByStravaUser($this->athlete->getStravaId(), 20);
+        $activities = $this->activityRepository->findRecentByStravaUser($this->athlete->getId(), 20);
 
         return $this->render('activities/index.html.twig', [
             ...$this->athlete->toArray(),
@@ -36,8 +36,8 @@ final class ActivitiesController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function clear(): JsonResponse
     {
-        $this->activityRepository->wipe($this->athlete->getStravaId());
+        $this->activityRepository->wipe($this->athlete->getId());
 
-        return $this->json(['message' => 'cleared all activites', 'strava_user_id' => $this->athlete->getStravaId()]);
+        return $this->json(['message' => 'cleared all activites', 'strava_user_id' => $this->athlete->getId()]);
     }
 }

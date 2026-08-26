@@ -6,6 +6,7 @@ use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceZone;
+use App\Momentum\Power;
 use App\Momentum\ZoneDescription;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +18,7 @@ class ZoneDescriptionTest extends TestCase
     #[Test]
     public function heart_rate_zone_description(): void
     {
-        $athlete = self::createAthlete(Pace::fromSecondsPerKilometer(240), new HeartRate(180));
+        $athlete = self::createAthlete(Pace::fromSecondsPerKilometer(240), Power::Zero(), new HeartRate(180));
 
         $description = new ZoneDescription($athlete);
 
@@ -31,7 +32,7 @@ class ZoneDescriptionTest extends TestCase
     #[Test]
     public function pace_zone_description(): void
     {
-        $athlete = self::createAthlete(Pace::fromSecondsPerKilometer(240), new HeartRate(180));
+        $athlete = self::createAthlete(Pace::fromSecondsPerKilometer(240), Power::Zero(), new HeartRate(180));
 
         $description = new ZoneDescription($athlete);
 

@@ -38,5 +38,9 @@
         <div class="text-xs font-semibold text-gray-600 truncate">Max. Heart Rate</div>
         <div class="text-sm font-bold">{{ activity_data.getHeartRateMax() }} bpm</div>
     </div>
+    <div class="flex flex-col gap-1 bg-white border border-gray-200 rounded p-2">
+        <div class="text-xs font-semibold text-gray-600 truncate">Avg. Power</div>
+        <div class="text-sm font-bold">{{ activity_data.getPowerAverage() }}</div>
+    </div>
     {% endif %}
 </div>

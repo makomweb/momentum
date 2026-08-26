@@ -26,8 +26,6 @@ final readonly class ZoneStatistics
              * @param array<string, array{description: string, value: int}> $carry
              *
              * @return array<string, array{description: string, value: int}>
-             *
-             * @todo Simplify to ARROW Function!
              */
             static function (array $carry, HeartRateZone|PaceZone $zone) use ($descriptions): array {
                 $carry[$zone->value] = [

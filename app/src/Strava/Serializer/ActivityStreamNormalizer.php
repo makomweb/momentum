@@ -22,6 +22,7 @@ final class ActivityStreamNormalizer implements NormalizerInterface
             'distance' => $object->distance ? $this->normalizeSeries($object->distance) : null,
             'velocity' => $object->velocity ? $this->normalizeSeries($object->velocity) : null,
             'heartrate' => $object->heartrate ? $this->normalizeSeries($object->heartrate) : null,
+            'watts' => $object->watts ? $this->normalizeSeries($object->watts) : null,
         ];
     }
 

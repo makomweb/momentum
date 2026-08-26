@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
+use App\Momentum\Power;
 use App\Strava\API\Athlete;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -35,7 +36,10 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $profilePictureMedium;
 
     #[ORM\Column]
-    private float $treshold;
+    private float $runTreshold;
+
+    #[ORM\Column]
+    private int $cyclingTreshold;
 
     #[ORM\Column]
     private int $maxHeartRate;
@@ -50,12 +54,12 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->name = $name;
         $this->profilePicture = $profilePicture;
         $this->profilePictureMedium = $profilePictureMedium;
-        $this->treshold = 0.0;
+        $this->runTreshold = 0.0;
+        $this->cyclingTreshold = 0;
         $this->maxHeartRate = 0;
     }
 
-    // TODO: Rename to fromAthlete()!
-    public static function fromStravaUser(Athlete $athlete): self
+    public static function fromAthlete(Athlete $athlete): self
     {
         return new self(
             $athlete->id,
@@ -122,14 +126,24 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return sprintf('%s (Strava ID: %d)', $this->name, $this->stravaId);
     }
 
-    public function getTreshold(): Pace
+    public function getRunTreshold(): Pace
     {
-        return new Pace($this->treshold, PaceUnit::MINUTES_PER_KILOMETER);
+        return new Pace($this->runTreshold, PaceUnit::MINUTES_PER_KILOMETER);
     }
 
-    public function setTreshold(Pace $treshold): void
+    public function setRunTreshold(Pace $treshold): void
     {
-        $this->treshold = $treshold->value;
+        $this->runTreshold = $treshold->value;
+    }
+
+    public function getCyclingTreshold(): Power
+    {
+        return new Power($this->cyclingTreshold);
+    }
+
+    public function setCyclingTreshold(Power $treshold): void
+    {
+        $this->cyclingTreshold = $treshold->watts;
     }
 
     public function getMaxHeartRate(): HeartRate

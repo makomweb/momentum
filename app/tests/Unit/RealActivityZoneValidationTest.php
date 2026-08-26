@@ -10,6 +10,7 @@ use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
+use App\Momentum\Power;
 use App\Momentum\Velocity;
 use App\Momentum\ZoneSessions;
 use PHPUnit\Framework\TestCase;
@@ -61,11 +62,13 @@ final class RealActivityZoneValidationTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => null,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) $timeData[-1]).'S'));
-        $zoneZessions = ZoneSessions::create(self::createAthlete($treshold, $maxHeartRate), $endTime, $dataPoints);
+        $zoneZessions = ZoneSessions::create(self::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
 
         $paceSessions = $zoneZessions->getPaceZoneSessions();
         $totalSeconds = (int) $timeData[-1];
@@ -152,11 +155,13 @@ final class RealActivityZoneValidationTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT60S'));
-        $zoneZessions = ZoneSessions::create(self::createAthlete($treshold, $maxHeartRate), $endTime, $dataPoints);
+        $zoneZessions = ZoneSessions::create(self::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
 
         $paceSessions = $zoneZessions->getPaceZoneSessions();
         $hrSessions = $zoneZessions->getHeartRateSessions();

@@ -7,6 +7,7 @@ namespace App\Strava\API;
 use App\Momentum\ActivityDataPoint;
 use App\Momentum\HeartRate;
 use App\Momentum\MovingAverage;
+use App\Momentum\Power;
 use App\Momentum\Velocity;
 
 final readonly class ActivityStream
@@ -16,6 +17,7 @@ final readonly class ActivityStream
         public ?Series $distance = null,
         public ?Series $velocity = null,
         public ?Series $heartrate = null,
+        public ?Series $watts = null,
     ) {
     }
 
@@ -39,24 +41,31 @@ final readonly class ActivityStream
         return null !== $this->velocity && $this->velocity->getCount() > 0;
     }
 
+    public function hasWattData(): bool
+    {
+        return null !== $this->watts && $this->watts->getCount() > 0;
+    }
+
     public function hasData(): bool
     {
         return $this->hasHeartRateData()
             || $this->hasTimeData()
             || $this->hasDistanceData()
-            || $this->hasVelocityData();
+            || $this->hasVelocityData()
+            || $this->hasWattData();
     }
 
     /**
      * @return \Generator<ActivityDataPoint>
      */
-    public function yield(\DateTimeImmutable $start, int $movingAveragePeriod): \Generator
+    public function yield(\DateTimeImmutable $start, int $movingAveragePeriod, int $wattsAveragePeriod = 4): \Generator
     {
         assert($this->hasTimeData());
         assert(!is_null($this->time));
 
         $velocityAvg = $this->hasVelocityData() ? MovingAverage::create('velocity_avg', $start, $movingAveragePeriod) : null;
         $heartRateAvg = $this->hasHeartRateData() ? MovingAverage::create('heart_rate_avg', $start, $movingAveragePeriod) : null;
+        $wattsAvg = $this->hasWattData() ? MovingAverage::create('watts_avg', $start, $wattsAveragePeriod) : null;
 
         $count = $this->time->getCount();
 
@@ -95,6 +104,16 @@ final readonly class ActivityStream
                 $heartRateAvgValue = new HeartRate((int) $heartRateAvg->getValue());
             }
 
+            $watts = null;
+            $wattsAvgValue = null;
+            if ($this->hasWattData() && null !== $this->watts && null !== $wattsAvg) {
+                $wattsValue = $this->watts->getDataPoint($i);
+                assert(is_int($wattsValue));
+                $watts = new Power($wattsValue);
+                $wattsAvg = $wattsAvg->with($wattsValue, $timestamp);
+                $wattsAvgValue = new Power((int) $wattsAvg->getValue());
+            }
+
             yield new ActivityDataPoint([
                 'timestamp' => $timestamp,
                 'distance' => $distance,
@@ -102,6 +121,8 @@ final readonly class ActivityStream
                 'heart_rate_avg' => $heartRateAvgValue,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocityAvgValue,
+                'watts' => $watts,
+                'watts_avg' => $wattsAvgValue,
             ]);
         }
     }

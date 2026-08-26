@@ -5,6 +5,7 @@ namespace App\Tests\Unit;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
+use App\Momentum\Power;
 use App\Strava\ActivityData;
 use App\Strava\ActivityStreamFactory;
 use App\Strava\API\Activity;
@@ -22,14 +23,33 @@ class ActivityDataTest extends TestCase
     #[Test]
     public function format_moving_time_should_work(): void
     {
-        $data = self::createActivityData();
+        $data = self::createActivityData(14417573, 18155703383);
 
         self::assertInstanceOf(ActivityData::class, $data);
 
         self::assertEquals('12 min 0 s', FormatMovingTime::format($data->getMetaData()->getMovingTime()));
     }
 
-    private static function createActivityData(): ActivityData
+    #[Test]
+    public function should_contain_watts(): void
+    {
+        $data = self::createActivityData(14417573, 19881882510);
+
+        self::assertInstanceOf(ActivityData::class, $data);
+
+        $wattData = $data->getWattPoints();
+
+        self::assertNotEmpty($data->getWattPoints());
+
+        $nonZeros = array_filter(
+            $wattData,
+            static fn (array $dataPoint) => $dataPoint['value'] > 0
+        );
+
+        self::assertNotEmpty($nonZeros, 'There should be power data!');
+    }
+
+    private static function createActivityData(int $athleteId, int $activityId): ActivityData
     {
         $data = [
             'id' => 4419625548,
@@ -45,7 +65,7 @@ class ActivityDataTest extends TestCase
             'average_speed' => 3.75,
         ];
 
-        $filePath = __DIR__.'/../data/activity_stream_14417573_18155703383.json';
+        $filePath = sprintf('%s/../data/activity_stream_%d_%d.json', __DIR__, $athleteId, $activityId);
 
         $factory = new ActivityStreamFactory(
             new Serializer(
@@ -60,7 +80,7 @@ class ActivityDataTest extends TestCase
         );
 
         return new ActivityData(
-            self::createAthlete(new Pace(5.00, PaceUnit::MINUTES_PER_KILOMETER), new HeartRate(180)),
+            self::createAthlete(new Pace(5.00, PaceUnit::MINUTES_PER_KILOMETER), Power::ZERO(), new HeartRate(180)),
             Activity::fromRawData($data),
             $factory->fromJsonFile($filePath)
         );

@@ -7,17 +7,24 @@ namespace App\Tests\Unit;
 use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
+use App\Momentum\Power;
 
 trait AthleteFactory
 {
-    protected static function createAthlete(Pace $threshold, HeartRate $maxHeartRate): AthleteInterface
-    {
-        return new class($threshold, $maxHeartRate) implements AthleteInterface {
-            public function __construct(private Pace $threshold, private HeartRate $maxHeartRate)
-            {
+    protected static function createAthlete(
+        Pace $runThreshold,
+        Power $cyclingThreshold,
+        HeartRate $maxHeartRate,
+    ): AthleteInterface {
+        return new class($runThreshold, $cyclingThreshold, $maxHeartRate) implements AthleteInterface {
+            public function __construct(
+                private Pace $runThreshold,
+                private Power $cyclingThreshold,
+                private HeartRate $maxHeartRate,
+            ) {
             }
 
-            public function getStravaId(): int
+            public function getId(): int
             {
                 return 123;
             }
@@ -27,9 +34,14 @@ trait AthleteFactory
                 throw new \Exception('Not implemented');
             }
 
-            public function getTreshold(): Pace
+            public function getRunTreshold(): Pace
             {
-                return $this->threshold;
+                return $this->runThreshold;
+            }
+
+            public function getCyclingTreshold(): Power
+            {
+                return $this->cyclingThreshold;
             }
 
             public function getMaxHeartRate(): HeartRate

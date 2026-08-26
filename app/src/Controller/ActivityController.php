@@ -10,6 +10,7 @@ use App\Momentum\ActivityShareTokenException;
 use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
+use App\Momentum\Power;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\ZoneSession;
 use App\Repository\ActivityRepository;
@@ -43,7 +44,7 @@ final class ActivityController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function analyze(int $id): Response
     {
-        $activity = $this->activityRepository->findOrNull($this->athlete->getStravaId(), $id);
+        $activity = $this->activityRepository->findOrNull($this->athlete->getId(), $id);
 
         if (null === $activity) {
             return $this->render('activity/analysis_empty.html.twig', [
@@ -53,7 +54,7 @@ final class ActivityController extends AbstractController
 
         try {
             $stream = $this->streamCache->get(
-                $this->athlete->getStravaId(),
+                $this->athlete->getId(),
                 $activity->getId()
             );
         } catch (\Exception) {
@@ -81,7 +82,7 @@ final class ActivityController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function share(int $id, Request $request): JsonResponse
     {
-        $activity = $this->activityRepository->findOrNull($this->athlete->getStravaId(), $id);
+        $activity = $this->activityRepository->findOrNull($this->athlete->getId(), $id);
 
         if (null === $activity) {
             return $this->json(['error' => 'Activity not found'], Response::HTTP_NOT_FOUND);
@@ -95,7 +96,7 @@ final class ActivityController extends AbstractController
             return $this->json(['error' => 'expires_in must be between 1 and 365 days'], Response::HTTP_BAD_REQUEST);
         }
 
-        $shareData = $this->shareToken->generate($this->athlete->getStravaId(), $activity->getId(), $expiryDays);
+        $shareData = $this->shareToken->generate($this->athlete->getId(), $activity->getId(), $expiryDays);
 
         return $this->json([
             ...$shareData,
@@ -148,7 +149,7 @@ final class ActivityController extends AbstractController
             {
             }
 
-            public function getStravaId(): int
+            public function getId(): int
             {
                 throw new \Exception('Not implemented');
             }
@@ -158,9 +159,14 @@ final class ActivityController extends AbstractController
                 return $this->user->getName();
             }
 
-            public function getTreshold(): Pace
+            public function getRunTreshold(): Pace
             {
-                return $this->user->getTreshold();
+                return $this->user->getRunTreshold();
+            }
+
+            public function getCyclingTreshold(): Power
+            {
+                return $this->user->getCyclingTreshold();
             }
 
             public function getMaxHeartRate(): HeartRate

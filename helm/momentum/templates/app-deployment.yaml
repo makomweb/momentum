@@ -54,11 +54,8 @@ spec:
         - |
           echo "Creating database..."
           bin/console doctrine:database:create --if-not-exists
-          echo "Updating schema..."
-          bin/console doctrine:schema:update --force
-          # Note: Add --no-interaction flag and uncomment when migrations are needed in production
-          # echo "Running migrations..."
-          # bin/console doctrine:migrations:migrate --no-interaction
+          echo "Running migrations..."
+          bin/console doctrine:migrations:migrate --no-interaction
           echo "Database setup complete!"
       containers:
       - name: app

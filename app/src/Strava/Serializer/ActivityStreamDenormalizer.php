@@ -55,11 +55,21 @@ final class ActivityStreamDenormalizer implements DenormalizerInterface
          * }[] $heartrateSeries */
         $heartrateSeries = isset($data['heartrate']) ? $data['heartrate'] : [];
 
+        /**
+         * @var array{
+         *  data: array<int|float>,
+         *  seriesType: string,
+         *  resolution: string,
+         *  originalSize: int
+         * }[] $wattsSeries */
+        $wattsSeries = isset($data['watts']) ? $data['watts'] : [];
+
         return new ActivityStream(
             time: $this->denormalizeSeries($timeSeries),
             distance: $this->denormalizeSeries($distanceSeries),
             velocity: $this->denormalizeSeries($velocitySeries),
             heartrate: $this->denormalizeSeries($heartrateSeries),
+            watts: $this->denormalizeSeries($wattsSeries),
         );
     }
 

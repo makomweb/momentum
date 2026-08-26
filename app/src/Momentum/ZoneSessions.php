@@ -13,7 +13,7 @@ final readonly class ZoneSessions
     /** @param ActivityDataPoint[] $dataPoints */
     public static function create(AthleteInterface $athlete, \DateTimeImmutable $endTime, array $dataPoints): self
     {
-        return new self($endTime, new ZoneEntries($athlete->getTreshold(), $athlete->getMaxHeartRate(), $dataPoints));
+        return new self($endTime, new ZoneEntries($athlete->getRunTreshold(), $athlete->getMaxHeartRate(), $dataPoints));
     }
 
     /** @return ZoneSession[] */
