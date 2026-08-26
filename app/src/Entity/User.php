@@ -143,7 +143,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setCyclingTreshold(Power $treshold): void
     {
-        $this->cyclingTreshold = $treshold->watt;
+        $this->cyclingTreshold = $treshold->watts;
     }
 
     public function getMaxHeartRate(): HeartRate

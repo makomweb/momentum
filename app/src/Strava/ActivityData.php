@@ -60,6 +60,14 @@ final class ActivityData
     }
 
     /**
+     * @return array<array{timestamp: string, value: int, value_smooth: int}>
+     */
+    public function getWattPoints(int $averagePeriod = self::MOVING_AVERAGE_PERIOD): array
+    {
+        return iterator_to_array($this->yieldWattsPoints($averagePeriod));
+    }
+
+    /**
      * @return \Generator<ActivityDataPoint>
      */
     private function yieldDataPoints(int $averagePeriod): \Generator
@@ -93,6 +101,20 @@ final class ActivityData
                 'value' => $point->hasVelocity()
                     ? $this->convertVelocity($point->getVelocityAverage())
                     : 0.0,
+            ];
+        }
+    }
+
+    /**
+     * @return \Generator<array{timestamp: string, value: int, value_smooth: int}>
+     */
+    private function yieldWattsPoints(int $averagePeriod): \Generator
+    {
+        foreach ($this->yieldDataPoints($averagePeriod) as $point) {
+            yield [
+                'timestamp' => $point->getTimestamp()->format('H:i:s'),
+                'value' => $point->getWatts()->watts,
+                'value_smooth' => $point->getWattsAverage()->watts,
             ];
         }
     }

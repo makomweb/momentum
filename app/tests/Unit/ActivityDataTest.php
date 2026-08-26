@@ -36,9 +36,17 @@ class ActivityDataTest extends TestCase
         $data = self::createActivityData(14417573, 19881882510);
 
         self::assertInstanceOf(ActivityData::class, $data);
-        assert($data instanceof ActivityData);
 
-        self::assertNotNull($data->hasAnyData());
+        $wattData = $data->getWattPoints();
+
+        self::assertNotEmpty($data->getWattPoints());
+
+        $nonZeros = array_filter(
+            $wattData,
+            static fn (array $dataPoint) => $dataPoint['value'] > 0
+        );
+
+        self::assertNotEmpty($nonZeros, 'There should be power data!');
     }
 
     private static function createActivityData(int $athleteId, int $activityId): ActivityData

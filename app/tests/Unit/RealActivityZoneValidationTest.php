@@ -62,6 +62,8 @@ final class RealActivityZoneValidationTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => null,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -153,6 +155,8 @@ final class RealActivityZoneValidationTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 

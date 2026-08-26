@@ -68,6 +68,8 @@ final class ZonePercentageAggregationTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => null,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 

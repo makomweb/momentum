@@ -6,7 +6,7 @@ namespace App\Momentum;
 
 final readonly class Power implements \Stringable
 {
-    public function __construct(public int $watt)
+    public function __construct(public int $watts)
     {
     }
 
@@ -17,11 +17,11 @@ final readonly class Power implements \Stringable
 
     public function isZero(): bool
     {
-        return $this->watt < 1;
+        return $this->watts < 1;
     }
 
     public function __toString(): string
     {
-        return sprintf('%d W', $this->watt);
+        return sprintf('%d W', $this->watts);
     }
 }

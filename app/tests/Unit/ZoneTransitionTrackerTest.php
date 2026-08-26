@@ -49,6 +49,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $baseVelocity,
                 'velocity_avg' => $baseVelocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -65,6 +67,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $fasterVelocity,
                 'velocity_avg' => $fasterVelocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -99,6 +103,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -113,6 +119,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -152,6 +160,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                     'heart_rate_avg' => null,
                     'velocity' => $zone['velocity'],
                     'velocity_avg' => $zone['velocity'],
+                    'watts' => null,
+                    'watts_avg' => null,
                 ]);
                 ++$timestamp;
             }
@@ -186,6 +196,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -224,6 +236,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -252,6 +266,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -280,6 +296,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381), // Zone 2 pace
                 'velocity_avg' => new Velocity(2.381),
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -291,6 +309,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(3.03), // Zone 5 pace
                 'velocity_avg' => new Velocity(3.03),
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -319,6 +339,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381), // Zone 2 pace
                 'velocity_avg' => new Velocity(2.381),
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -332,6 +354,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381), // Zone 2 pace (same zone!)
                 'velocity_avg' => new Velocity(2.381),
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -359,6 +383,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -370,6 +396,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -408,6 +436,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
@@ -421,6 +451,8 @@ final class ZoneTransitionTrackerTest extends TestCase
                 'heart_rate_avg' => null,
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
+                'watts' => null,
+                'watts_avg' => null,
             ]);
         }
 
