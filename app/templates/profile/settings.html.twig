@@ -32,18 +32,33 @@
                 <input type="hidden" name="_token" value="{{ csrf_token }}">
                 
                 <div>
-                    <label for="treshold_minutes_per_kilometer" class="block text-xs font-semibold text-gray-600 mb-2">Treshold (minutes per kilometer)</label>
+                    <label for="run_treshold_minutes_per_kilometer" class="block text-xs font-semibold text-gray-600 mb-2">Run treshold (minutes per kilometer)</label>
                     <input
                         type="number"
                         step="0.01"
                         min="0"
                         class="w-full px-3 py-2 border border-gray-200 rounded focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none"
-                        id="treshold_minutes_per_kilometer"
-                        name="treshold_minutes_per_kilometer"
-                        value="{{ treshold is null ? '' : treshold.value }}"
+                        id="run_treshold_minutes_per_kilometer"
+                        name="run_treshold_minutes_per_kilometer"
+                        value="{{ run_treshold is null ? '' : run_treshold.value }}"
                         placeholder="e.g. 4.50"
                     >
                     <p class="text-gray-600 text-xs mt-1">Used to calculate pace zones for running activities.</p>
+                </div>
+                
+                <div>
+                    <label for="cycling_treshold_watt" class="block text-xs font-semibold text-gray-600 mb-2">Cycling treshold (watt)</label>
+                    <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        class="w-full px-3 py-2 border border-gray-200 rounded focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none"
+                        id="cycling_treshold_watt"
+                        name="cycling_treshold_watt"
+                        value="{{ cycling_treshold is null ? '' : cycling_treshold.watt }}"
+                        placeholder="e.g. 120"
+                    >
+                    <p class="text-gray-600 text-xs mt-1">Used to calculate pace zones for cycling activities.</p>
                 </div>
 
                 <div>
@@ -55,7 +70,7 @@
                         class="w-full px-3 py-2 border border-gray-200 rounded focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none"
                         id="max_heart_rate"
                         name="max_heart_rate"
-                        value="{{ maxHeartRate.isValid() ? maxHeartRate.bpm : '' }}"
+                        value="{{ max_heart_rate.isValid() ? max_heart_rate.bpm : '' }}"
                         placeholder="e.g. 180"
                     >
                     <p class="text-gray-600 text-xs mt-1">Used to calculate heart rate zones when stream data includes heart rate.</p>
@@ -77,8 +92,9 @@
             <div class="bg-gray-50 rounded border border-gray-200 p-3 mt-4">
                 <div class="font-semibold text-sm mb-2 text-gray-700">Current values</div>
                 <div class="text-sm space-y-1 text-gray-600">
-                    <div><span>Treshold:</span> <span class="font-semibold text-gray-900">{{ treshold }}</span></div>
-                    <div><span>Max heart rate:</span> <span class="font-semibold text-gray-900">{{ maxHeartRate is null ? 'Not set' : maxHeartRate }}</span></div>
+                    <div><span>Run treshold:</span> <span class="font-semibold text-gray-900">{{ run_treshold }}</span></div>
+                    <div><span>Cycling treshold:</span> <span class="font-semibold text-gray-900">{{ cycling_treshold }}</span></div>
+                    <div><span>Max heart rate:</span> <span class="font-semibold text-gray-900">{{ max_heart_rate is null ? 'Not set' : max_heart_rate }}</span></div>
                 </div>
             </div>
         </div>

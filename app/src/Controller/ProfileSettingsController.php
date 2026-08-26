@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
+use App\Momentum\Power;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +35,8 @@ final class ProfileSettingsController extends AbstractController
         assert($user instanceof User);
 
         $errors = [];
-        $treshold = $user->getRunTreshold();
+        $runTreshold = $user->getRunTreshold();
+        $cyclingTreshold = $user->getCyclingTreshold();
         $maxHeartRate = $user->getMaxHeartRate();
 
         if ('POST' === $request->getMethod()) {
@@ -45,15 +47,25 @@ final class ProfileSettingsController extends AbstractController
                 return $this->redirectToRoute('profile_settings');
             }
 
-            $tresholdRaw = trim((string) $request->request->get('treshold_minutes_per_kilometer', ''));
+            $runTresholdRaw = trim((string) $request->request->get('run_treshold_minutes_per_kilometer', ''));
+            $cyclingTresholdRaw = trim((string) $request->request->get('cycling_treshold_watt', ''));
             $maxHeartRateRaw = trim((string) $request->request->get('max_heart_rate', ''));
 
-            $treshold = Pace::ZERO();
-            if ('' !== $tresholdRaw) {
-                if (!is_numeric($tresholdRaw) || (float) $tresholdRaw <= 0) {
-                    $errors[] = '$treshold must be a positive number.';
+            $runTreshold = Pace::ZERO();
+            if ('' !== $runTresholdRaw) {
+                if (!is_numeric($runTresholdRaw) || (float) $runTresholdRaw <= 0) {
+                    $errors[] = '$runTreshold must be a positive number.';
                 } else {
-                    $treshold = new Pace((float) $tresholdRaw, PaceUnit::MINUTES_PER_KILOMETER);
+                    $runTreshold = new Pace((float) $runTresholdRaw, PaceUnit::MINUTES_PER_KILOMETER);
+                }
+            }
+
+            $cyclingTreshold = Power::ZERO();
+            if ('' !== $cyclingTresholdRaw) {
+                if (!is_numeric($cyclingTresholdRaw) || (int) $cyclingTresholdRaw <= 0) {
+                    $errors[] = '$cyclingTresholdRaw must be a positive number.';
+                } else {
+                    $cyclingTreshold = new Power((int) $cyclingTresholdRaw);
                 }
             }
 
@@ -67,7 +79,8 @@ final class ProfileSettingsController extends AbstractController
             }
 
             if (empty($errors)) {
-                $user->setRunTreshold($treshold);
+                $user->setRunTreshold($runTreshold);
+                $user->setCyclingTreshold($cyclingTreshold);
                 $user->setMaxHeartRate($maxHeartRate);
 
                 $this->entityManager->flush();
@@ -77,16 +90,15 @@ final class ProfileSettingsController extends AbstractController
                 return $this->redirectToRoute('profile_settings');
             }
 
-            $maxHeartRate = '' === $maxHeartRateRaw ? null : (int) $maxHeartRateRaw;
-
             foreach ($errors as $error) {
                 $this->addFlash('error', $error);
             }
         }
 
         return $this->render('profile/settings.html.twig', [
-            'treshold' => $treshold,
-            'maxHeartRate' => $maxHeartRate,
+            'run_treshold' => $runTreshold,
+            'cycling_treshold' => $cyclingTreshold,
+            'max_heart_rate' => $maxHeartRate,
             'profile_picture' => $user->getProfilePictureMedium(),
             'csrf_token' => $this->csrfTokenManager->getToken('profile_settings')->getValue(),
         ]);

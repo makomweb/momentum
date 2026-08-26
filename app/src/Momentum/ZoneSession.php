@@ -7,7 +7,7 @@ namespace App\Momentum;
 final readonly class ZoneSession implements \Stringable
 {
     /**
-     * @deprecated Only for test purposes. Use ZoneSession::open() instead!
+     * @deprecated Constructor is public only for test purposes. Use ZoneSession::open() instead!
      */
     public function __construct(
         public PaceZone|HeartRateZone $zone,
