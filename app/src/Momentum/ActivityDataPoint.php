@@ -14,6 +14,8 @@ final readonly class ActivityDataPoint implements \Stringable
      *  heart_rate_avg: HeartRate|null,
      *  velocity: Velocity|null,
      *  velocity_avg: Velocity|null,
+     *  watts: Power|null,
+     *  watts_avg: Power|null
      * } $data
      */
     public function __construct(private array $data)
@@ -62,6 +64,20 @@ final readonly class ActivityDataPoint implements \Stringable
         $velocity = $this->data['velocity_avg'];
 
         return $velocity ?? Velocity::ZERO();
+    }
+
+    public function getWatts(): Power
+    {
+        $watts = $this->data['watts'];
+
+        return $watts ?? Power::ZERO();
+    }
+
+    public function getWattsAverage(): Power
+    {
+        $watts = $this->data['watts_avg'];
+
+        return $watts ?? Power::ZERO();
     }
 
     public function getPaceZone(Pace $treshold): PaceZone

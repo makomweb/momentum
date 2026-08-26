@@ -26,7 +26,7 @@ class DebugTokenCacheTest extends KernelTestCase
             'access_token' => 'my_access_token',
             'refresh_token' => 'my_refresh_token',
             'athlete' => [
-                'id' => 123,
+                'id' => 123456789,
                 'username' => 'Power-Athlete',
                 'firstname' => 'Maxi',
                 'lastname' => 'Mustermann',
@@ -39,7 +39,7 @@ class DebugTokenCacheTest extends KernelTestCase
 
         $cache->saveToken($token);
 
-        $restored = $cache->getToken(123);
+        $restored = $cache->getToken(123456789);
 
         self::assertInstanceOf(Token::class, $restored);
         self::assertEquals('my_access_token', $token->accessToken);

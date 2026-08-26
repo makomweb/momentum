@@ -31,7 +31,7 @@ final readonly class ActivityStreamDownloader
                 'Authorization' => $token->getAuthHeaderValue(),
             ],
             'query' => [
-                'keys' => 'time,distance,heartrate,velocity_smooth',
+                'keys' => 'time,distance,heartrate,velocity_smooth,watts',
                 'key_by_type' => 'true',
             ],
         ]);

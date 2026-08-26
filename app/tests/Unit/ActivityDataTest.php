@@ -23,14 +23,25 @@ class ActivityDataTest extends TestCase
     #[Test]
     public function format_moving_time_should_work(): void
     {
-        $data = self::createActivityData();
+        $data = self::createActivityData(14417573, 18155703383);
 
         self::assertInstanceOf(ActivityData::class, $data);
 
         self::assertEquals('12 min 0 s', FormatMovingTime::format($data->getMetaData()->getMovingTime()));
     }
 
-    private static function createActivityData(): ActivityData
+    #[Test]
+    public function should_contain_watts(): void
+    {
+        $data = self::createActivityData(14417573, 19881882510);
+
+        self::assertInstanceOf(ActivityData::class, $data);
+        assert($data instanceof ActivityData);
+
+        self::assertNotNull($data->hasAnyData());
+    }
+
+    private static function createActivityData(int $athleteId, int $activityId): ActivityData
     {
         $data = [
             'id' => 4419625548,
@@ -46,7 +57,7 @@ class ActivityDataTest extends TestCase
             'average_speed' => 3.75,
         ];
 
-        $filePath = __DIR__.'/../data/activity_stream_14417573_18155703383.json';
+        $filePath = sprintf('%s/../data/activity_stream_%d_%d.json', __DIR__, $athleteId, $activityId);
 
         $factory = new ActivityStreamFactory(
             new Serializer(
