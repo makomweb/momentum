@@ -28,7 +28,7 @@ final class RememberMeUserIdentifierTest extends TestCase
     {
         // Create a test user
         $athlete = $this->createAthlete(12345);
-        $user = User::fromStravaUser($athlete);
+        $user = User::fromAthlete($athlete);
 
         // The user identifier should be the Strava ID as a string
         $identifier = $user->getUserIdentifier();
@@ -42,7 +42,7 @@ final class RememberMeUserIdentifierTest extends TestCase
     {
         // Create a test user
         $athlete = $this->createAthlete(54321, 'Jane', 'Smith');
-        $user = User::fromStravaUser($athlete);
+        $user = User::fromAthlete($athlete);
 
         // The user identifier should exactly match the Strava ID
         $this->assertSame((string) $user->getStravaId(), $user->getUserIdentifier());
@@ -52,7 +52,7 @@ final class RememberMeUserIdentifierTest extends TestCase
     {
         // Create a test user with large Strava ID
         $athlete = $this->createAthlete(987654321);
-        $user = User::fromStravaUser($athlete);
+        $user = User::fromAthlete($athlete);
 
         // Verify the identifier is numeric
         $identifier = $user->getUserIdentifier();

@@ -58,18 +58,18 @@ final class StravaAuthenticator extends AbstractAuthenticator
             $token = $this->client->requestToken($code);
 
             // TODO: Rename to athlete!
-            $stravaUser = $token->athlete;
+            $athlete = $token->athlete;
 
             // Find or create user
-            $user = $this->userRepository->findByStravaId($stravaUser->id);
+            $user = $this->userRepository->findByStravaId($athlete->id);
             if (!$user) {
-                $user = User::fromStravaUser($stravaUser);
+                $user = User::fromAthlete($athlete);
                 $this->userRepository->save($user, true);
             }
 
             // Store strava user ID in session for later use
             $session = $request->getSession();
-            $session->set('strava_user_id', $stravaUser->id);
+            $session->set('strava_user_id', $athlete->id);
 
             $badge = new RememberMeBadge();
             // Enable remember-me if user checked the box during OAuth initiation
@@ -79,7 +79,7 @@ final class StravaAuthenticator extends AbstractAuthenticator
             }
 
             return new SelfValidatingPassport(
-                new UserBadge((string) $stravaUser->id, fn () => $user),
+                new UserBadge((string) $athlete->id, fn () => $user),
                 [$badge],
             );
         } catch (\Throwable $ex) {
