@@ -7,7 +7,7 @@ namespace App\Momentum;
 final readonly class ExtractHeartRateZones
 {
     /**
-     * @param ZoneSession[] $heartRateSessions,
+     * @param Session[] $heartRateSessions,
      */
     public function __construct(private array $heartRateSessions)
     {
@@ -18,7 +18,7 @@ final readonly class ExtractHeartRateZones
      *
      * @return HeartRateZone[]
      */
-    public function for(ZoneSession $paceSession): array
+    public function for(Session $paceSession): array
     {
         return array_reduce(
             $this->heartRateSessions,
@@ -34,7 +34,7 @@ final readonly class ExtractHeartRateZones
                  *
                  * @return HeartRateZone[]
                  */
-                public function reduce(array $carry, ZoneSession $session): array
+                public function reduce(array $carry, Session $session): array
                 {
                     if ($session->end > $this->start && $session->start < $this->end) {
                         if ($session->zone instanceof HeartRateZone) {

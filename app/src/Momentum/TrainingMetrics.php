@@ -14,13 +14,13 @@ final readonly class TrainingMetrics
     }
 
     /**
-     * @param ZoneSession[] $zoneSessions
+     * @param Session[] $zoneSessions
      */
     public static function fromSessions(array $zoneSessions): self
     {
         return array_reduce(
             $zoneSessions,
-            static fn (self $metrics, ZoneSession $session) => $metrics->with($session),
+            static fn (self $metrics, Session $session) => $metrics->with($session),
             new self()
         );
     }
@@ -64,7 +64,7 @@ final readonly class TrainingMetrics
             && $hardPercentage <= $hardThreshold;
     }
 
-    private function with(ZoneSession $session): self
+    private function with(Session $session): self
     {
         if ($session->isHard()) {
             return new self(

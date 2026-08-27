@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class ZoneStatistics
+final readonly class Statistics
 {
     /** @param array<string, array{description: string, value: int}> $statistics */
     private function __construct(public array $statistics = [])
@@ -12,7 +12,7 @@ final readonly class ZoneStatistics
     }
 
     /**
-     * @param ZoneSession[]                 $sessions
+     * @param Session[]                     $sessions
      * @param array<HeartRateZone|PaceZone> $zones
      */
     public static function fromSessions(AthleteInterface $athlete, array $sessions, array $zones): self
@@ -46,7 +46,7 @@ final readonly class ZoneStatistics
              *
              * @return array<string, array{description: string, value: int}>
              */
-            static function (array $carry, ZoneSession $session) use ($descriptions): array {
+            static function (array $carry, Session $session) use ($descriptions): array {
                 /** @var array{description: string, value: int} $zone */
                 $zone = $carry[$session->zone->value];
                 $carry[$session->zone->value] = [

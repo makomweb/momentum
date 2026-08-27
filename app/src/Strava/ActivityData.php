@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\Activity as MomentumActivity;
 use App\Momentum\ActivityDataPoint;
 use App\Momentum\Assert\Assert;
 use App\Momentum\AthleteInterface;
@@ -11,12 +12,11 @@ use App\Momentum\HeartRateZone;
 use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
 use App\Momentum\Power;
+use App\Momentum\Session;
 use App\Momentum\SpeedUnit;
+use App\Momentum\Statistics;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\Velocity;
-use App\Momentum\ZoneSession;
-use App\Momentum\ZoneSessions;
-use App\Momentum\ZoneStatistics;
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityStream;
 
@@ -243,8 +243,8 @@ final class ActivityData
      * @return array{
      *     meta_data: ActivityMetaData,
      *     metrics: TrainingMetrics,
-     *     pace_zone_sessions: array<ZoneSession>,
-     *     heart_rate_zone_sessions: array<ZoneSession>,
+     *     pace_zone_sessions: array<Session>,
+     *     heart_rate_zone_sessions: array<Session>,
      *     pace_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      * }
@@ -258,8 +258,8 @@ final class ActivityData
         $paceZoneSessions = $sessions->getPaceZoneSessions();
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
-        $paceStats = ZoneStatistics::fromSessions($this->athlete, $paceZoneSessions, PaceZone::cases());
-        $hrStats = ZoneStatistics::fromSessions($this->athlete, $heartRateZoneSessions, HeartRateZone::cases());
+        $paceStats = Statistics::fromSessions($this->athlete, $paceZoneSessions, PaceZone::cases());
+        $hrStats = Statistics::fromSessions($this->athlete, $heartRateZoneSessions, HeartRateZone::cases());
 
         // Use zone session totals instead of moving_time
         // This ensures percentages always aggregate to 100%
@@ -292,7 +292,7 @@ final class ActivityData
         };
     }
 
-    private function createZoneSessions(): ZoneSessions
+    private function createZoneSessions(): MomentumActivity
     {
         Assert::that(!$this->athlete->getRunTreshold()->isZero(), 'Please configure a treshold!');
         Assert::that($this->athlete->getMaxHeartRate()->isValid(), 'Please configure a max. heart rate!');
@@ -300,7 +300,7 @@ final class ActivityData
         $startDate = $this->activity->getStartDateLocalTime();
         $dataPoints = iterator_to_array($this->stream->yield($startDate, 50));
 
-        return ZoneSessions::create(
+        return MomentumActivity::create(
             $this->athlete,
             $this->activity->getEndDateLocalTime(),
             $dataPoints

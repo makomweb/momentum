@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit;
 
 use App\Momentum\PaceZone;
+use App\Momentum\Session;
 use App\Momentum\TrainingMetrics;
-use App\Momentum\ZoneSession;
 use PHPUnit\Framework\TestCase;
 
 class TrainingMetricsTest extends TestCase
@@ -18,9 +18,9 @@ class TrainingMetricsTest extends TestCase
         $this->start = new \DateTimeImmutable('2024-01-01 10:00:00');
     }
 
-    private function session(PaceZone $zone, int $seconds): ZoneSession
+    private function session(PaceZone $zone, int $seconds): Session
     {
-        return new ZoneSession(
+        return new Session(
             $zone,
             $this->start,
             $this->start->add(new \DateInterval("PT{$seconds}S"))
@@ -83,17 +83,17 @@ class TrainingMetricsTest extends TestCase
     public function test_percentage_relative_to_total(): void
     {
         $sessions = [
-            new ZoneSession(
+            new Session(
                 PaceZone::ZONE_1,
                 $this->start,
                 $this->start->add(new \DateInterval('PT100S'))
             ),
-            new ZoneSession(
+            new Session(
                 PaceZone::ZONE_3,
                 $this->start->add(new \DateInterval('PT100S')),
                 $this->start->add(new \DateInterval('PT200S'))
             ),
-            new ZoneSession(
+            new Session(
                 PaceZone::ZONE_5,
                 $this->start->add(new \DateInterval('PT200S')),
                 $this->start->add(new \DateInterval('PT300S'))

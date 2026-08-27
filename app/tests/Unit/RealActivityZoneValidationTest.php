@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit;
 
+use App\Momentum\Activity;
 use App\Momentum\ActivityDataPoint;
 use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
@@ -12,7 +13,6 @@ use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
 use App\Momentum\Power;
 use App\Momentum\Velocity;
-use App\Momentum\ZoneSessions;
 use PHPUnit\Framework\TestCase;
 
 final class RealActivityZoneValidationTest extends TestCase
@@ -68,9 +68,9 @@ final class RealActivityZoneValidationTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) $timeData[-1]).'S'));
-        $zoneZessions = ZoneSessions::create(self::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(self::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
 
-        $paceSessions = $zoneZessions->getPaceZoneSessions();
+        $paceSessions = $activity->getPaceZoneSessions();
         $totalSeconds = (int) $timeData[-1];
 
         // Analyze VO2max sessions
@@ -161,10 +161,10 @@ final class RealActivityZoneValidationTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT60S'));
-        $zoneZessions = ZoneSessions::create(self::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(self::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
 
-        $paceSessions = $zoneZessions->getPaceZoneSessions();
-        $hrSessions = $zoneZessions->getHeartRateSessions();
+        $paceSessions = $activity->getPaceZoneSessions();
+        $hrSessions = $activity->getHeartRateSessions();
 
         // Pace zone is ZONE_5 (VO2max) because velocity is high
         self::assertCount(1, $paceSessions);
