@@ -48,7 +48,7 @@ final class ProfileSettingsController extends AbstractController
             }
 
             $runTresholdRaw = trim((string) $request->request->get('run_treshold_minutes_per_kilometer', ''));
-            $cyclingTresholdRaw = trim((string) $request->request->get('cycling_treshold_watt', ''));
+            $cyclingTresholdRaw = trim((string) $request->request->get('cycling_treshold_watts', ''));
             $maxHeartRateRaw = trim((string) $request->request->get('max_heart_rate', ''));
 
             $runTreshold = Pace::ZERO();

@@ -17,6 +17,11 @@ final readonly class Series
     ) {
     }
 
+    public static function Empty(string $name): self
+    {
+        return new self([], $name, '<unknown>', 0);
+    }
+
     public function getDataPoint(int $index): int|float|null
     {
         return $this->data[$index] ?? null;

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:best-practices"],
+  "timezone": "Europe/Berlin",
+  "schedule": ["before 3am on Monday"],
+  "prConcurrency": 5,
+  "semanticCommits": true,
+  "commitMessagePrefix": "chore(deps):",
+  "php": {
+    "enabled": true
+  },
+  "composer": {
+    "enabled": true,
+    "ignoreScripts": false
+  },
+  "packageRules": [
+    {
+      "description": "Auto-merge patch updates (0.0.x)",
+      "matchUpdateTypes": ["patch"],
+      "matchDatasources": ["composer"],
+      "automerge": true,
+      "automergeStrategy": "squash",
+      "automergeType": "pr",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Auto-merge minor updates for dev dependencies",
+      "matchUpdateTypes": ["minor"],
+      "matchDepTypes": ["require-dev"],
+      "automerge": true,
+      "automergeStrategy": "squash",
+      "automergeType": "pr",
+      "minimumReleaseAge": "5 days"
+    },
+    {
+      "description": "Group Symfony patches",
+      "matchPackagePatterns": ["^symfony/"],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "Symfony Patches",
+      "groupSlug": "symfony-patches"
+    },
+    {
+      "description": "Group major updates",
+      "matchUpdateTypes": ["major"],
+      "groupName": "Major Updates",
+      "schedule": ["after 10pm on Friday"],
+      "assignees": ["@makomweb"],
+      "reviewers": ["@makomweb"]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security", "renovate"],
+    "assignees": ["@makomweb"]
+  }
+}
