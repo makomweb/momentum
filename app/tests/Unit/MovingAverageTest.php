@@ -16,16 +16,16 @@ class MovingAverageTest extends TestCase
 
     public function setUp(): void
     {
-        $filePath = __DIR__.'/../data/activity_stream_14417573_18155703383.json';
+        $filePath = __DIR__.'/../data/activity_stream_14417573_19881882510.json';
 
         $factory = new ActivityStreamFactory($this->getSerializer());
         $stream = $factory->fromJsonFile($filePath);
 
         self::assertTrue($stream->hasVelocityData());
-        self::assertNotNull($stream->velocity);
-        self::assertNotNull($stream->time);
-        self::assertEquals(7887, $stream->velocity->getCount());
-        self::assertNull($stream->watts);
+        self::assertTrue($stream->hasHeartRateData());
+        self::assertTrue($stream->hasTimeData());
+        self::assertEquals(7120, $stream->velocities->getCount());
+        self::assertTrue($stream->hasWattData());
 
         $this->stream = $stream;
     }
@@ -95,7 +95,7 @@ class MovingAverageTest extends TestCase
             $this->stream->yield($start, 10)
         );
 
-        self::assertCount(7887, $series);
+        self::assertCount(7120, $series);
 
         foreach ($series as $data) {
             $timestamp = $data->getTimestamp();

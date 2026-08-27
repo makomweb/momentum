@@ -22,7 +22,7 @@ final class RealActivityZoneValidationTest extends TestCase
     public function test_real_activity_vo2max_zone_validation(): void
     {
         // Load real activity data
-        $jsonFile = __DIR__.'/../data/activity_stream_14417573_18355632062.json';
+        $jsonFile = __DIR__.'/../data/activity_stream_14417573_19881882510.json';
         self::assertFileExists($jsonFile, 'Activity stream file not found');
 
         $fileContents = file_get_contents($jsonFile);

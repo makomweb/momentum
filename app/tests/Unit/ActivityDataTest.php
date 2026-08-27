@@ -23,7 +23,7 @@ class ActivityDataTest extends TestCase
     #[Test]
     public function format_moving_time_should_work(): void
     {
-        $data = self::createActivityData(14417573, 18155703383);
+        $data = self::createActivityData(14417573, 19881882510);
 
         self::assertInstanceOf(ActivityData::class, $data);
 

@@ -15,61 +15,21 @@ final class ActivityStreamDenormalizer implements DenormalizerInterface
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param array<string, array<array{
+     *  data: array<int|float>,
+     *  seriesType: string,
+     *  resolution: string,
+     *  originalSize: int
+     * }>> $data
      */
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): ActivityStream
     {
-        /**
-         * @var array{
-         *  data: array<int|float>,
-         *  seriesType: string,
-         *  resolution: string,
-         *  originalSize: int
-         * }[] $timeSeries */
-        $timeSeries = isset($data['time']) ? $data['time'] : [];
-
-        /**
-         * @var array{
-         *  data: array<int|float>,
-         *  seriesType: string,
-         *  resolution: string,
-         *  originalSize: int
-         * }[] $distanceSeries */
-        $distanceSeries = isset($data['distance']) ? $data['distance'] : [];
-
-        /**
-         * @var array{
-         *  data: array<int|float>,
-         *  seriesType: string,
-         *  resolution: string,
-         *  originalSize: int
-         * }[] $velocitySeries */
-        $velocitySeries = isset($data['velocity_smooth']) ? $data['velocity_smooth'] : (isset($data['velocity']) ? $data['velocity'] : []);
-
-        /**
-         * @var array{
-         *  data: array<int|float>,
-         *  seriesType: string,
-         *  resolution: string,
-         *  originalSize: int
-         * }[] $heartrateSeries */
-        $heartrateSeries = isset($data['heartrate']) ? $data['heartrate'] : [];
-
-        /**
-         * @var array{
-         *  data: array<int|float>,
-         *  seriesType: string,
-         *  resolution: string,
-         *  originalSize: int
-         * }[] $wattsSeries */
-        $wattsSeries = isset($data['watts']) ? $data['watts'] : [];
-
         return new ActivityStream(
-            time: $this->denormalizeSeries($timeSeries),
-            distance: $this->denormalizeSeries($distanceSeries),
-            velocity: $this->denormalizeSeries($velocitySeries),
-            heartrate: $this->denormalizeSeries($heartrateSeries),
-            watts: $this->denormalizeSeries($wattsSeries),
+            times: $this->denormalizeSeries($data, 'time'),
+            distances: $this->denormalizeSeries($data, 'distance'),
+            velocities: $this->denormalizeSeries($data, 'velocity_smooth', 'velocity'),
+            heartrates: $this->denormalizeSeries($data, 'heartrate'),
+            watts: $this->denormalizeSeries($data, 'watts'),
         );
     }
 
@@ -87,17 +47,25 @@ final class ActivityStreamDenormalizer implements DenormalizerInterface
     }
 
     /**
-     * @param array{
+     * @param array<string, array<array{
      *  data: array<int|float>,
      *  seriesType: string,
      *  resolution: string,
      *  originalSize: int
-     * }[] $data
+     * }>> $data
      */
-    private function denormalizeSeries(array $data): ?Series
+    private function denormalizeSeries(array $data, string $key, string $fallback = ''): Series
     {
-        return empty($data)
-            ? null
-            : $this->seriesDenormalizer->denormalize($data, Series::class, null, []);
+        if (isset($data[$key])) {
+            $series = $data[$key];
+        } elseif (!empty($fallback) && isset($data[$fallback])) {
+            $series = $data[$fallback];
+        } else {
+            $series = [];
+        }
+
+        return empty($series)
+            ? Series::Empty($key)
+            : $this->seriesDenormalizer->denormalize($series, Series::class, null, []);
     }
 }

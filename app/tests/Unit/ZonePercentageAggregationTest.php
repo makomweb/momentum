@@ -28,7 +28,7 @@ final class ZonePercentageAggregationTest extends TestCase
     public function test_zone_percentage_aggregation_for_activity_18768361285(): void
     {
         // Load real activity data with 149% aggregation issue
-        $jsonFile = __DIR__.'/../data/activity_stream_14417573_18768361285.json';
+        $jsonFile = __DIR__.'/../data/activity_stream_14417573_19881882510.json';
         self::assertFileExists($jsonFile, 'Activity stream file not found');
 
         $fileContents = file_get_contents($jsonFile);
