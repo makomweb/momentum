@@ -13,32 +13,32 @@ use App\Momentum\Velocity;
 final readonly class ActivityStream
 {
     public function __construct(
-        public Series $times,
-        public Series $distances,
-        public Series $velocities,
-        public Series $heartrates,
+        public Series $time,
+        public Series $distance,
+        public Series $velocity,
+        public Series $heartrate,
         public Series $watts,
     ) {
     }
 
     public function hasHeartRateData(): bool
     {
-        return $this->heartrates->getCount() > 0;
+        return $this->heartrate->getCount() > 0;
     }
 
     public function hasTimeData(): bool
     {
-        return $this->times->getCount() > 0;
+        return $this->time->getCount() > 0;
     }
 
     public function hasDistanceData(): bool
     {
-        return $this->distances->getCount() > 0;
+        return $this->distance->getCount() > 0;
     }
 
     public function hasVelocityData(): bool
     {
-        return $this->velocities->getCount() > 0;
+        return $this->velocity->getCount() > 0;
     }
 
     public function hasWattData(): bool
@@ -66,10 +66,10 @@ final readonly class ActivityStream
         $heartRateAvg = MovingAverage::create('heart_rate_avg', $start, $movingAveragePeriod);
         $wattsAvg = MovingAverage::create('watts_avg', $start, $wattsAveragePeriod);
 
-        $count = $this->times->getCount();
+        $count = $this->time->getCount();
 
         for ($i = 0; $i < $count; ++$i) {
-            $offset = $this->times->getDataPoint($i);
+            $offset = $this->time->getDataPoint($i);
             assert(is_int($offset));
 
             $timestamp = $start->add(
@@ -78,7 +78,7 @@ final readonly class ActivityStream
 
             $distance = null;
             if ($this->hasDistanceData()) {
-                $distanceValue = $this->distances->getDataPoint($i);
+                $distanceValue = $this->distance->getDataPoint($i);
                 assert(is_numeric($distanceValue));
                 $distance = $distanceValue;
             }
@@ -86,7 +86,7 @@ final readonly class ActivityStream
             $velocity = null;
             $velocityAvgValue = null;
             if ($this->hasVelocityData()) {
-                $velocityValue = $this->velocities->getDataPoint($i);
+                $velocityValue = $this->velocity->getDataPoint($i);
                 assert(is_numeric($velocityValue));
                 $velocity = new Velocity($velocityValue);
                 $velocityAvg = $velocityAvg->with($velocityValue, $timestamp);
@@ -96,7 +96,7 @@ final readonly class ActivityStream
             $heartRate = null;
             $heartRateAvgValue = null;
             if ($this->hasHeartRateData()) {
-                $heartRateValue = $this->heartrates->getDataPoint($i);
+                $heartRateValue = $this->heartrate->getDataPoint($i);
                 assert(is_int($heartRateValue));
                 $heartRate = new HeartRate($heartRateValue);
                 $heartRateAvg = $heartRateAvg->with($heartRateValue, $timestamp);

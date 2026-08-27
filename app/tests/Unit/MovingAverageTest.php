@@ -24,7 +24,7 @@ class MovingAverageTest extends TestCase
         self::assertTrue($stream->hasVelocityData());
         self::assertTrue($stream->hasHeartRateData());
         self::assertTrue($stream->hasTimeData());
-        self::assertEquals(7120, $stream->velocities->getCount());
+        self::assertEquals(7120, $stream->velocity->getCount());
         self::assertTrue($stream->hasWattData());
 
         $this->stream = $stream;
