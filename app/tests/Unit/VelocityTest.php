@@ -29,7 +29,7 @@ class VelocityTest extends TestCase
 
         $pace = $velocity->asPace();
 
-        self::assertEquals(PaceUnit::MINUTES_PER_KILOMETER, $pace->unit);
+        self::assertEquals(PaceUnit::PER_KILOMETER, $pace->unit);
         self::assertEqualsWithDelta(4.17, $pace->value, 0.01);
     }
 

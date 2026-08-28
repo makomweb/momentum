@@ -142,14 +142,7 @@ final class Activity
 
     public function getAverageVelocityAsStringable(): \Stringable
     {
-        $type = $this->data['type'];
-
-        return match ($type) {
-            'Run', 'Walk', 'Hike' => $this->getAverageVelocity()->asPace(),
-            'Swim' => $this->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
-            'Ride' => $this->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
-        };
+        return $this->getAverageVelocity()->asStringable($this->data['type']);
     }
 
     public function getMovingTimeSeconds(): int

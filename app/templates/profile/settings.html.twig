@@ -32,14 +32,14 @@
                 <input type="hidden" name="_token" value="{{ csrf_token }}">
                 
                 <div>
-                    <label for="run_treshold_minutes_per_kilometer" class="block text-xs font-semibold text-gray-600 mb-2">Run treshold (minutes per kilometer)</label>
+                    <label for="run_treshold_per_kilometer" class="block text-xs font-semibold text-gray-600 mb-2">Run treshold (minutes per kilometer)</label>
                     <input
                         type="number"
                         step="0.01"
                         min="0"
                         class="w-full px-3 py-2 border border-gray-200 rounded focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none"
-                        id="run_treshold_minutes_per_kilometer"
-                        name="run_treshold_minutes_per_kilometer"
+                        id="run_treshold_per_kilometer"
+                        name="run_treshold_per_kilometer"
                         value="{{ run_treshold is null ? '' : run_treshold.value }}"
                         placeholder="e.g. 4.50"
                     >

@@ -128,7 +128,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRunTreshold(): Pace
     {
-        return new Pace($this->runTreshold, PaceUnit::MINUTES_PER_KILOMETER);
+        return new Pace($this->runTreshold, PaceUnit::PER_KILOMETER);
     }
 
     public function setRunTreshold(Pace $treshold): void

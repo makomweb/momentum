@@ -43,7 +43,7 @@ final class RealActivityZoneValidationTest extends TestCase
         self::assertNotEmpty($hrData, 'No heart rate data found');
 
         // User config
-        $treshold = new Pace(6.0, PaceUnit::MINUTES_PER_KILOMETER); // 6:00 min/km
+        $treshold = new Pace(6.0, PaceUnit::PER_KILOMETER); // 6:00 min/km
         $maxHeartRate = new HeartRate(190);
 
         // Process zones
@@ -132,7 +132,7 @@ final class RealActivityZoneValidationTest extends TestCase
         // This test documents the desired behavior:
         // A pace zone should only be confirmed if HR zone matches
 
-        $treshold = new Pace(6.0, PaceUnit::MINUTES_PER_KILOMETER);
+        $treshold = new Pace(6.0, PaceUnit::PER_KILOMETER);
         $maxHeartRate = new HeartRate(190);
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
 

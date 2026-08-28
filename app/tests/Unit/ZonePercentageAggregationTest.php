@@ -49,7 +49,7 @@ final class ZonePercentageAggregationTest extends TestCase
         self::assertNotEmpty($hrData, 'No heart rate data found');
 
         // User's athlete configuration
-        $treshold = new Pace(4.45, PaceUnit::MINUTES_PER_KILOMETER); // 4:27 min/km
+        $treshold = new Pace(4.45, PaceUnit::PER_KILOMETER); // 4:27 min/km
         $maxHeartRate = new HeartRate(180);
 
         // Process zones
