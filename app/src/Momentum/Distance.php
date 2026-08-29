@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Strava\API;
+namespace App\Momentum;
 
 final readonly class Distance implements \Stringable
 {
-    public function __construct(private float $meters)
+    public function __construct(public float $meters)
     {
     }
 
@@ -17,10 +17,5 @@ final readonly class Distance implements \Stringable
         }
 
         return sprintf('%.2f km', $this->meters / 1000);
-    }
-
-    public function getMeters(): float
-    {
-        return $this->meters;
     }
 }

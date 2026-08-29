@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Strava\API;
 
 use App\Momentum\Assert\Assert;
-use App\Momentum\PaceUnit;
-use App\Momentum\SpeedUnit;
+use App\Momentum\Distance;
 use App\Momentum\Velocity;
 
 final readonly class Activity implements \Stringable

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\Distance;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
 use App\Momentum\Speed;
 use App\Momentum\SpeedUnit;
 use App\Strava\API\Activity;
-use App\Strava\API\Distance;
 
 final readonly class ActivityMetaData
 {

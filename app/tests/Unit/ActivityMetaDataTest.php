@@ -26,12 +26,12 @@ class ActivityMetaDataTest extends TestCase
     public static function provideTestData(): array
     {
         return [
-            '22 s' => [self::create(['moving_time' => 22]), '22 s'],
-            '2 min 3 s' => [self::create(['moving_time' => 123]), '2 min 3 s'],
-            '2 min 55 s' => [self::create(['moving_time' => 175]), '2 min 55 s'],
-            '1 h 30 s' => [self::create(['moving_time' => 3630]), '1 h 30 s'],
-            '2 h 46 min 40 s' => [self::create(/* Rely on default value. */), '2 h 46 min 40 s'],
-            '3 h 3 min 20 s' => [self::create(['moving_time' => 11000]), '3 h 3 min 20 s'],
+            '22s' => [self::create(['moving_time' => 22]), '22s'],
+            '2min 3s' => [self::create(['moving_time' => 123]), '2min 3s'],
+            '2min 55s' => [self::create(['moving_time' => 175]), '2min 55s'],
+            '1h 30s' => [self::create(['moving_time' => 3630]), '1h 30s'],
+            '2h 46min 40s' => [self::create(/* Rely on default value. */), '2h 46min 40s'],
+            '3h 3min 20s' => [self::create(['moving_time' => 11000]), '3h 3min 20s'],
         ];
     }
 
