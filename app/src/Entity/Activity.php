@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Momentum\Distance;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity as StravaApiActivity;
 use Doctrine\ORM\Mapping as ORM;
@@ -136,6 +137,11 @@ final class Activity
     public function getStartDateLocalTime(): \DateTimeImmutable
     {
         return $this->startDate->setTimezone(new \DateTimeZone($this->timezone));
+    }
+
+    public function getDistance(): Distance
+    {
+        return new Distance($this->data['distance']);
     }
 
     public function getAverageVelocityAsStringable(): \Stringable

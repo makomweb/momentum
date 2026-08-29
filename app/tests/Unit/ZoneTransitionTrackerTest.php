@@ -6,6 +6,7 @@ namespace App\Tests\Unit;
 
 use App\Momentum\Activity;
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\Distance;
 use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
@@ -44,13 +45,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 60; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $baseVelocity,
                 'velocity_avg' => $baseVelocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -62,13 +63,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 60; $i < 120; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $fasterVelocity,
                 'velocity_avg' => $fasterVelocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -98,13 +99,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 50; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(130),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -114,13 +115,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 50; $i < 100; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(170),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -155,13 +156,13 @@ final class ZoneTransitionTrackerTest extends TestCase
             for ($i = 0; $i < $zone['duration']; ++$i) {
                 $dataPoints[] = new ActivityDataPoint([
                     'timestamp' => $startTime->add(new \DateInterval("PT{$timestamp}S")),
-                    'distance' => null,
-                    'heart_rate' => null,
-                    'heart_rate_avg' => null,
+                    'distance' => Distance::ZERO(),
+                    'heart_rate' => HeartRate::ZERO(),
+                    'heart_rate_avg' => HeartRate::ZERO(),
                     'velocity' => $zone['velocity'],
                     'velocity_avg' => $zone['velocity'],
-                    'watts' => null,
-                    'watts_avg' => null,
+                    'watts' => Power::ZERO(),
+                    'watts_avg' => Power::ZERO(),
                 ]);
                 ++$timestamp;
             }
@@ -191,13 +192,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 100; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -231,13 +232,13 @@ final class ZoneTransitionTrackerTest extends TestCase
             $velocity = Velocity::create(new Pace(7.0, PaceUnit::PER_KILOMETER));
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(170),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -261,13 +262,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 50; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -291,26 +292,26 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 50; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381), // Zone 2 pace
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         for ($i = 50; $i < 100; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(3.03), // Zone 5 pace
                 'velocity_avg' => new Velocity(3.03),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -334,13 +335,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i <= 7; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381), // Zone 2 pace
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -349,13 +350,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 15; $i <= 30; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381), // Zone 2 pace (same zone!)
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -378,26 +379,26 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 10; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(150),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         for ($i = 20; $i < 30; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(150),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -431,13 +432,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 50; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(150),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -446,13 +447,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 60; $i < 100; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(150),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Strava\API;
 
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\Distance;
 use App\Momentum\HeartRate;
 use App\Momentum\MovingAverage;
 use App\Momentum\Power;
@@ -76,15 +77,15 @@ final readonly class ActivityStream
                 \DateInterval::createFromDateString("$offset seconds")
             );
 
-            $distance = null;
+            $distance = Distance::ZERO();
             if ($this->hasDistanceData()) {
                 $distanceValue = $this->distance->getDataPoint($i);
                 assert(is_numeric($distanceValue));
-                $distance = $distanceValue;
+                $distance = new Distance($distanceValue);
             }
 
-            $velocity = null;
-            $velocityAvgValue = null;
+            $velocity = Velocity::ZERO();
+            $velocityAvgValue = Velocity::ZERO();
             if ($this->hasVelocityData()) {
                 $velocityValue = $this->velocity->getDataPoint($i);
                 assert(is_numeric($velocityValue));
@@ -93,8 +94,8 @@ final readonly class ActivityStream
                 $velocityAvgValue = new Velocity($velocityAvg->getValue());
             }
 
-            $heartRate = null;
-            $heartRateAvgValue = null;
+            $heartRate = HeartRate::ZERO();
+            $heartRateAvgValue = HeartRate::ZERO();
             if ($this->hasHeartRateData()) {
                 $heartRateValue = $this->heartrate->getDataPoint($i);
                 assert(is_int($heartRateValue));
@@ -103,8 +104,8 @@ final readonly class ActivityStream
                 $heartRateAvgValue = new HeartRate((int) $heartRateAvg->getValue());
             }
 
-            $watts = null;
-            $wattsAvgValue = null;
+            $watts = Power::ZERO();
+            $wattsAvgValue = Power::ZERO();
             if ($this->hasWattData()) {
                 $wattsValue = $this->watts->getDataPoint($i);
                 assert(is_int($wattsValue));

@@ -10,12 +10,22 @@ final readonly class Distance implements \Stringable
     {
     }
 
+    public static function ZERO(): self
+    {
+        return new self(0.0);
+    }
+
+    public function isZero(): bool
+    {
+        return $this->meters < 0.1;
+    }
+
     public function __toString(): string
     {
         if ($this->meters < 1000.0) {
-            return sprintf('%.1f m', $this->meters);
+            return sprintf('%.0f m', $this->meters);
         }
 
-        return sprintf('%.2f km', $this->meters / 1000);
+        return sprintf('%.1f km', $this->meters / 1000);
     }
 }

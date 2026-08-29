@@ -35,37 +35,29 @@ final readonly class ActivityMetaData
     /**
      * @return array{
      *  elapsed_time: \DateInterval,
-     *  distance: Distance|null,
-     *  average_velocity: Speed|Pace|null
+     *  distance: Distance,
+     *  average_velocity: Speed|Pace
      * }
      */
     public function getData(): array
     {
-        $distance = $this->activity->data['distance'] > 0
-            ? $this->activity->getDistance()
-            : null;
-
-        $type = $this->getActivityType();
-
-        $averageVelocity = match ($type) {
+        $averageVelocity = match ($this->getActivityType()) {
             'Run', 'Walk', 'Hike', => $this->activity->getAverageVelocity()->asPace(),
             'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::PER_100_METERS),
             'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => null,
+            default => Pace::ZERO(),
         };
 
         return [
             'elapsed_time' => $this->activity->getElapsedTime(),
-            'distance' => $distance,
+            'distance' => $this->activity->getDistance(),
             'average_velocity' => $averageVelocity,
         ];
     }
 
     public function getLabel(): string
     {
-        $type = $this->getActivityType();
-
-        return match ($type) {
+        return match ($this->getActivityType()) {
             'Run', 'Walk', 'Hike', 'Swim' => 'Pace',
             'Ride' => 'Speed',
             default => 'Metric',

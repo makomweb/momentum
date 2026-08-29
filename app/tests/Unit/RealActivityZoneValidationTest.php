@@ -6,6 +6,7 @@ namespace App\Tests\Unit;
 
 use App\Momentum\Activity;
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\Distance;
 use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
@@ -57,13 +58,13 @@ final class RealActivityZoneValidationTest extends TestCase
 
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $timestamp,
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate($hr),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
-                'velocity_avg' => null,
-                'watts' => null,
-                'watts_avg' => null,
+                'velocity_avg' => Velocity::ZERO(),
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -150,13 +151,13 @@ final class RealActivityZoneValidationTest extends TestCase
 
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $timestamp,
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => $hr,
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 

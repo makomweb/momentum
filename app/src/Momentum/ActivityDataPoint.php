@@ -9,13 +9,13 @@ final readonly class ActivityDataPoint implements \Stringable
     /**
      * @param array{
      *  timestamp: \DateTimeImmutable,
-     *  distance: float|null,
-     *  heart_rate: HeartRate|null,
-     *  heart_rate_avg: HeartRate|null,
-     *  velocity: Velocity|null,
-     *  velocity_avg: Velocity|null,
-     *  watts: Power|null,
-     *  watts_avg: Power|null
+     *  distance: Distance,
+     *  heart_rate: HeartRate,
+     *  heart_rate_avg: HeartRate,
+     *  velocity: Velocity,
+     *  velocity_avg: Velocity,
+     *  watts: Power,
+     *  watts_avg: Power
      * } $data
      */
     public function __construct(private array $data)
@@ -27,23 +27,34 @@ final readonly class ActivityDataPoint implements \Stringable
         return $this->data['timestamp'];
     }
 
-    public function getDistance(): ?float
+    public function getDistance(): Distance
     {
         return $this->data['distance'];
     }
 
+    public function hasDistance(): bool
+    {
+        return !$this->getDistance()->isZero();
+    }
+
     public function getHeartRate(): HeartRate
     {
-        $hr = $this->data['heart_rate'];
-
-        return $hr ?? HeartRate::ZERO();
+        return $this->data['heart_rate'];
     }
 
     public function getHeartRateAverage(): HeartRate
     {
-        $hr = $this->data['heart_rate_avg'];
+        return $this->data['heart_rate_avg'];
+    }
 
-        return $hr ?? HeartRate::ZERO();
+    public function getVelocity(): Velocity
+    {
+        return $this->data['velocity'];
+    }
+
+    public function getVelocityAverage(): Velocity
+    {
+        return $this->data['velocity_avg'];
     }
 
     public function hasVelocity(): bool
@@ -52,32 +63,14 @@ final readonly class ActivityDataPoint implements \Stringable
             && !$this->getVelocityAverage()->isZero();
     }
 
-    public function getVelocity(): Velocity
-    {
-        $velocity = $this->data['velocity'];
-
-        return $velocity ?? Velocity::ZERO();
-    }
-
-    public function getVelocityAverage(): Velocity
-    {
-        $velocity = $this->data['velocity_avg'];
-
-        return $velocity ?? Velocity::ZERO();
-    }
-
     public function getWatts(): Power
     {
-        $watts = $this->data['watts'];
-
-        return $watts ?? Power::ZERO();
+        return $this->data['watts'];
     }
 
     public function getWattsAverage(): Power
     {
-        $watts = $this->data['watts_avg'];
-
-        return $watts ?? Power::ZERO();
+        return $this->data['watts_avg'];
     }
 
     public function getPaceZone(Pace $treshold): PaceZone
