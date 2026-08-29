@@ -23,7 +23,7 @@ final readonly class Distance implements \Stringable
     public function __toString(): string
     {
         if ($this->meters < 1000.0) {
-            return sprintf('%.0f m', $this->meters);
+            return sprintf('%d m', (int) $this->meters);
         }
 
         return sprintf('%.1f km', $this->meters / 1000);
