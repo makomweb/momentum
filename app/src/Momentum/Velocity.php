@@ -51,7 +51,7 @@ final readonly class Velocity
             'Run', 'Walk', 'Hike' => $this->asPace(),
             'Swim' => $this->asPace()->as(PaceUnit::PER_100_METERS),
             'Ride' => $this->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => throw new \Exception(sprintf('Unsupported activity type "%s"!', $activityType)),
+            default => Speed::ZERO(),
         };
     }
 }
