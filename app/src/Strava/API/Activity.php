@@ -130,6 +130,11 @@ final readonly class Activity implements \Stringable
         return new Distance($this->data['distance']);
     }
 
+    public function hasVelocity(): bool
+    {
+        return !$this->getAverageVelocity()->isZero();
+    }
+
     public function getMaxVelocity(): Velocity
     {
         return new Velocity($this->data['max_speed']);

@@ -7,7 +7,6 @@ namespace App\Strava;
 use App\Momentum\Distance;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
-use App\Momentum\Speed;
 use App\Momentum\SpeedUnit;
 use App\Strava\API\Activity;
 
@@ -32,27 +31,29 @@ final readonly class ActivityMetaData
         return $this->activity->getStartDateLocalTime();
     }
 
-    /**
-     * @return array{
-     *  elapsed_time: \DateInterval,
-     *  distance: Distance,
-     *  average_velocity: Speed|Pace
-     * }
-     */
-    public function getData(): array
+    public function getElapsedTime(): \DateInterval
     {
-        $averageVelocity = match ($this->getActivityType()) {
+        return $this->activity->getElapsedTime();
+    }
+
+    public function getDistance(): Distance
+    {
+        return $this->activity->getDistance();
+    }
+
+    public function getAverageVelocity(): \Stringable
+    {
+        return match ($this->getActivityType()) {
             'Run', 'Walk', 'Hike', => $this->activity->getAverageVelocity()->asPace(),
             'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::PER_100_METERS),
             'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => Pace::ZERO(),
         };
+    }
 
-        return [
-            'elapsed_time' => $this->activity->getElapsedTime(),
-            'distance' => $this->activity->getDistance(),
-            'average_velocity' => $averageVelocity,
-        ];
+    public function hasVelocity(): bool
+    {
+        return $this->activity->hasVelocity();
     }
 
     public function getLabel(): string
@@ -60,7 +61,7 @@ final readonly class ActivityMetaData
         return match ($this->getActivityType()) {
             'Run', 'Walk', 'Hike', 'Swim' => 'Pace',
             'Ride' => 'Speed',
-            default => 'Metric',
+            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
         };
     }
 

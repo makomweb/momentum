@@ -59,6 +59,10 @@ final readonly class Pace implements \Stringable
 
     public function __toString(): string
     {
+        if ($this->isZero()) {
+            return 'N/A';
+        }
+
         $minutes = (int) $this->value;
         $seconds = (int) (($this->value - $minutes) * 60);
 
