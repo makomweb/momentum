@@ -139,9 +139,19 @@ final class Activity
         return $this->startDate->setTimezone(new \DateTimeZone($this->timezone));
     }
 
+    public function hasDistance(): bool
+    {
+        return !$this->getDistance()->isZero();
+    }
+
     public function getDistance(): Distance
     {
         return new Distance($this->data['distance']);
+    }
+
+    public function hasVelocity(): bool
+    {
+        return !$this->getAverageVelocity()->isZero();
     }
 
     public function getAverageVelocityAsStringable(): \Stringable
