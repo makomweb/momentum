@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class ZoneSessions
+final readonly class Activity
 {
     private function __construct(private \DateTimeImmutable $endTime, private ZoneEntries $zoneEntries)
     {
@@ -13,35 +13,35 @@ final readonly class ZoneSessions
     /** @param ActivityDataPoint[] $dataPoints */
     public static function create(AthleteInterface $athlete, \DateTimeImmutable $endTime, array $dataPoints): self
     {
-        return new self($endTime, new ZoneEntries($athlete->getRunTreshold(), $athlete->getMaxHeartRate(), $dataPoints));
+        return new self($endTime, ZoneEntries::create($athlete, $dataPoints));
     }
 
-    /** @return ZoneSession[] */
+    /** @return Session[] */
     public function getPaceZoneSessions(): array
     {
         $entries = $this->zoneEntries->getPaceZoneEntries();
 
-        /** @var ZoneSession[] $result */
+        /** @var Session[] $result */
         $result = array_reduce($entries, self::reduce(...), []);
 
         return self::finalize($result, $this->endTime);
     }
 
-    /** @return ZoneSession[] */
+    /** @return Session[] */
     public function getHeartRateSessions(): array
     {
         $entries = $this->zoneEntries->getHeartRateZoneEntries();
 
-        /** @var ZoneSession[] $result */
+        /** @var Session[] $result */
         $result = array_reduce($entries, self::reduce(...), []);
 
         return self::finalize($result, $this->endTime);
     }
 
     /**
-     * @param ZoneSession[] $carry
+     * @param Session[] $carry
      *
-     * @return ZoneSession[]
+     * @return Session[]
      */
     private static function reduce(array $carry, PaceZoneEntry|HeartRateZoneEntry $entry): array
     {
@@ -50,13 +50,13 @@ final readonly class ZoneSessions
             $carry[] = $previous->close($entry->entered);
         }
 
-        return [...$carry, ZoneSession::open($entry)];
+        return [...$carry, Session::open($entry)];
     }
 
     /**
-     * @param ZoneSession[] $sessions
+     * @param Session[] $sessions
      *
-     * @return ZoneSession[]
+     * @return Session[]
      */
     private static function finalize(array $sessions, \DateTimeImmutable $endTime): array
     {

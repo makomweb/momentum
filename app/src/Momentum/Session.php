@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-final readonly class ZoneSession implements \Stringable
+final readonly class Session implements \Stringable
 {
     /**
-     * @deprecated Constructor is public only for test purposes. Use ZoneSession::open() instead!
+     * @deprecated Constructor is public only for test purposes. Use Session::open() instead!
      */
     public function __construct(
         public PaceZone|HeartRateZone $zone,
@@ -45,7 +45,7 @@ final readonly class ZoneSession implements \Stringable
     }
 
     /**
-     * @param ZoneSession[] $sessions
+     * @param Session[] $sessions
      */
     public function isConfirmedByOneOf(array $sessions): bool
     {

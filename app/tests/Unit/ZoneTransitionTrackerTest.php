@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit;
 
+use App\Momentum\Activity;
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\Distance;
 use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
@@ -12,7 +14,6 @@ use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
 use App\Momentum\Power;
 use App\Momentum\Velocity;
-use App\Momentum\ZoneSessions;
 use PHPUnit\Framework\TestCase;
 
 final class ZoneTransitionTrackerTest extends TestCase
@@ -25,7 +26,7 @@ final class ZoneTransitionTrackerTest extends TestCase
     protected function setUp(): void
     {
         // 6:00 min/km = 360 seconds per km
-        $this->treshold = new Pace(6.0, PaceUnit::MINUTES_PER_KILOMETER);
+        $this->treshold = new Pace(6.0, PaceUnit::PER_KILOMETER);
         $this->maxHeartRate = new HeartRate(200);
     }
 
@@ -44,13 +45,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 60; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $baseVelocity,
                 'velocity_avg' => $baseVelocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -62,19 +63,19 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 60; $i < 120; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $fasterVelocity,
                 'velocity_avg' => $fasterVelocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT120S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $sessions = $zoneSessions->getPaceZoneSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $activity->getPaceZoneSessions();
 
         self::assertCount(2, $sessions, 'Should have 2 pace zone sessions');
         self::assertTrue($sessions[0]->isEqual(PaceZone::ZONE_2));
@@ -98,13 +99,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 50; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(130),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -114,19 +115,19 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 50; $i < 100; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(170),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $sessions = $zoneSessions->getHeartRateSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $activity->getHeartRateSessions();
 
         self::assertCount(2, $sessions, 'Should have 2 heart rate zone sessions');
         self::assertTrue($sessions[0]->isEqual(HeartRateZone::ZONE_2));
@@ -155,21 +156,21 @@ final class ZoneTransitionTrackerTest extends TestCase
             for ($i = 0; $i < $zone['duration']; ++$i) {
                 $dataPoints[] = new ActivityDataPoint([
                     'timestamp' => $startTime->add(new \DateInterval("PT{$timestamp}S")),
-                    'distance' => null,
-                    'heart_rate' => null,
-                    'heart_rate_avg' => null,
+                    'distance' => Distance::ZERO(),
+                    'heart_rate' => HeartRate::ZERO(),
+                    'heart_rate_avg' => HeartRate::ZERO(),
                     'velocity' => $zone['velocity'],
                     'velocity_avg' => $zone['velocity'],
-                    'watts' => null,
-                    'watts_avg' => null,
+                    'watts' => Power::ZERO(),
+                    'watts_avg' => Power::ZERO(),
                 ]);
                 ++$timestamp;
             }
         }
 
         $endTime = $startTime->add(new \DateInterval("PT{$timestamp}S"));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $sessions = $zoneSessions->getPaceZoneSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $activity->getPaceZoneSessions();
 
         self::assertCount(4, $sessions, 'Should have 4 pace zone sessions');
         self::assertTrue($sessions[0]->isEqual(PaceZone::ZONE_2));
@@ -191,19 +192,19 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 100; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $sessions = $zoneSessions->getPaceZoneSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $activity->getPaceZoneSessions();
 
         self::assertCount(1, $sessions);
 
@@ -215,10 +216,10 @@ final class ZoneTransitionTrackerTest extends TestCase
     {
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::ZERO(), $this->maxHeartRate), $endTime, [/* Nothing */]);
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::ZERO(), $this->maxHeartRate), $endTime, [/* Nothing */]);
 
-        self::assertCount(0, $zoneSessions->getPaceZoneSessions());
-        self::assertCount(0, $zoneSessions->getHeartRateSessions());
+        self::assertCount(0, $activity->getPaceZoneSessions());
+        self::assertCount(0, $activity->getHeartRateSessions());
     }
 
     public function test_mixed_pace_and_heart_rate_zones(): void
@@ -228,23 +229,23 @@ final class ZoneTransitionTrackerTest extends TestCase
         $dataPoints = [];
         // Slow pace (Zone 2) with high HR (Zone 4)
         for ($i = 0; $i < 30; ++$i) {
-            $velocity = Velocity::create(new Pace(7.0, PaceUnit::MINUTES_PER_KILOMETER));
+            $velocity = Velocity::create(new Pace(7.0, PaceUnit::PER_KILOMETER));
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(170),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT30S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $paceSessions = $zoneSessions->getPaceZoneSessions();
-        $hrSessions = $zoneSessions->getHeartRateSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $paceSessions = $activity->getPaceZoneSessions();
+        $hrSessions = $activity->getHeartRateSessions();
 
         self::assertCount(1, $paceSessions);
         self::assertCount(1, $hrSessions);
@@ -261,20 +262,20 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 50; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
                 'velocity_avg' => $velocity,
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT50S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $paceSessions = $zoneSessions->getPaceZoneSessions();
-        $hrSessions = $zoneSessions->getHeartRateSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $paceSessions = $activity->getPaceZoneSessions();
+        $hrSessions = $activity->getHeartRateSessions();
 
         self::assertCount(1, $paceSessions);
         self::assertCount(1, $hrSessions);
@@ -291,32 +292,32 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 50; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381), // Zone 2 pace
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         for ($i = 50; $i < 100; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(3.03), // Zone 5 pace
                 'velocity_avg' => new Velocity(3.03),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $sessions = $zoneSessions->getPaceZoneSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $activity->getPaceZoneSessions();
 
         self::assertEquals($startTime, $sessions[0]->start);
         self::assertEquals($startTime->add(new \DateInterval('PT50S')), $sessions[0]->end);
@@ -334,13 +335,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i <= 7; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381), // Zone 2 pace
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -349,19 +350,19 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 15; $i <= 30; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
-                'heart_rate' => null,
-                'heart_rate_avg' => null,
+                'distance' => Distance::ZERO(),
+                'heart_rate' => HeartRate::ZERO(),
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381), // Zone 2 pace (same zone!)
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT31S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $sessions = $zoneSessions->getPaceZoneSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $sessions = $activity->getPaceZoneSessions();
 
         // Should have 2 sessions due to gap, not 1 extended session
         self::assertCount(2, $sessions);
@@ -378,34 +379,34 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 10; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(150),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         for ($i = 20; $i < 30; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(150),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $endTime = $startTime->add(new \DateInterval('PT15S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $paceSessions = $zoneSessions->getPaceZoneSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $paceSessions = $activity->getPaceZoneSessions();
 
-        $heartRateSessions = $zoneSessions->getHeartRateSessions();
+        $heartRateSessions = $activity->getHeartRateSessions();
 
         self::assertSame(2, count($paceSessions));
         self::assertSame(2, count($heartRateSessions));
@@ -431,13 +432,13 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 0; $i < 50; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(150),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
@@ -446,21 +447,21 @@ final class ZoneTransitionTrackerTest extends TestCase
         for ($i = 60; $i < 100; ++$i) {
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $startTime->add(new \DateInterval("PT{$i}S")),
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate(150),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => new Velocity(2.381),
                 'velocity_avg' => new Velocity(2.381),
-                'watts' => null,
-                'watts_avg' => null,
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         // Correct endTime: start + elapsed_time (100s)
         // The last zone session starts at T+60; close(T+100) → 40 seconds
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $zoneSessions = ZoneSessions::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
-        $paceSessions = $zoneSessions->getPaceZoneSessions();
+        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $paceSessions = $activity->getPaceZoneSessions();
 
         self::assertNotEmpty($paceSessions);
         $lastSession = $paceSessions[count($paceSessions) - 1];

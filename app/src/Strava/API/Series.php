@@ -17,7 +17,7 @@ final readonly class Series
     ) {
     }
 
-    public static function Empty(string $name): self
+    public static function empty(string $name): self
     {
         return new self([], $name, '<unknown>', 0);
     }

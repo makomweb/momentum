@@ -13,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class AuthTest extends WebTestCase
 {
-    private const STRAVA_USER_ID = 14417573;
+    private const STRAVA_USER_ID = 444111;
 
     public function setUp(): void
     {

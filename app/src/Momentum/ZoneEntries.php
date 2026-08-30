@@ -11,12 +11,18 @@ final readonly class ZoneEntries
     private \DateInterval $gapTreshold;
 
     /** @param ActivityDataPoint[] $dataPoints */
-    public function __construct(private Pace $treshold, private HeartRate $maxHeartRate, private array $dataPoints)
+    private function __construct(private Pace $treshold, private HeartRate $maxHeartRate, private array $dataPoints)
     {
         Assert::that(!$treshold->isZero(), 'Please configure a treshold pace!');
         Assert::that($maxHeartRate->isValid(), 'Please configure a max. heart rate!');
 
         $this->gapTreshold = \DateInterval::createFromDateString('5 seconds');
+    }
+
+    /** @param ActivityDataPoint[] $dataPoints */
+    public static function create(AthleteInterface $athlete, array $dataPoints): self
+    {
+        return new self($athlete->getRunTreshold(), $athlete->getMaxHeartRate(), $dataPoints);
     }
 
     /** @return PaceZoneEntry[] */

@@ -11,8 +11,8 @@ use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRate;
 use App\Momentum\Pace;
 use App\Momentum\Power;
+use App\Momentum\Session;
 use App\Momentum\TrainingMetrics;
-use App\Momentum\ZoneSession;
 use App\Repository\ActivityRepository;
 use App\Repository\UserRepository;
 use App\Strava\ActivityData;
@@ -211,8 +211,8 @@ final class ActivityController extends AbstractController
      *     activity_id: int,
      *     meta_data: ActivityMetaData,
      *     metrics: TrainingMetrics,
-     *     pace_zone_sessions: array<ZoneSession>,
-     *     heart_rate_zone_sessions: array<ZoneSession>,
+     *     pace_zone_sessions: array<Session>,
+     *     heart_rate_zone_sessions: array<Session>,
      *     pace_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      * }

@@ -8,8 +8,12 @@ use App\Strava\API\ActivityStream;
 use App\Strava\API\Series;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-final class ActivityStreamNormalizer implements NormalizerInterface
+final readonly class ActivityStreamNormalizer implements NormalizerInterface
 {
+    public function __construct(private SeriesNormalizer $normalizer)
+    {
+    }
+
     /**
      * @param ActivityStream $object
      *
@@ -18,10 +22,10 @@ final class ActivityStreamNormalizer implements NormalizerInterface
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         return [
-            'times' => $this->normalizeSeries($object->times),
-            'distances' => $this->normalizeSeries($object->distances),
-            'velocities' => $this->normalizeSeries($object->velocities),
-            'heartrates' => $this->normalizeSeries($object->heartrates),
+            'time' => $this->normalizeSeries($object->time),
+            'distance' => $this->normalizeSeries($object->distance),
+            'velocity' => $this->normalizeSeries($object->velocity),
+            'heartrate' => $this->normalizeSeries($object->heartrate),
             'watts' => $this->normalizeSeries($object->watts),
         ];
     }
@@ -44,8 +48,6 @@ final class ActivityStreamNormalizer implements NormalizerInterface
      */
     private function normalizeSeries(Series $series): array
     {
-        $normalizer = new SeriesNormalizer();
-
-        return $normalizer->normalize($series, null, []);
+        return $this->normalizer->normalize($series, null, []);
     }
 }

@@ -29,7 +29,7 @@
             {%- if activity.data.distance > 0 -%}
             <div class="flex flex-col gap-1 bg-gray-50 border border-gray-200 rounded p-2">
                 <div class="text-xs font-semibold text-gray-600">Distance</div>
-                <div class="text-sm font-bold truncate">{{ (activity.data.distance / 1000) | round(1) }} km</div>
+                <div class="text-sm font-bold truncate">{{ activity.getDistance() }}</div>
             </div>
             {%- else -%}
             <div class="flex flex-col gap-1 bg-gray-50 border border-gray-200 rounded p-2">

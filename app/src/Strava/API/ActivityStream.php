@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Strava\API;
 
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\Distance;
 use App\Momentum\HeartRate;
 use App\Momentum\MovingAverage;
 use App\Momentum\Power;
@@ -13,32 +14,32 @@ use App\Momentum\Velocity;
 final readonly class ActivityStream
 {
     public function __construct(
-        public Series $times,
-        public Series $distances,
-        public Series $velocities,
-        public Series $heartrates,
+        public Series $time,
+        public Series $distance,
+        public Series $velocity,
+        public Series $heartrate,
         public Series $watts,
     ) {
     }
 
     public function hasHeartRateData(): bool
     {
-        return $this->heartrates->getCount() > 0;
+        return $this->heartrate->getCount() > 0;
     }
 
     public function hasTimeData(): bool
     {
-        return $this->times->getCount() > 0;
+        return $this->time->getCount() > 0;
     }
 
     public function hasDistanceData(): bool
     {
-        return $this->distances->getCount() > 0;
+        return $this->distance->getCount() > 0;
     }
 
     public function hasVelocityData(): bool
     {
-        return $this->velocities->getCount() > 0;
+        return $this->velocity->getCount() > 0;
     }
 
     public function hasWattData(): bool
@@ -66,45 +67,45 @@ final readonly class ActivityStream
         $heartRateAvg = MovingAverage::create('heart_rate_avg', $start, $movingAveragePeriod);
         $wattsAvg = MovingAverage::create('watts_avg', $start, $wattsAveragePeriod);
 
-        $count = $this->times->getCount();
+        $count = $this->time->getCount();
 
         for ($i = 0; $i < $count; ++$i) {
-            $offset = $this->times->getDataPoint($i);
+            $offset = $this->time->getDataPoint($i);
             assert(is_int($offset));
 
             $timestamp = $start->add(
                 \DateInterval::createFromDateString("$offset seconds")
             );
 
-            $distance = null;
+            $distance = Distance::ZERO();
             if ($this->hasDistanceData()) {
-                $distanceValue = $this->distances->getDataPoint($i);
+                $distanceValue = $this->distance->getDataPoint($i);
                 assert(is_numeric($distanceValue));
-                $distance = $distanceValue;
+                $distance = new Distance($distanceValue);
             }
 
-            $velocity = null;
-            $velocityAvgValue = null;
+            $velocity = Velocity::ZERO();
+            $velocityAvgValue = Velocity::ZERO();
             if ($this->hasVelocityData()) {
-                $velocityValue = $this->velocities->getDataPoint($i);
+                $velocityValue = $this->velocity->getDataPoint($i);
                 assert(is_numeric($velocityValue));
                 $velocity = new Velocity($velocityValue);
                 $velocityAvg = $velocityAvg->with($velocityValue, $timestamp);
                 $velocityAvgValue = new Velocity($velocityAvg->getValue());
             }
 
-            $heartRate = null;
-            $heartRateAvgValue = null;
+            $heartRate = HeartRate::ZERO();
+            $heartRateAvgValue = HeartRate::ZERO();
             if ($this->hasHeartRateData()) {
-                $heartRateValue = $this->heartrates->getDataPoint($i);
+                $heartRateValue = $this->heartrate->getDataPoint($i);
                 assert(is_int($heartRateValue));
                 $heartRate = new HeartRate($heartRateValue);
                 $heartRateAvg = $heartRateAvg->with($heartRateValue, $timestamp);
                 $heartRateAvgValue = new HeartRate((int) $heartRateAvg->getValue());
             }
 
-            $watts = null;
-            $wattsAvgValue = null;
+            $watts = Power::ZERO();
+            $wattsAvgValue = Power::ZERO();
             if ($this->hasWattData()) {
                 $wattsValue = $this->watts->getDataPoint($i);
                 assert(is_int($wattsValue));

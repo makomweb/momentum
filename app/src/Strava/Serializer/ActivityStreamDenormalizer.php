@@ -8,9 +8,9 @@ use App\Strava\API\ActivityStream;
 use App\Strava\API\Series;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-final class ActivityStreamDenormalizer implements DenormalizerInterface
+final readonly class ActivityStreamDenormalizer implements DenormalizerInterface
 {
-    public function __construct(private SeriesDenormalizer $seriesDenormalizer)
+    public function __construct(private SeriesDenormalizer $denormalizer)
     {
     }
 
@@ -25,10 +25,10 @@ final class ActivityStreamDenormalizer implements DenormalizerInterface
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): ActivityStream
     {
         return new ActivityStream(
-            times: $this->denormalizeSeries($data, 'time'),
-            distances: $this->denormalizeSeries($data, 'distance'),
-            velocities: $this->denormalizeSeries($data, 'velocity_smooth', 'velocity'),
-            heartrates: $this->denormalizeSeries($data, 'heartrate'),
+            time: $this->denormalizeSeries($data, 'time'),
+            distance: $this->denormalizeSeries($data, 'distance'),
+            velocity: $this->denormalizeSeries($data, 'velocity_smooth', 'velocity'),
+            heartrate: $this->denormalizeSeries($data, 'heartrate'),
             watts: $this->denormalizeSeries($data, 'watts'),
         );
     }
@@ -64,8 +64,8 @@ final class ActivityStreamDenormalizer implements DenormalizerInterface
             $series = [];
         }
 
-        return empty($series)
-            ? Series::Empty($key)
-            : $this->seriesDenormalizer->denormalize($series, Series::class, null, []);
+        return !empty($series)
+            ? $this->denormalizer->denormalize($series, Series::class, null, [])
+            : Series::empty($key);
     }
 }

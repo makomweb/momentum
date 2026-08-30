@@ -47,7 +47,7 @@ final class ProfileSettingsController extends AbstractController
                 return $this->redirectToRoute('profile_settings');
             }
 
-            $runTresholdRaw = trim((string) $request->request->get('run_treshold_minutes_per_kilometer', ''));
+            $runTresholdRaw = trim((string) $request->request->get('run_treshold_per_kilometer', ''));
             $cyclingTresholdRaw = trim((string) $request->request->get('cycling_treshold_watts', ''));
             $maxHeartRateRaw = trim((string) $request->request->get('max_heart_rate', ''));
 
@@ -56,7 +56,7 @@ final class ProfileSettingsController extends AbstractController
                 if (!is_numeric($runTresholdRaw) || (float) $runTresholdRaw <= 0) {
                     $errors[] = '$runTreshold must be a positive number.';
                 } else {
-                    $runTreshold = new Pace((float) $runTresholdRaw, PaceUnit::MINUTES_PER_KILOMETER);
+                    $runTreshold = new Pace((float) $runTresholdRaw, PaceUnit::PER_KILOMETER);
                 }
             }
 

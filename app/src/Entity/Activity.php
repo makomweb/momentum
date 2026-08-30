@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Momentum\PaceUnit;
-use App\Momentum\SpeedUnit;
+use App\Momentum\Distance;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity as StravaApiActivity;
 use Doctrine\ORM\Mapping as ORM;
@@ -140,16 +139,14 @@ final class Activity
         return $this->startDate->setTimezone(new \DateTimeZone($this->timezone));
     }
 
+    public function getDistance(): Distance
+    {
+        return new Distance($this->data['distance']);
+    }
+
     public function getAverageVelocityAsStringable(): \Stringable
     {
-        $type = $this->data['type'];
-
-        return match ($type) {
-            'Run', 'Walk', 'Hike' => $this->getAverageVelocity()->asPace(),
-            'Swim' => $this->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
-            'Ride' => $this->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => throw new \Exception(sprintf('Unsupported type "%s"!', $type)),
-        };
+        return $this->getAverageVelocity()->asStringable($this->data['type']);
     }
 
     public function getMovingTimeSeconds(): int

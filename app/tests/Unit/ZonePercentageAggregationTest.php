@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit;
 
+use App\Momentum\Activity;
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\Distance;
 use App\Momentum\HeartRate;
 use App\Momentum\HeartRateZone;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
 use App\Momentum\PaceZone;
 use App\Momentum\Power;
+use App\Momentum\Statistics;
 use App\Momentum\Velocity;
-use App\Momentum\ZoneSessions;
-use App\Momentum\ZoneStatistics;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -49,7 +50,7 @@ final class ZonePercentageAggregationTest extends TestCase
         self::assertNotEmpty($hrData, 'No heart rate data found');
 
         // User's athlete configuration
-        $treshold = new Pace(4.45, PaceUnit::MINUTES_PER_KILOMETER); // 4:27 min/km
+        $treshold = new Pace(4.45, PaceUnit::PER_KILOMETER); // 4:27 min/km
         $maxHeartRate = new HeartRate(180);
 
         // Process zones
@@ -63,20 +64,20 @@ final class ZonePercentageAggregationTest extends TestCase
 
             $dataPoints[] = new ActivityDataPoint([
                 'timestamp' => $timestamp,
-                'distance' => null,
+                'distance' => Distance::ZERO(),
                 'heart_rate' => new HeartRate($hr),
-                'heart_rate_avg' => null,
+                'heart_rate_avg' => HeartRate::ZERO(),
                 'velocity' => $velocity,
-                'velocity_avg' => null,
-                'watts' => null,
-                'watts_avg' => null,
+                'velocity_avg' => Velocity::ZERO(),
+                'watts' => Power::ZERO(),
+                'watts_avg' => Power::ZERO(),
             ]);
         }
 
         $athlete = self::createAthlete($treshold, Power::Zero(), $maxHeartRate);
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) end($timeData)).'S'));
-        $zoneSessionsData = ZoneSessions::create($athlete, $endTime, $dataPoints);
+        $activity = Activity::create($athlete, $endTime, $dataPoints);
 
         // Total time span of zone sessions (from first to last data point)
         $totalZoneSeconds = (int) end($timeData);  // 4781 seconds
@@ -85,11 +86,11 @@ final class ZonePercentageAggregationTest extends TestCase
         $stravaMovingTime = 3196; // As reported by user
 
         // Calculate moving time (similar to Activity::getMovingTimeSeconds)
-        $paceSessions = $zoneSessionsData->getPaceZoneSessions();
-        $hrSessions = $zoneSessionsData->getHeartRateSessions();
+        $paceSessions = $activity->getPaceZoneSessions();
+        $hrSessions = $activity->getHeartRateSessions();
 
         // When using total zone seconds (correct for unit test):
-        $paceStatistics = ZoneStatistics::fromSessions($athlete, $paceSessions, PaceZone::cases());
+        $paceStatistics = Statistics::fromSessions($athlete, $paceSessions, PaceZone::cases());
         $paceStatsArrayCorrect = $paceStatistics->toArray($totalZoneSeconds);
         $paceTotalPercentageCorrect = array_sum(array_column($paceStatsArrayCorrect, 'duration_percentage'));
 
@@ -97,7 +98,7 @@ final class ZonePercentageAggregationTest extends TestCase
         $paceStatsArrayWithBug = $paceStatistics->toArray($stravaMovingTime);
         $paceTotalPercentageWithBug = array_sum(array_column($paceStatsArrayWithBug, 'duration_percentage'));
 
-        $hrStatistics = ZoneStatistics::fromSessions($athlete, $hrSessions, HeartRateZone::cases());
+        $hrStatistics = Statistics::fromSessions($athlete, $hrSessions, HeartRateZone::cases());
         $hrStatsArrayCorrect = $hrStatistics->toArray($totalZoneSeconds);
         $hrTotalPercentageCorrect = array_sum(array_column($hrStatsArrayCorrect, 'duration_percentage'));
 

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\Distance;
 use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
 use App\Momentum\Speed;
 use App\Momentum\SpeedUnit;
 use App\Strava\API\Activity;
-use App\Strava\API\Distance;
 
 final readonly class ActivityMetaData
 {
@@ -35,37 +35,29 @@ final readonly class ActivityMetaData
     /**
      * @return array{
      *  elapsed_time: \DateInterval,
-     *  distance: Distance|null,
-     *  average_velocity: Speed|Pace|null
+     *  distance: Distance,
+     *  average_velocity: Speed|Pace
      * }
      */
     public function getData(): array
     {
-        $distance = $this->activity->data['distance'] > 0
-            ? $this->activity->getDistance()
-            : null;
-
-        $type = $this->getActivityType();
-
-        $averageVelocity = match ($type) {
+        $averageVelocity = match ($this->getActivityType()) {
             'Run', 'Walk', 'Hike', => $this->activity->getAverageVelocity()->asPace(),
-            'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
+            'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::PER_100_METERS),
             'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => null,
+            default => Pace::ZERO(),
         };
 
         return [
             'elapsed_time' => $this->activity->getElapsedTime(),
-            'distance' => $distance,
+            'distance' => $this->activity->getDistance(),
             'average_velocity' => $averageVelocity,
         ];
     }
 
     public function getLabel(): string
     {
-        $type = $this->getActivityType();
-
-        return match ($type) {
+        return match ($this->getActivityType()) {
             'Run', 'Walk', 'Hike', 'Swim' => 'Pace',
             'Ride' => 'Speed',
             default => 'Metric',
@@ -136,8 +128,8 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
-            'Swim' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_100_METERS->value),
+            'Run', 'Walk', 'Hike' => sprintf('Pace (%s)', PaceUnit::PER_KILOMETER->value),
+            'Swim' => sprintf('Pace (%s)', PaceUnit::PER_100_METERS->value),
             default /* , Ride */ => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
         };
     }
