@@ -2,24 +2,16 @@
     <div class="flex flex-col gap-1 bg-white border border-gray-200 rounded p-2">
         <div class="text-xs font-semibold text-gray-600">Distance</div>
         <div class="text-sm font-bold">
-            {% if meta_data.getData()['distance'].isZero() %}
-                N/A
-            {% else %}
-                {{ meta_data.getData()['distance'] }}
-            {% endif %}
+            {{ meta_data.getDistance() }}
         </div>
     </div>
+    {% if meta_data.hasVelocity() %}
     <div class="flex flex-col gap-1 bg-white border border-gray-200 rounded p-2">
         <div class="text-xs font-semibold text-gray-600">Avg. {{ meta_data.getLabel() }}</div>
         <div class="text-sm font-bold">
-            {% if meta_data.getData()['average_velocity'].isZero() %}
-                N/A
-            {% else %}
-                {{ meta_data.getData()['average_velocity'] }}
-            {% endif %}
+            {{ meta_data.getAverageVelocity() }}
         </div>
     </div>
-    {% if activity_data.hasVelocityData() %}
     <div class="flex flex-col gap-1 bg-white border border-gray-200 rounded p-2">
         <div class="text-xs font-semibold text-gray-600">Max. {{ meta_data.getLabel() }}</div>
         <div class="text-sm font-bold">{{ activity_data.getVelocityMax() | format_velocity(meta_data.getActivityType()) }}</div>

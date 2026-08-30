@@ -125,9 +125,19 @@ final readonly class Activity implements \Stringable
         return $this->getStartDateLocalTime()->add($this->getElapsedTime());
     }
 
+    public function hasDistance(): bool
+    {
+        return !$this->getDistance()->isZero();
+    }
+
     public function getDistance(): Distance
     {
         return new Distance($this->data['distance']);
+    }
+
+    public function hasVelocity(): bool
+    {
+        return !$this->getAverageVelocity()->isZero();
     }
 
     public function getMaxVelocity(): Velocity
