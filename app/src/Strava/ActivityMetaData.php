@@ -101,6 +101,7 @@ final readonly class ActivityMetaData
         };
     }
 
+    // TODO Make it dynamic depending on velocity min!
     public function getChartYAxisMinValue(): int
     {
         $type = $this->getActivityType();
@@ -113,6 +114,7 @@ final readonly class ActivityMetaData
         };
     }
 
+    // TODO Make it dynamic depending on velocity max!
     public function getChartYAxisMaxValue(): int
     {
         $type = $this->getActivityType();
