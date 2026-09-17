@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
+use App\Momentum\Assert\Assert;
+
 final readonly class TrainingMetrics
 {
     private function __construct(
@@ -45,23 +47,44 @@ final readonly class TrainingMetrics
         return $this->easySeconds + $this->mediumSeconds + $this->hardSeconds;
     }
 
+    public function isTooHard(
+        float $maxHard = 30.0, /* percent */
+    ): bool {
+        Assert::that(0.0 < $maxHard && $maxHard < 100.0);
+
+        return $this->getHardPercentage() >= $maxHard;
+    }
+
     /**
      * Returns true if training aligns with balanced training principles to minimize gray zone (medium) training.
      * At least easy threshold, not more than hard treshold!
      */
     public function isBalanced(
-        float $easyThreshold = 45.0 /* percent */,
-        float $hardThreshold = 45.0, /* percent */
+        float $maxEasy = 45.0 /* percent */,
+        float $maxHard = 45.0, /* percent */
     ): bool {
-        $maxMedium = 100.0 - ($easyThreshold + $hardThreshold);
+        Assert::that(0.0 < $maxEasy + $maxHard && $maxEasy + $maxHard < 100.0);
 
-        $easyPercentage = $this->getEasyPercentage();
-        $mediumPercentage = $this->getMediumPercentage();
-        $hardPercentage = $this->getHardPercentage();
+        $maxMedium = 100.0 - ($maxEasy + $maxHard);
+
+        /*
+        dump(json_encode([
+            'max_easy' => $maxEasy,
+            'max_medium' => $maxMedium,
+            'max_hard' => $maxHard,
+            'easy' => $this->getEasyPercentage(),
+            'medium' => $this->getMediumPercentage(),
+            'hard' => $this->getHardPercentage(),
+        ], JSON_PRETTY_PRINT));
 
         return $easyPercentage >= $easyThreshold
             && $mediumPercentage <= $maxMedium
             && $hardPercentage <= $hardThreshold;
+        */
+
+        return $this->getEasyPercentage() >= $maxEasy
+            && $this->getMediumPercentage() <= $maxMedium
+            && $this->getHardPercentage() <= $maxHard;
     }
 
     private function with(Session $session): self
