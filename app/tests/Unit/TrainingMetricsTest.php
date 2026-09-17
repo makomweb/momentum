@@ -114,14 +114,15 @@ class TrainingMetricsTest extends TestCase
         self::assertSame(0.0, $metrics->getEasyPercentage());
         self::assertSame(0.0, $metrics->getMediumPercentage());
         self::assertSame(0.0, $metrics->getHardPercentage());
+        self::assertFalse($metrics->isBalanced());
     }
 
     public function test_is_balanced_with_even_distribution(): void
     {
         $sessions = [
-            $this->session(PaceZone::ZONE_2, 1500), // 50% easy
-            $this->session(PaceZone::ZONE_3, 300),  // 10% medium
-            $this->session(PaceZone::ZONE_4, 1200), // 40% hard
+            $this->session(PaceZone::ZONE_1, 450), // 45% easy
+            $this->session(PaceZone::ZONE_3, 100), // 10% medium
+            $this->session(PaceZone::ZONE_5, 450), // 45% hard
         ];
 
         $metrics = TrainingMetrics::fromSessions($sessions);

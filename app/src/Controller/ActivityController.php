@@ -209,6 +209,7 @@ final class ActivityController extends AbstractController
     /**
      * @return array{
      *     activity_id: int,
+     *     profile_picture: string,
      *     meta_data: ActivityMetaData,
      *     metrics: TrainingMetrics,
      *     pace_zone_sessions: array<Session>,
@@ -221,10 +222,6 @@ final class ActivityController extends AbstractController
     {
         $activityData = new ActivityData($athlete, $activity, $stream);
 
-        return [
-            'activity_id' => $activity->getId(),
-            'profile_picture' => $athlete->getProfilePicture(),
-            ...$activityData->toArray(),
-        ];
+        return $activityData->toArray();
     }
 }

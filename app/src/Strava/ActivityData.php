@@ -241,6 +241,8 @@ final class ActivityData
 
     /**
      * @return array{
+     *     activity_id: int,
+     *     profile_picture: string,
      *     meta_data: ActivityMetaData,
      *     metrics: TrainingMetrics,
      *     pace_zone_sessions: array<Session>,
@@ -251,8 +253,6 @@ final class ActivityData
      */
     public function toArray(): array
     {
-        $metaData = $this->getMetaData();
-
         $sessions = $this->createZoneSessions();
         $heartRateZoneSessions = $sessions->getHeartRateSessions();
         $paceZoneSessions = $sessions->getPaceZoneSessions();
@@ -270,8 +270,10 @@ final class ActivityData
         $hrStatsArray = $hrStats->toArray($totalHrSeconds);
 
         return [
+            'activity_id' => $this->activity->getId(),
+            'profile_picture' => $this->athlete->getProfilePicture(),
+            'meta_data' => $this->getMetaData(),
             'activity_data' => $this,
-            'meta_data' => $metaData,
             'metrics' => $metrics,
             'pace_zone_sessions' => $paceZoneSessions,
             'pace_stats' => $paceStatsArray,
