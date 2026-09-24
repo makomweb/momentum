@@ -16,24 +16,19 @@ final class FormatLocalDateTime extends AbstractExtension
         ];
     }
 
-    public static function format(\DateTimeInterface $dateTime, string $format = 'D, d M Y · H:i'): string
-    {
-        return $dateTime->format($format);
-    }
-
-    public static function formatDay(\DateTimeImmutable $dateTime): string
+    public static function format(\DateTimeInterface $dateTime, string $template = 'D, d M Y · H:i'): string
     {
         $today = new \DateTimeImmutable();
         $yesterday = $today->modify('-1 day');
 
         if ($dateTime->format('Y-m-d') === $today->format('Y-m-d')) {
-            return 'Today';
+            return sprintf('Today · %s', $dateTime->format('H:i'));
         }
 
         if ($dateTime->format('Y-m-d') === $yesterday->format('Y-m-d')) {
-            return 'Yesterday';
+            return sprintf('Yesterday · %s', $dateTime->format('H:i'));
         }
 
-        return $dateTime->format('D, d M Y · H:i');
+        return $dateTime->format($template);
     }
 }
