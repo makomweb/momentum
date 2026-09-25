@@ -66,7 +66,7 @@ final readonly class Token
      *  }
      * } $data
      */
-    public static function fromData(array $data): self
+    public static function from(array $data): self
     {
         return new self(
             TokenType::from($data['token_type']),
@@ -74,7 +74,7 @@ final readonly class Token
             $data['expires_in'],
             $data['access_token'],
             $data['refresh_token'],
-            Athlete::fromData($data['athlete'])
+            Athlete::from($data['athlete'])
         );
     }
 
@@ -89,7 +89,7 @@ final readonly class Token
      */
     public function withData(array $data): self
     {
-        return self::fromData([
+        return self::from([
             ...$this->toArray(),
             ...$data,
         ]);
