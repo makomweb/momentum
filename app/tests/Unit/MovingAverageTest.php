@@ -2,8 +2,8 @@
 
 namespace App\Tests\Unit;
 
+use App\Momentum\ActivityStream;
 use App\Strava\ActivityStreamFactory;
-use App\Strava\API\ActivityStream;
 use App\Strava\Serializer\ActivityStreamDenormalizer;
 use App\Strava\Serializer\SeriesDenormalizer;
 use PHPUnit\Framework\Attributes\Test;

@@ -6,6 +6,7 @@ namespace App\Strava;
 
 use App\Momentum\Activity as MomentumActivity;
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\ActivityStream;
 use App\Momentum\Assert\Assert;
 use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRateZone;
@@ -18,7 +19,6 @@ use App\Momentum\Statistics;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity;
-use App\Strava\API\ActivityStream;
 
 final class ActivityData
 {

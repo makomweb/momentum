@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava\Serializer;
 
-use App\Strava\API\ActivityStream;
-use App\Strava\API\Series;
+use App\Momentum\ActivityStream;
+use App\Momentum\Series;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 final readonly class ActivityStreamNormalizer implements NormalizerInterface

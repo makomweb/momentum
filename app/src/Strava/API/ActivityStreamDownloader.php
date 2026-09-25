@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava\API;
 
+use App\Momentum\ActivityStream;
 use App\Momentum\Assert\Assert;
 use App\Strava\ActivityStreamFactory;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
