@@ -12,6 +12,8 @@ parameters:
     strava_client_id: '%env(string:STRAVA_CLIENT_ID)%'
     strava_client_secret: '%env(string:STRAVA_CLIENT_SECRET)%'
     strava_redirect_uri: '%env(string:STRAVA_REDIRECT_URI)%'
+    ollama_endpoint: '%env(string:OLLAMA_ENDPOINT)%'
+    ollama_model: '%env(string:OLLAMA_MODEL)%'
     activity_stream_cache_dir: '%kernel.project_dir%/var'
     remember_me_lifetime: 2592000  # 30 days in seconds
 
@@ -62,6 +64,12 @@ services:
     App\Momentum\ActivityShareToken:
         arguments:
             $appSecret: '%app.secret%'
+
+    # Inject Ollama configuration into OllamaClient
+    App\LLM\OllamaClient:
+        arguments:
+            $endpoint: '%ollama_endpoint%'
+            $model: '%ollama_model%'
 
     # Make Client service public for testing
     App\Strava\API\Client:
