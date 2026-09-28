@@ -56,7 +56,7 @@ class OllamaClient
 
         $data = $response->toArray();
 
-        return $data['response'] ?? '';
+        return isset($data['response']) && is_string($data['response']) ? $data['response'] : '';
     }
 
     /**
@@ -93,7 +93,7 @@ class OllamaClient
             }
 
             $data = json_decode($chunk->getContent(), true);
-            if (isset($data['response'])) {
+            if (is_array($data) && isset($data['response']) && is_string($data['response'])) {
                 $onChunk($data['response']);
             }
         }
@@ -102,7 +102,7 @@ class OllamaClient
     /**
      * Get list of available models.
      *
-     * @return array List of available model names
+     * @return array<int, string> List of available model names
      */
     public function getAvailableModels(): array
     {
@@ -116,8 +116,13 @@ class OllamaClient
             $data = $response->toArray();
             $models = [];
 
-            foreach ($data['models'] ?? [] as $model) {
-                $models[] = $model['name'];
+            $modelsList = $data['models'] ?? [];
+            if (is_array($modelsList)) {
+                foreach ($modelsList as $model) {
+                    if (is_array($model) && isset($model['name']) && is_string($model['name'])) {
+                        $models[] = $model['name'];
+                    }
+                }
             }
 
             return $models;

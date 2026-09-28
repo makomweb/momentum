@@ -82,12 +82,15 @@ class OllamaAskCommand extends Command
 
         $io->success('✓ Ollama is running');
 
-        if ($model = $input->getOption('model')) {
+        $model = $input->getOption('model');
+        if (is_string($model)) {
             $this->ollamaClient->setModel($model);
         }
 
-        $question = $input->getArgument('question');
-        $temperature = (float) $input->getOption('temperature');
+        $questionArg = $input->getArgument('question');
+        $question = is_string($questionArg) ? $questionArg : '';
+        $tempArg = $input->getOption('temperature');
+        $temperature = is_string($tempArg) ? (float) $tempArg : 0.7;
         $stream = $input->getOption('stream');
 
         $io->section('Model: '.$this->ollamaClient->getModel());
