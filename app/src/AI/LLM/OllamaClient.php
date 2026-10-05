@@ -1,7 +1,8 @@
 <?php
 
-namespace App\LLM;
+namespace App\AI\LLM;
 
+use App\AI\OllamaConfig;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class OllamaClient
@@ -10,9 +11,13 @@ class OllamaClient
 
     public function __construct(
         private HttpClientInterface $httpClient,
-        private string $endpoint,
-        private string $model,
+        private OllamaConfig $config,
     ) {
+    }
+
+    public function getMetaData(): string
+    {
+        return "Metadata: {$this->config}";
     }
 
     /**
@@ -32,7 +37,7 @@ class OllamaClient
         ?float $topP = null,
     ): string {
         $payload = [
-            'model' => $this->model,
+            'model' => $this->config->model,
             'prompt' => $prompt,
             'stream' => false,
             'temperature' => $temperature,
@@ -48,7 +53,7 @@ class OllamaClient
 
         $response = $this->httpClient->request(
             'POST',
-            $this->endpoint.'/api/generate', [
+            $this->config->getApiEndpoint().'/generate', [
                 'json' => $payload,
                 'timeout' => self::TIMEOUT,
             ]
@@ -72,7 +77,7 @@ class OllamaClient
         float $temperature = 0.7,
     ): void {
         $payload = [
-            'model' => $this->model,
+            'model' => $this->config->model,
             'prompt' => $prompt,
             'stream' => true,
             'temperature' => $temperature,
@@ -80,7 +85,7 @@ class OllamaClient
 
         $response = $this->httpClient->request(
             'POST',
-            $this->endpoint.'/api/generate',
+            $this->config->getApiEndpoint().'/generate',
             [
                 'json' => $payload,
                 'timeout' => self::TIMEOUT,
@@ -109,7 +114,7 @@ class OllamaClient
         try {
             $response = $this->httpClient->request(
                 'GET',
-                $this->endpoint.'/api/tags',
+                $this->config->getApiEndpoint().'/tags',
                 ['timeout' => 10]
             );
 
@@ -130,13 +135,13 @@ class OllamaClient
             return [];
         }
     }
-    
+
     public function isAvailable(): bool
     {
         try {
             $this->httpClient->request(
                 'HEAD',
-                $this->endpoint,
+                $this->config->getBaseEndpoint(),
                 ['timeout' => 5]
             );
 
@@ -145,14 +150,14 @@ class OllamaClient
             return false;
         }
     }
-    
+
     public function setModel(string $model): void
     {
-        $this->model = $model;
+        throw new \Exception('❌ Not supported!');
     }
 
     public function getModel(): string
     {
-        return $this->model;
+        return $this->config->model;
     }
 }

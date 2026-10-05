@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\LLM\OllamaClient;
+use App\AI\LLM\OllamaClient;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -63,6 +63,8 @@ class OllamaCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $io->writeln($this->ollamaClient->getMetaData());
+
         if ($input->getOption('list-models')) {
             return $this->listModels($io);
         }
@@ -74,7 +76,7 @@ class OllamaCommand extends Command
         }
 
         if (!$this->ollamaClient->isAvailable()) {
-            $io->error('❌ Ollama is not available at http://localhost:11434');
+            $io->error('❌ Ollama is not available');
             $io->note('Make sure Ollama is running: ollama serve');
 
             return Command::FAILURE;
