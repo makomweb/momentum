@@ -12,10 +12,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'ollama:ask',
+    name: 'app:ollama',
     description: 'Ask a question to Ollama LLM',
 )]
-class OllamaAskCommand extends Command
+class OllamaCommand extends Command
 {
     public function __construct(
         private OllamaClient $ollamaClient,
