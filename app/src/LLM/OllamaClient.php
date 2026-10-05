@@ -130,10 +130,7 @@ class OllamaClient
             return [];
         }
     }
-
-    /**
-     * Check if Ollama is available and running.
-     */
+    
     public function isAvailable(): bool
     {
         try {
@@ -148,20 +145,12 @@ class OllamaClient
             return false;
         }
     }
-
-    /**
-     * Set the model to use.
-     */
-    public function setModel(string $model): self
+    
+    public function setModel(string $model): void
     {
         $this->model = $model;
-
-        return $this;
     }
 
-    /**
-     * Get the current model.
-     */
     public function getModel(): string
     {
         return $this->model;
