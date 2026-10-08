@@ -44,7 +44,7 @@ final readonly class ActivityMetaData
     public function getAverageVelocity(): \Stringable
     {
         return match ($this->getActivityType()) {
-            'Run', 'Walk', 'Hike', => $this->activity->getAverageVelocity()->asPace(),
+            'Run', 'Walk', 'Hike', 'RockClimbing' => $this->activity->getAverageVelocity()->asPace(),
             'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
             'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => Pace::ZERO(),
@@ -58,9 +58,13 @@ final readonly class ActivityMetaData
 
     public function getLabel(): string
     {
-        return match ($this->getActivityType()) {
-            'Run', 'Walk', 'Hike', 'Swim' => 'Pace',
-            'Ride' => 'Speed',
+        $type = $this->getActivityType();
+
+        dump(['type' => $type]);
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike', 'RockClimbing' => 'Pace',
+            'Ride', 'Swim' => 'Speed',
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
         };
     }
@@ -70,24 +74,9 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike' => 'Pace Over Time',
-            'Swim' => 'Speed Over Time',
-            'Ride' => 'Speed Over Time',
+            'Run', 'Walk', 'Hike', 'RockClimbing' => 'Pace Over Time',
+            'Swim', 'Ride' => 'Speed Over Time',
             default => 'Activity Data',
-        };
-    }
-
-    public function getEmoji(): string
-    {
-        $type = $this->getActivityType();
-
-        return match ($type) {
-            'Run' => '🏃‍♂️',
-            'Walk' => '🚶‍♂️',
-            'Hike' => '🥾',
-            'Swim' => '🏊‍♀️',
-            'Ride' => '🚴‍♂️',
-            default => '🥇',
         };
     }
 
@@ -96,7 +85,7 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => true,
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => true,
             default /* , Ride */ => false,
         };
     }
@@ -114,22 +103,15 @@ final readonly class ActivityMetaData
         };
     }
 
-    // TODO Make it dynamic depending on velocity max!
     public function getChartYAxisMaxValue(): int
     {
         $type = $this->getActivityType();
-
-        // return match ($type) {
-        //     'Run', 'Swim', 'Walk' => 15,
-        //     'Hike' => 20,
-        //     default => 0,
-        // };
 
         $velocity = $this->activity->getMaxVelocity();
 
         return match ($type) {
             'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->asInt(),
-            'Run', 'Walk', 'Hike' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_KILOMETER)->asInt(),
+            'Run', 'Walk', 'Hike', 'RockClimbing' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_KILOMETER)->asInt(),
             'Bike' => $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR)->asInt(),
             default => 0,
         };
@@ -140,7 +122,7 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
+            'Run', 'Walk', 'Hike', 'RockClimbing' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
             'Swim' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_100_METERS->value),
             default /* , Ride */ => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
         };
@@ -156,7 +138,7 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => '⏱️',
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => '⏱️',
             'Ride' => '🚴‍♂️',
             default => '📊',
         };
@@ -167,7 +149,7 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => true,
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => true,
             default /* Ride */ => false,
         };
     }

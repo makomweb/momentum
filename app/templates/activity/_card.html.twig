@@ -6,20 +6,7 @@
                 <div class="text-gray-600 text-xs">{{ activity.getStartDateLocalTime()|format_local_date_time }}</div>
             </div>
             <span class="text-2xl flex-shrink-0">
-                {% set type_lower = activity.data.type | lower %}
-                {% if type_lower == 'run' %}
-                    🏃
-                {% elseif type_lower == 'ride' %}
-                    🚴
-                {% elseif type_lower == 'swim' %}
-                    🏊
-                {% elseif type_lower == 'walk' %}
-                    🚶
-                {% elseif type_lower == 'hike' %}
-                    🥾
-                {% else %}
-                    🏅
-                {% endif %}
+                {{ activity | activity_emoji }}
             </span>
         </div>
 
