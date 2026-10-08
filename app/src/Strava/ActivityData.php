@@ -288,7 +288,7 @@ final class ActivityData
 
         return match ($type) {
             'Run', 'Walk', 'Hike' => $velocity->asPace()->value,
-            'Swim' => $velocity->asPace()->as(PaceUnit::PER_100_METERS)->value,
+            'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->value,
             'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR)->value,
             default => 0.0,
         };

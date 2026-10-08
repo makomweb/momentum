@@ -15,7 +15,7 @@ final readonly class Pace implements \Stringable
     public static function fromSecondsPerKilometer(int $secondsPerKilometer): self
     {
         return $secondsPerKilometer > 0
-            ? new self($secondsPerKilometer / 60, PaceUnit::PER_KILOMETER)
+            ? new self($secondsPerKilometer / 60, PaceUnit::MINUTES_PER_KILOMETER)
             : Pace::ZERO();
     }
 
@@ -23,12 +23,12 @@ final readonly class Pace implements \Stringable
     {
         return $metersPerSecond < 0.1
             ? self::ZERO()
-            : new self(16.667 / $metersPerSecond, PaceUnit::PER_KILOMETER);
+            : new self(16.667 / $metersPerSecond, PaceUnit::MINUTES_PER_KILOMETER);
     }
 
     public static function ZERO(): self
     {
-        return new self(0.0, PaceUnit::PER_KILOMETER);
+        return new self(0.0, PaceUnit::MINUTES_PER_KILOMETER);
     }
 
     public function getZone(Pace $treshold): PaceZone
@@ -47,9 +47,14 @@ final readonly class Pace implements \Stringable
     {
         return match (true) {
             ($this->unit == $unit) => $this,
-            PaceUnit::PER_100_METERS == $unit => new self($this->value / 10, $unit),
-            PaceUnit::PER_KILOMETER == $unit => new self($this->value * 10, $unit),
+            PaceUnit::MINUTES_PER_100_METERS == $unit => new self($this->value / 10, $unit),
+            PaceUnit::MINUTES_PER_KILOMETER == $unit => new self($this->value * 10, $unit),
         };
+    }
+
+    public function asInt(): int
+    {
+        return (int) $this->value;
     }
 
     public function multiply(float $factor): self

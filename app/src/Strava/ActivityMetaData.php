@@ -45,7 +45,7 @@ final readonly class ActivityMetaData
     {
         return match ($this->getActivityType()) {
             'Run', 'Walk', 'Hike', => $this->activity->getAverageVelocity()->asPace(),
-            'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::PER_100_METERS),
+            'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
             'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => Pace::ZERO(),
         };
@@ -119,9 +119,18 @@ final readonly class ActivityMetaData
     {
         $type = $this->getActivityType();
 
+        // return match ($type) {
+        //     'Run', 'Swim', 'Walk' => 15,
+        //     'Hike' => 20,
+        //     default => 0,
+        // };
+
+        $velocity = $this->activity->getMaxVelocity();
+
         return match ($type) {
-            'Run', 'Swim', 'Walk' => 15,
-            'Hike' => 20,
+            'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->asInt(),
+            'Run', 'Walk', 'Hike' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_KILOMETER)->asInt(),
+            'Bike' => $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR)->asInt(),
             default => 0,
         };
     }
@@ -131,8 +140,8 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike' => sprintf('Pace (%s)', PaceUnit::PER_KILOMETER->value),
-            'Swim' => sprintf('Pace (%s)', PaceUnit::PER_100_METERS->value),
+            'Run', 'Walk', 'Hike' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
+            'Swim' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_100_METERS->value),
             default /* , Ride */ => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
         };
     }

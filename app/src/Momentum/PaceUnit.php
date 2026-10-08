@@ -6,6 +6,6 @@ namespace App\Momentum;
 
 enum PaceUnit: string
 {
-    case PER_KILOMETER = '/km';
-    case PER_100_METERS = '/100m';
+    case MINUTES_PER_KILOMETER = '/km';
+    case MINUTES_PER_100_METERS = '/100m';
 }

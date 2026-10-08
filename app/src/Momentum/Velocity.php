@@ -49,7 +49,7 @@ final readonly class Velocity
     {
         return match ($activityType) {
             'Run', 'Walk', 'Hike' => $this->asPace(),
-            'Swim' => $this->asPace()->as(PaceUnit::PER_100_METERS),
+            'Swim' => $this->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
             'Ride' => $this->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
             default => Speed::ZERO(),
         };

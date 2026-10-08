@@ -80,7 +80,7 @@ class ActivityDataTest extends TestCase
         );
 
         return new ActivityData(
-            self::createAthlete(new Pace(5.00, PaceUnit::PER_KILOMETER), Power::ZERO(), new HeartRate(180)),
+            self::createAthlete(new Pace(5.00, PaceUnit::MINUTES_PER_KILOMETER), Power::ZERO(), new HeartRate(180)),
             Activity::fromRawData($data),
             $factory->fromJsonFile($filePath)
         );

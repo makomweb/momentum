@@ -38,6 +38,11 @@ final readonly class Speed
         };
     }
 
+    public function asInt(): int
+    {
+        return (int) $this->value;
+    }
+
     public function __toString(): string
     {
         return sprintf('%.2f %s', $this->value, $this->unit->value);
