@@ -62,7 +62,7 @@ hint:
 	@echo ""
 	@echo "✨ Application URLs:"
 	@echo "  🌐 App       → http://localhost:8080"
-	@echo "  📊 Dashboard → http://localhost:8000 (links to all services)"
+	@echo "  📊 Dashboard → http://localhost:8001 (links to all services)"
 	@echo "  🗄️  Database  → http://localhost:8085 (Adminer, user: root, pwd: secret)"
 	@echo ""
 	@echo "💡 Tip: Use 'make logs' to view logs"
@@ -143,16 +143,16 @@ restart:
 
 open:
 	@if command -v xdg-open > /dev/null 2>&1; then \
-		xdg-open http://localhost:8000 2>/dev/null & \
+		xdg-open http://localhost:8001 2>/dev/null & \
 	elif command -v open > /dev/null 2>&1; then \
-		open http://localhost:8000; \
+		open http://localhost:8001; \
 	elif command -v wslview > /dev/null 2>&1; then \
-		wslview http://localhost:8000; \
+		wslview http://localhost:8001; \
 	elif command -v cmd.exe > /dev/null 2>&1; then \
-		cmd.exe /c start http://localhost:8000; \
+		cmd.exe /c start http://localhost:8001; \
 	else \
 		echo "❌ Could not detect browser launcher."; \
-		echo "📍 Please open http://localhost:8000 manually"; \
+		echo "📍 Please open http://localhost:8001 manually"; \
 	fi
 
 docker-push:

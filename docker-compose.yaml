@@ -91,7 +91,7 @@ services:
     volumes:
       - ./dashboard/assets:/www/assets
     ports:
-      - "8000:8080"
+      - "8001:8080"
     restart: unless-stopped
     networks:
       - momentum
