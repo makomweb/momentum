@@ -43,6 +43,11 @@ final readonly class Speed
         return (int) $this->value;
     }
 
+    public function multiply(float $factor): self
+    {
+        return new self($this->value * $factor, $this->unit);
+    }
+
     public function __toString(): string
     {
         return sprintf('%.2f %s', $this->value, $this->unit->value);

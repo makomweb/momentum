@@ -145,6 +145,11 @@ final readonly class Activity implements \Stringable
         return new Velocity($this->data['max_speed']);
     }
 
+    public function getMaxVelocityAsStringable(): \Stringable
+    {
+        return $this->getMaxVelocity()->asStringable($this->data['type']);
+    }
+
     public function getAverageVelocity(): Velocity
     {
         return new Velocity($this->data['average_speed']);

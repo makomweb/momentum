@@ -59,6 +59,7 @@ final readonly class Pace implements \Stringable
 
     public function multiply(float $factor): self
     {
+        // TODO: Double check if multiply is correct! Or we should "/" for Pace!
         return new self($this->value * $factor, $this->unit);
     }
 

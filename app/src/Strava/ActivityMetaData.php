@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Strava;
 
 use App\Momentum\Distance;
-use App\Momentum\Pace;
-use App\Momentum\PaceUnit;
-use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use App\Strava\API\Activity;
 
 final readonly class ActivityMetaData
@@ -43,12 +41,12 @@ final readonly class ActivityMetaData
 
     public function getAverageVelocity(): \Stringable
     {
-        return match ($this->getActivityType()) {
-            'Run', 'Walk', 'Hike', 'RockClimbing' => $this->activity->getAverageVelocity()->asPace(),
-            'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::MINUTES_PER_100_METERS),
-            'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => Pace::ZERO(),
-        };
+        return $this->activity->getAverageVelocityAsStringable();
+    }
+
+    public function getMaxVelocity(): Velocity
+    {
+        return $this->activity->getMaxVelocity();
     }
 
     public function hasVelocity(): bool
@@ -59,8 +57,6 @@ final readonly class ActivityMetaData
     public function getLabel(): string
     {
         $type = $this->getActivityType();
-
-        dump(['type' => $type]);
 
         return match ($type) {
             'Run', 'Walk', 'Hike', 'RockClimbing' => 'Pace',
@@ -76,55 +72,17 @@ final readonly class ActivityMetaData
         return match ($type) {
             'Run', 'Walk', 'Hike', 'RockClimbing' => 'Pace Over Time',
             'Swim', 'Ride' => 'Speed Over Time',
-            default => 'Activity Data',
+            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
         };
     }
 
-    public function useInverseScale(): bool
+    public function hasSpeed(): bool
     {
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => true,
-            default /* , Ride */ => false,
-        };
-    }
-
-    // TODO Make it dynamic depending on velocity min!
-    public function getChartYAxisMinValue(): int
-    {
-        $type = $this->getActivityType();
-
-        return match ($type) {
-            'Run' => 2,
-            'Swim' => 1,
-            'Walk', 'Hike' => 5,
-            default => 0,
-        };
-    }
-
-    public function getChartYAxisMaxValue(): int
-    {
-        $type = $this->getActivityType();
-
-        $velocity = $this->activity->getMaxVelocity();
-
-        return match ($type) {
-            'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->asInt(),
-            'Run', 'Walk', 'Hike', 'RockClimbing' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_KILOMETER)->asInt(),
-            'Bike' => $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR)->asInt(),
-            default => 0,
-        };
-    }
-
-    public function getChartYAxisLabel(): string
-    {
-        $type = $this->getActivityType();
-
-        return match ($type) {
-            'Run', 'Walk', 'Hike', 'RockClimbing' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
-            'Swim' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_100_METERS->value),
-            default /* , Ride */ => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => false,
+            default /* , Ride */ => true,
         };
     }
 
@@ -144,6 +102,7 @@ final readonly class ActivityMetaData
         };
     }
 
+    // TODO: Unify with hasSpeed()!
     public function usesPaceZones(): bool
     {
         $type = $this->getActivityType();

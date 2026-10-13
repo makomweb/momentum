@@ -36,10 +36,10 @@ class ZoneDescriptionTest extends TestCase
 
         $description = new ZoneDescription($athlete);
 
-        self::assertEquals('Recovery (≤ 5:09 /km)', $description->getDescription(PaceZone::ZONE_1));
-        self::assertEquals('Basis (≤ 4:33 /km)', $description->getDescription(PaceZone::ZONE_2));
-        self::assertEquals('Tempo (≤ 4:14 /km)', $description->getDescription(PaceZone::ZONE_3));
-        self::assertEquals('Threshold (≤ 3:57 /km)', $description->getDescription(PaceZone::ZONE_4));
-        self::assertEquals('vO2max (> 3:57 /km)', $description->getDescription(PaceZone::ZONE_5));
+        self::assertEquals('Recovery (≤ 5:09 min/km)', $description->getDescription(PaceZone::ZONE_1));
+        self::assertEquals('Basis (≤ 4:33 min/km)', $description->getDescription(PaceZone::ZONE_2));
+        self::assertEquals('Tempo (≤ 4:14 min/km)', $description->getDescription(PaceZone::ZONE_3));
+        self::assertEquals('Threshold (≤ 3:57 min/km)', $description->getDescription(PaceZone::ZONE_4));
+        self::assertEquals('vO2max (> 3:57 min/km)', $description->getDescription(PaceZone::ZONE_5));
     }
 }

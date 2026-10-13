@@ -51,6 +51,6 @@ class VelocityTest extends TestCase
 
         $pace = $velocity->asPace();
 
-        self::assertEquals('4:10 /km', (string) $pace);
+        self::assertEquals('4:10 min/km', (string) $pace);
     }
 }
