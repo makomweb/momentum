@@ -1,19 +1,49 @@
-.PHONY: help build init symfony laravel up hint shell down composer-install maintain composer-update composer-require caddyfile logs open docker-push
+.PHONY: help build init symfony laravel up hint shell down composer-install maintain composer-update composer-require caddyfile logs open docker-push sa cs test arch qa cc clear cache-clear cache-pool-clear db create-database create-schema reset restart
 
 help:
-	@echo "Available targets:"
-	@echo "  boot                  Build images, install dependencies, start the stack, init database"
-	@echo "  up                    Start the stack"
-	@echo "  down                  Stop the stack"
-	@echo "  shell                 Open shell on app container"
-	@echo "  hint                  Print local app URLs"
-	@echo "  build                 Build Docker images"
-	@echo "  composer-install      Run composer install"
-	@echo "  maintain              Run composer update -W"
-	@echo "  composer-require      Add a package (use PKG=vendor/package)"
-	@echo "  caddyfile             Create ./app/Caddyfile"
-	@echo "  logs                  View app logs"
-	@echo "  open                  Open the app in a browser"
+	@echo ""
+	@echo "╔════════════════════════════════════════════════════════════════════════════╗"
+	@echo "║                     🚀 MOMENTUM - Make Targets 🚀                          ║"
+	@echo "╚════════════════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "📦 SETUP & MANAGEMENT"
+	@echo "  boot                  ⚙️  Build images, install deps, start stack, init DB"
+	@echo "  up                    ⬆️  Start the stack"
+	@echo "  down                  ⬇️  Stop the stack"
+	@echo "  restart               🔄 Restart app and worker containers"
+	@echo ""
+	@echo "🔧 DEVELOPMENT"
+	@echo "  shell                 🐚 Open bash on app container"
+	@echo "  build                 🏗️  Build Docker images"
+	@echo "  logs                  📋 View app logs (tail -f)"
+	@echo "  open                  🌐 Open the app in a browser"
+	@echo "  hint                  💡 Print local app URLs"
+	@echo ""
+	@echo "📚 COMPOSER"
+	@echo "  composer-install      📦 Run composer install"
+	@echo "  maintain              🔄 Run composer update -W"
+	@echo "  composer-require      ➕ Add a package (use PKG=vendor/package)"
+	@echo ""
+	@echo "🗄️  DATABASE"
+	@echo "  db                    🔧 Create database and schema"
+	@echo "  create-database       📊 Create database if not exists"
+	@echo "  create-schema         📐 Create tables from entity definitions"
+	@echo ""
+	@echo "⚡ CACHE"
+	@echo "  cc / clear            🗑️  Clear all caches (app + pool)"
+	@echo "  cache-clear           🧹 Clear Symfony app cache only"
+	@echo "  cache-pool-clear      🧹 Clear cache pools only"
+	@echo ""
+	@echo "✅ QUALITY ASSURANCE"
+	@echo "  qa                    🎯 Run full QA suite (SA + CS + Test + Arch)"
+	@echo "  sa                    🔍 Static code analysis (PHPStan level 8)"
+	@echo "  cs                    🎨 Fix code style (Symfony rules)"
+	@echo "  test                  ✓  Run PHPUnit tests"
+	@echo "  arch                  📐 Run architecture tests (Deptrac)"
+	@echo ""
+	@echo "🚢 DEPLOYMENT"
+	@echo "  docker-push           🐳 Build and push multi-arch image (amd64 + arm64)"
+	@echo ""
 
 
 boot: build composer-install up create-database create-schema
@@ -29,9 +59,14 @@ up:
 	@$(MAKE) hint
 
 hint:
-	@echo "App at http://localhost:8080"
-	@echo "Dashboard at http://localhost:8000 (links to all services)"
-	@echo "To view logs: make logs"
+	@echo ""
+	@echo "✨ Application URLs:"
+	@echo "  🌐 App       → http://localhost:8080"
+	@echo "  📊 Dashboard → http://localhost:8001 (links to all services)"
+	@echo "  🗄️  Database  → http://localhost:8085 (Adminer, user: root, pwd: secret)"
+	@echo ""
+	@echo "💡 Tip: Use 'make logs' to view logs"
+	@echo ""
 
 shell:
 	@echo "Open shell on app container..."
@@ -108,16 +143,16 @@ restart:
 
 open:
 	@if command -v xdg-open > /dev/null 2>&1; then \
-		xdg-open http://localhost:8000 2>/dev/null & \
+		xdg-open http://localhost:8001 2>/dev/null & \
 	elif command -v open > /dev/null 2>&1; then \
-		open http://localhost:8000; \
+		open http://localhost:8001; \
 	elif command -v wslview > /dev/null 2>&1; then \
-		wslview http://localhost:8000; \
+		wslview http://localhost:8001; \
 	elif command -v cmd.exe > /dev/null 2>&1; then \
-		cmd.exe /c start http://localhost:8000; \
+		cmd.exe /c start http://localhost:8001; \
 	else \
 		echo "❌ Could not detect browser launcher."; \
-		echo "📍 Please open http://localhost:8000 manually"; \
+		echo "📍 Please open http://localhost:8001 manually"; \
 	fi
 
 docker-push:

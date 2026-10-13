@@ -2,14 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Strava\API;
-
-use App\Momentum\ActivityDataPoint;
-use App\Momentum\Distance;
-use App\Momentum\HeartRate;
-use App\Momentum\MovingAverage;
-use App\Momentum\Power;
-use App\Momentum\Velocity;
+namespace App\Momentum;
 
 final readonly class ActivityStream
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
-use App\Strava\API\ActivityStream;
+use App\Momentum\ActivityStream;
 use Symfony\Component\Serializer\SerializerInterface;
 
 final readonly class ActivityStreamFactory

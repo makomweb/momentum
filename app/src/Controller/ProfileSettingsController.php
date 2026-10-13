@@ -56,7 +56,7 @@ final class ProfileSettingsController extends AbstractController
                 if (!is_numeric($runTresholdRaw) || (float) $runTresholdRaw <= 0) {
                     $errors[] = '$runTreshold must be a positive number.';
                 } else {
-                    $runTreshold = new Pace((float) $runTresholdRaw, PaceUnit::PER_KILOMETER);
+                    $runTreshold = new Pace((float) $runTresholdRaw, PaceUnit::MINUTES_PER_KILOMETER);
                 }
             }
 

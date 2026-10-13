@@ -30,14 +30,14 @@ final readonly class Athlete implements \Stringable
      *  profile: string
      * } $data
      */
-    public static function fromData(array $data): self
+    public static function from(array $data): self
     {
         return new self(
             $data['id'],
             $data['username'],
             $data['firstname'],
             $data['lastname'],
-            Gender::from($data['sex']),
+            Gender::tryFrom($data['sex']) ?? Gender::UNKNOWN,
             $data['premium'],
             $data['profile_medium'],
             $data['profile'],

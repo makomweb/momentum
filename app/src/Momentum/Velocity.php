@@ -15,12 +15,20 @@ final readonly class Velocity
         return new self(0.0);
     }
 
-    /** @param float[] $velocities */
-    public static function max(array $velocities): self
+    /** @param float[] $values */
+    public static function max(array $values): self
     {
-        return empty($velocities)
-            ? self::ZERO()
-            : new self(max($velocities));
+        assert(!empty($values));
+
+        return new self(max($values));
+    }
+
+    /** @param float[] $values */
+    public static function min(array $values): self
+    {
+        assert(!empty($values));
+
+        return new self(min($values));
     }
 
     public static function create(Pace $pace): self
@@ -35,23 +43,23 @@ final readonly class Velocity
         return 0.0 == $this->metersPerSecond;
     }
 
-    public function asSpeed(): Speed
+    public function asSpeed(SpeedUnit $unit = SpeedUnit::KILOMETERS_PER_HOUR): Speed
     {
-        return Speed::fromMetersPerSecond($this->metersPerSecond);
+        return Speed::fromMetersPerSecond($this->metersPerSecond)->as($unit);
     }
 
-    public function asPace(): Pace
+    public function asPace(PaceUnit $unit = PaceUnit::MINUTES_PER_KILOMETER): Pace
     {
-        return Pace::fromMetersPerSecond($this->metersPerSecond);
+        return Pace::fromMetersPerSecond($this->metersPerSecond)->as($unit);
     }
 
     public function asStringable(string $activityType): \Stringable
     {
         return match ($activityType) {
-            'Run', 'Walk', 'Hike' => $this->asPace(),
-            'Swim' => $this->asPace()->as(PaceUnit::PER_100_METERS),
-            'Ride' => $this->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => Speed::ZERO(),
+            'Run', 'Walk', 'Hike' => $this->asPace(PaceUnit::MINUTES_PER_KILOMETER),
+            'Swim', 'RockClimbing' => $this->asPace(PaceUnit::MINUTES_PER_100_METERS),
+            'Ride' => $this->asSpeed(SpeedUnit::KILOMETERS_PER_HOUR),
+            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $activityType)),
         };
     }
 }

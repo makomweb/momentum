@@ -29,7 +29,7 @@ class TokenTest extends TestCase
             ],
         ];
 
-        $token = Token::fromData($data);
+        $token = Token::from($data);
 
         self::assertEquals(TokenType::BEARER, $token->tokenType);
         self::assertNotEmpty($token->accessToken);

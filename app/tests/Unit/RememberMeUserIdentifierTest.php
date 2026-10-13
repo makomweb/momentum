@@ -12,7 +12,7 @@ final class RememberMeUserIdentifierTest extends TestCase
 {
     private function createAthlete(int $id, string $firstName = 'John', string $lastName = 'Doe'): Athlete
     {
-        return Athlete::fromData([
+        return Athlete::from([
             'id' => $id,
             'username' => strtolower($firstName.$lastName),
             'firstname' => $firstName,

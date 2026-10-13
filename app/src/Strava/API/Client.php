@@ -36,7 +36,8 @@ final readonly class Client
             ],
         ]);
 
-        /** @var array{
+        /**
+         * @var array{
          *  token_type: string,
          *  expires_at: int,
          *  expires_in: int,
@@ -47,7 +48,7 @@ final readonly class Client
          */
         $data = $response->toArray();
 
-        $token = Token::fromData($data);
+        $token = Token::from($data);
 
         $this->cache->saveToken($token);
 

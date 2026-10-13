@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Strava;
 
 use App\Momentum\Distance;
-use App\Momentum\Pace;
-use App\Momentum\PaceUnit;
-use App\Momentum\SpeedUnit;
+use App\Momentum\Velocity;
 use App\Strava\API\Activity;
 
 final readonly class ActivityMetaData
@@ -43,12 +41,12 @@ final readonly class ActivityMetaData
 
     public function getAverageVelocity(): \Stringable
     {
-        return match ($this->getActivityType()) {
-            'Run', 'Walk', 'Hike', => $this->activity->getAverageVelocity()->asPace(),
-            'Swim' => $this->activity->getAverageVelocity()->asPace()->as(PaceUnit::PER_100_METERS),
-            'Ride' => $this->activity->getAverageVelocity()->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => Pace::ZERO(),
-        };
+        return $this->activity->getAverageVelocityAsStringable();
+    }
+
+    public function getMaxVelocity(): Velocity
+    {
+        return $this->activity->getMaxVelocity();
     }
 
     public function hasVelocity(): bool
@@ -58,9 +56,11 @@ final readonly class ActivityMetaData
 
     public function getLabel(): string
     {
-        return match ($this->getActivityType()) {
-            'Run', 'Walk', 'Hike', 'Swim' => 'Pace',
-            'Ride' => 'Speed',
+        $type = $this->getActivityType();
+
+        return match ($type) {
+            'Run', 'Walk', 'Hike', 'RockClimbing' => 'Pace',
+            'Ride', 'Swim' => 'Speed',
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
         };
     }
@@ -70,70 +70,19 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike' => 'Pace Over Time',
-            'Swim' => 'Speed Over Time',
-            'Ride' => 'Speed Over Time',
-            default => 'Activity Data',
+            'Run', 'Walk', 'Hike', 'RockClimbing' => 'Pace Over Time',
+            'Swim', 'Ride' => 'Speed Over Time',
+            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
         };
     }
 
-    public function getEmoji(): string
+    public function hasSpeed(): bool
     {
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run' => '🏃‍♂️',
-            'Walk' => '🚶‍♂️',
-            'Hike' => '🥾',
-            'Swim' => '🏊‍♀️',
-            'Ride' => '🚴‍♂️',
-            default => '🥇',
-        };
-    }
-
-    public function useInverseScale(): bool
-    {
-        $type = $this->getActivityType();
-
-        return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => true,
-            default /* , Ride */ => false,
-        };
-    }
-
-    // TODO Make it dynamic depending on velocity min!
-    public function getChartYAxisMinValue(): int
-    {
-        $type = $this->getActivityType();
-
-        return match ($type) {
-            'Run' => 2,
-            'Swim' => 1,
-            'Walk', 'Hike' => 5,
-            default => 0,
-        };
-    }
-
-    // TODO Make it dynamic depending on velocity max!
-    public function getChartYAxisMaxValue(): int
-    {
-        $type = $this->getActivityType();
-
-        return match ($type) {
-            'Run', 'Swim', 'Walk' => 15,
-            'Hike' => 20,
-            default => 0,
-        };
-    }
-
-    public function getChartYAxisLabel(): string
-    {
-        $type = $this->getActivityType();
-
-        return match ($type) {
-            'Run', 'Walk', 'Hike' => sprintf('Pace (%s)', PaceUnit::PER_KILOMETER->value),
-            'Swim' => sprintf('Pace (%s)', PaceUnit::PER_100_METERS->value),
-            default /* , Ride */ => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => false,
+            default /* , Ride */ => true,
         };
     }
 
@@ -147,18 +96,19 @@ final readonly class ActivityMetaData
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => '⏱️',
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => '⏱️',
             'Ride' => '🚴‍♂️',
             default => '📊',
         };
     }
 
+    // TODO: Unify with hasSpeed()!
     public function usesPaceZones(): bool
     {
         $type = $this->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim' => true,
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => true,
             default /* Ride */ => false,
         };
     }

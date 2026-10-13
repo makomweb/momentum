@@ -292,17 +292,17 @@
             },
             scales: {
                 y: {
-                    {% if meta_data.useInverseScale() %}
-                    reverse: true,
-                    min: {{ meta_data.getChartYAxisMinValue() }},
-                    max: {{ meta_data.getChartYAxisMaxValue() }},
+                    {% if meta_data.hasSpeed() %}
+                        min: 0,
                     {% else %}
-                    min: 0,
+                        reverse: true,
+                        min: {{ activity_data | y_axis_min }},
+                        max: {{ activity_data | y_axis_max }},
                     {% endif %}
                     ticks: { font: { size: 12 } },
                     title: {
                         display: true,
-                        text: '{{ meta_data.getChartYAxisLabel() }}',
+                        text: '{{ activity_data | y_axis_label }}',
                         font: { size: 13, weight: 600 }
                     }
                 },

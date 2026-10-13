@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Strava;
 
+use App\Momentum\ActivityStream;
 use App\Momentum\Assert\Assert;
-use App\Strava\API\ActivityStream;
 use App\Strava\API\ActivityStreamDownloader;
 use League\Flysystem\Filesystem;
 use Symfony\Component\Serializer\SerializerInterface;

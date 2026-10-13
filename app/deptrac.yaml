@@ -14,6 +14,8 @@ deptrac:
         - type: classLike
           value: .*Doctrine\\.*
         - type: classLike
+          value: .*NeuronAI\\.*
+        - type: classLike
           value: .*PHPUnit\\Framework\\.*
         - type: classLike
           value: .*Psr\\.*
@@ -32,6 +34,8 @@ deptrac:
       collectors:
         - type: classLike
           value: .*App\\Async\\.*
+        - type: classLike
+          value: .*App\\AI\\.*
         - type: classLike
           value: .*App\\Command\\.*
         - type: classLike

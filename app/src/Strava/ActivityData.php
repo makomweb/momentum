@@ -6,6 +6,7 @@ namespace App\Strava;
 
 use App\Momentum\Activity as MomentumActivity;
 use App\Momentum\ActivityDataPoint;
+use App\Momentum\ActivityStream;
 use App\Momentum\Assert\Assert;
 use App\Momentum\AthleteInterface;
 use App\Momentum\HeartRateZone;
@@ -18,7 +19,6 @@ use App\Momentum\Statistics;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity;
-use App\Strava\API\ActivityStream;
 
 final class ActivityData
 {
@@ -79,7 +79,7 @@ final class ActivityData
     /**
      * @return \Generator<array{timestamp: string, value: float}>
      */
-    private function yieldVelocityRawPoints(int $averagePeriod): \Generator
+    private function yieldVelocityRawPoints(int $averagePeriod = self::MOVING_AVERAGE_PERIOD): \Generator
     {
         foreach ($this->yieldDataPoints($averagePeriod) as $point) {
             yield [
@@ -143,12 +143,38 @@ final class ActivityData
 
     public function hasVelocityData(): bool
     {
-        return !empty($this->getVelocityRawPoints());
+        // $nonZeroPoints = array_filter(
+        //     $this->getVelocityRawPoints(),
+        //     static fn (array $p) => $p['value'] > 0.0,
+        // );
+
+        // dump(['count_velocity_raw_points' => count($nonZeroPoints)]);
+
+        foreach ($this->yieldVelocityRawPoints() as $point) {
+            if ($point['value'] > 0.0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function hasHeartRateData(): bool
     {
-        return !empty($this->getHeartRatePoints());
+        // $nonZeroPoints = array_filter(
+        //     $this->getHeartRatePoints(),
+        //     static fn (array $p) => $p['value'] > 0,
+        // );
+
+        // dump(['count_heart_rate_points' => count($nonZeroPoints)]);
+
+        foreach ($this->yieldHeartRatePoints() as $point) {
+            if ($point['value'] > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function hasAnyData(): bool
@@ -288,7 +314,7 @@ final class ActivityData
 
         return match ($type) {
             'Run', 'Walk', 'Hike' => $velocity->asPace()->value,
-            'Swim' => $velocity->asPace()->as(PaceUnit::PER_100_METERS)->value,
+            'Swim' => $velocity->asPace()->as(PaceUnit::MINUTES_PER_100_METERS)->value,
             'Ride' => $velocity->asSpeed()->as(SpeedUnit::KILOMETERS_PER_HOUR)->value,
             default => 0.0,
         };

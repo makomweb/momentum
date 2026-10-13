@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
+use App\Momentum\ActivityStream;
 use App\Strava\ActivityStreamCache;
-use App\Strava\API\ActivityStream;
 use App\Strava\API\ApiException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

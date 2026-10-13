@@ -1,0 +1,163 @@
+<?php
+
+namespace App\AI\LLM;
+
+use App\AI\OllamaConfig;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+class OllamaClient
+{
+    private const TIMEOUT = 300; // seconds (5 minutes)
+
+    public function __construct(
+        private HttpClientInterface $httpClient,
+        private OllamaConfig $config,
+    ) {
+    }
+
+    public function getMetaData(): string
+    {
+        return "Metadata: {$this->config}";
+    }
+
+    /**
+     * Send a prompt to Ollama and get a response.
+     *
+     * @param string     $prompt      The prompt/question to send
+     * @param float      $temperature Temperature for creativity (0-1, higher = more creative)
+     * @param int|null   $topK        Optional top K parameter
+     * @param float|null $topP        Optional nucleus sampling parameter
+     *
+     * @return string The model's response
+     */
+    public function ask(
+        string $prompt,
+        float $temperature = 0.7,
+        ?int $topK = null,
+        ?float $topP = null,
+    ): string {
+        $payload = [
+            'model' => $this->config->model,
+            'prompt' => $prompt,
+            'stream' => false,
+            'temperature' => $temperature,
+        ];
+
+        if (null !== $topK) {
+            $payload['top_k'] = $topK;
+        }
+
+        if (null !== $topP) {
+            $payload['top_p'] = $topP;
+        }
+
+        $response = $this->httpClient->request(
+            'POST',
+            $this->config->getApiEndpoint().'/generate', [
+                'json' => $payload,
+                'timeout' => self::TIMEOUT,
+            ]
+        );
+
+        $data = $response->toArray();
+
+        return isset($data['response']) && is_string($data['response']) ? $data['response'] : '';
+    }
+
+    /**
+     * Stream a prompt response for real-time output (callback-based).
+     *
+     * @param string   $prompt      The prompt/question to send
+     * @param callable $onChunk     Callback function receiving each chunk of text
+     * @param float    $temperature Temperature for creativity (0-1, higher = more creative)
+     */
+    public function askStream(
+        string $prompt,
+        callable $onChunk,
+        float $temperature = 0.7,
+    ): void {
+        $payload = [
+            'model' => $this->config->model,
+            'prompt' => $prompt,
+            'stream' => true,
+            'temperature' => $temperature,
+        ];
+
+        $response = $this->httpClient->request(
+            'POST',
+            $this->config->getApiEndpoint().'/generate',
+            [
+                'json' => $payload,
+                'timeout' => self::TIMEOUT,
+            ]
+        );
+
+        foreach ($this->httpClient->stream($response) as $chunk) {
+            if ($chunk->isLast()) {
+                break;
+            }
+
+            $data = json_decode($chunk->getContent(), true);
+            if (is_array($data) && isset($data['response']) && is_string($data['response'])) {
+                $onChunk($data['response']);
+            }
+        }
+    }
+
+    /**
+     * Get list of available models.
+     *
+     * @return array<int, string> List of available model names
+     */
+    public function getAvailableModels(): array
+    {
+        try {
+            $response = $this->httpClient->request(
+                'GET',
+                $this->config->getApiEndpoint().'/tags',
+                ['timeout' => 10]
+            );
+
+            $data = $response->toArray();
+            $models = [];
+
+            $modelsList = $data['models'] ?? [];
+            if (is_array($modelsList)) {
+                foreach ($modelsList as $model) {
+                    if (is_array($model) && isset($model['name']) && is_string($model['name'])) {
+                        $models[] = $model['name'];
+                    }
+                }
+            }
+
+            return $models;
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    public function isAvailable(): bool
+    {
+        try {
+            $this->httpClient->request(
+                'HEAD',
+                $this->config->getBaseEndpoint(),
+                ['timeout' => 5]
+            );
+
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public function setModel(string $model): void
+    {
+        throw new \Exception('❌ Not supported!');
+    }
+
+    public function getModel(): string
+    {
+        return $this->config->model;
+    }
+}

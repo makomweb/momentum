@@ -19,7 +19,7 @@ class DebugTokenCacheTest extends KernelTestCase
 
         assert($cache instanceof DebugTokenCache);
 
-        $token = Token::fromData([
+        $token = Token::from([
             'token_type' => TokenType::BEARER->value,
             'expires_at' => new \DateTimeImmutable()->getTimestamp(),
             'expires_in' => 30,
