@@ -18,8 +18,6 @@ use PHPUnit\Framework\TestCase;
 
 final class RealActivityZoneValidationTest extends TestCase
 {
-    use AthleteFactory;
-
     public function test_real_activity_vo2max_zone_validation(): void
     {
         // Load real activity data
@@ -69,7 +67,7 @@ final class RealActivityZoneValidationTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) $timeData[-1]).'S'));
-        $activity = Activity::create(self::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
 
         $paceSessions = $activity->getPaceZoneSessions();
         $totalSeconds = (int) $timeData[-1];
@@ -162,7 +160,7 @@ final class RealActivityZoneValidationTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT60S'));
-        $activity = Activity::create(self::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($treshold, Power::Zero(), $maxHeartRate), $endTime, $dataPoints);
 
         $paceSessions = $activity->getPaceZoneSessions();
         $hrSessions = $activity->getHeartRateSessions();

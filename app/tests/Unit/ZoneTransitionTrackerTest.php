@@ -18,8 +18,6 @@ use PHPUnit\Framework\TestCase;
 
 final class ZoneTransitionTrackerTest extends TestCase
 {
-    use AthleteFactory;
-
     private Pace $treshold;
     private HeartRate $maxHeartRate;
 
@@ -74,7 +72,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT120S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $sessions = $activity->getPaceZoneSessions();
 
         self::assertCount(2, $sessions, 'Should have 2 pace zone sessions');
@@ -126,7 +124,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $sessions = $activity->getHeartRateSessions();
 
         self::assertCount(2, $sessions, 'Should have 2 heart rate zone sessions');
@@ -169,7 +167,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval("PT{$timestamp}S"));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $sessions = $activity->getPaceZoneSessions();
 
         self::assertCount(4, $sessions, 'Should have 4 pace zone sessions');
@@ -203,7 +201,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $sessions = $activity->getPaceZoneSessions();
 
         self::assertCount(1, $sessions);
@@ -216,7 +214,7 @@ final class ZoneTransitionTrackerTest extends TestCase
     {
         $startTime = new \DateTimeImmutable('2026-05-04 10:00:00');
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::ZERO(), $this->maxHeartRate), $endTime, [/* Nothing */]);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::ZERO(), $this->maxHeartRate), $endTime, [/* Nothing */]);
 
         self::assertCount(0, $activity->getPaceZoneSessions());
         self::assertCount(0, $activity->getHeartRateSessions());
@@ -243,7 +241,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT30S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $paceSessions = $activity->getPaceZoneSessions();
         $hrSessions = $activity->getHeartRateSessions();
 
@@ -273,7 +271,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT50S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $paceSessions = $activity->getPaceZoneSessions();
         $hrSessions = $activity->getHeartRateSessions();
 
@@ -316,7 +314,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $sessions = $activity->getPaceZoneSessions();
 
         self::assertEquals($startTime, $sessions[0]->start);
@@ -361,7 +359,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT31S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $sessions = $activity->getPaceZoneSessions();
 
         // Should have 2 sessions due to gap, not 1 extended session
@@ -403,7 +401,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         }
 
         $endTime = $startTime->add(new \DateInterval('PT15S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $paceSessions = $activity->getPaceZoneSessions();
 
         $heartRateSessions = $activity->getHeartRateSessions();
@@ -460,7 +458,7 @@ final class ZoneTransitionTrackerTest extends TestCase
         // Correct endTime: start + elapsed_time (100s)
         // The last zone session starts at T+60; close(T+100) → 40 seconds
         $endTime = $startTime->add(new \DateInterval('PT100S'));
-        $activity = Activity::create(self::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
+        $activity = Activity::create(AthleteFactory::createAthlete($this->treshold, Power::Zero(), $this->maxHeartRate), $endTime, $dataPoints);
         $paceSessions = $activity->getPaceZoneSessions();
 
         self::assertNotEmpty($paceSessions);

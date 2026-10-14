@@ -9,9 +9,9 @@ use App\Momentum\HeartRate;
 use App\Momentum\Pace;
 use App\Momentum\Power;
 
-trait AthleteFactory
+final readonly class AthleteFactory
 {
-    protected static function createAthlete(
+    public static function createAthlete(
         Pace $runThreshold,
         Power $cyclingThreshold,
         HeartRate $maxHeartRate,
