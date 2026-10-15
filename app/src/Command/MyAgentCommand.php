@@ -61,7 +61,7 @@ class MyAgentCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $io->error('Error communicating with Ollama: '.$e->getMessage());
+            $io->error('Error communicating with agent: '.$e->getMessage());
 
             return Command::FAILURE;
         }

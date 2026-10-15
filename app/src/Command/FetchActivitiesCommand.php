@@ -2,10 +2,13 @@
 
 namespace App\Command;
 
+use App\Repository\ActivityRepository;
+use App\Strava\API\Activity;
 use App\Strava\API\ApiException;
 use App\Strava\Synchronizer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,6 +22,7 @@ class FetchActivitiesCommand extends Command
 {
     public function __construct(
         private Synchronizer $synchronizer,
+        private ActivityRepository $activities,
     ) {
         parent::__construct();
     }
@@ -42,8 +46,6 @@ class FetchActivitiesCommand extends Command
 
         try {
             $this->synchronizer->sync($stravaUserId, new ReportProgressAdapter($output, $io));
-
-            return Command::SUCCESS;
         } catch (ApiException $ex) {
             $io->error($ex->getMessage());
 
@@ -53,5 +55,37 @@ class FetchActivitiesCommand extends Command
 
             return Command::FAILURE;
         }
+
+        try {
+            $activities = $this->activities->findByStravaUser($stravaUserId);
+            self::showTable($output, $activities);
+        } catch (\Throwable $ex) {
+            $io->error(sprintf('Error: %s', $ex));
+
+            return Command::FAILURE;
+        }
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * @param Activity[] $activities
+     */
+    private static function showTable(OutputInterface $output, array $activities): void
+    {
+        $table = new Table($output);
+        $table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
+
+        foreach ($activities as $activity) {
+            $table->addRow([
+                $activity->getId(),
+                $activity->getStartDateLocalTime()->format(\DateTimeImmutable::RFC2822),
+                $activity->getName(),
+                $activity->getDistance(),
+                $activity->getAverageVelocityAsStringable(),
+            ]);
+        }
+
+        $table->render();
     }
 }

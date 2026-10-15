@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\AI\RAG;
 
 use NeuronAI\Providers\AIProviderInterface;
+use NeuronAI\RAG\Document;
 use NeuronAI\RAG\Embeddings\EmbeddingsProviderInterface;
 use NeuronAI\RAG\RAG;
 use NeuronAI\RAG\VectorStore\VectorStoreInterface;
@@ -16,6 +17,14 @@ class MyChatbot extends RAG
     public static function initialize(NeuronAdapterInterface $adapter): void
     {
         self::$adapter = $adapter;
+    }
+
+    /**
+     * @param Document[] $documents
+     */
+    public static function ingest(array $documents): void
+    {
+        self::make()->addDocuments($documents);
     }
 
     protected function provider(): AIProviderInterface

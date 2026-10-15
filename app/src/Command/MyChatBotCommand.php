@@ -11,6 +11,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -32,7 +33,8 @@ class MyChatBotCommand extends Command
                 'question',
                 InputArgument::OPTIONAL,
                 'The question or prompt to ask'
-            );
+            )
+            ->addOption('index', 'i', InputOption::VALUE_OPTIONAL, 'index activities to seed the knowledge base', false);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -62,7 +64,7 @@ class MyChatBotCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $io->error('Error communicating with Ollama: '.$e->getMessage());
+            $io->error('Error communicating with chat bot: '.$e->getMessage());
 
             return Command::FAILURE;
         }
