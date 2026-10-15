@@ -9,7 +9,6 @@ use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
 use App\Momentum\Speed;
 use App\Momentum\SpeedUnit;
-use App\Momentum\Velocity;
 use App\Strava\ActivityData;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -63,17 +62,15 @@ final class ActivityFilter extends AbstractExtension
     private static function getMaxVelocity(ActivityData $activity): float
     {
         $metaData = $activity->getMetaData();
-        $maxVelocity = $metaData->getMaxVelocity();
 
         if ($metaData->hasSpeed()) {
-            return $maxVelocity->asSpeed()->multiply(1.1 /* add 10 % */)->value;
+            return $metaData->getMaxVelocity()->asSpeed()->multiply(1.1 /* add 10 % */)->value;
         }
 
         $type = $metaData->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike' => $maxVelocity->asPace(PaceUnit::MINUTES_PER_KILOMETER)->multiply(1.1 /* add 10 % */)->value,
-            'Swim', 'RockClimbing' => $maxVelocity->asPace(PaceUnit::MINUTES_PER_100_METERS)->multiply(1.1 /* add 10 % */)->value,
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getVelocityPercentile($activity, 0.95),
             'Yoga' => Pace::ZERO()->value,
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
@@ -87,34 +84,8 @@ final class ActivityFilter extends AbstractExtension
 
         $type = $activity->getMetaData()->getActivityType();
 
-        // return match ($type) {
-        //     'Run', 'Swim', 'Walk' => 15.0,
-        //     'Hike' => 40.0,
-        //     default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
-        // };
-
-        $values = array_map(
-            static fn (array $p) => $p['value'],
-            $activity->getVelocityRawPoints()
-        );
-
-        $min = Velocity::min($values);
-        $max = Velocity::max($values);
-
-        $type = $activity->getMetaData()->getActivityType();
-
-        dump([
-            'method' => __METHOD__,
-            'type' => $type,
-            'min' => $min,
-            'max' => $max,
-            'min_pace' => (string) $min->asPace(PaceUnit::MINUTES_PER_KILOMETER),
-            'max_pace' => (string) $max->asPace(PaceUnit::MINUTES_PER_KILOMETER),
-        ]);
-        
         return match ($type) {
-            'Run', 'Walk', 'Hike' => $min->asPace(PaceUnit::MINUTES_PER_KILOMETER)->value,
-            'Swim', 'RockClimbing' => $min->asPace(PaceUnit::MINUTES_PER_100_METERS)->value,
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getVelocityPercentile($activity, 0.05),
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
     }
@@ -129,5 +100,21 @@ final class ActivityFilter extends AbstractExtension
             'Ride' => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
+    }
+
+    private static function getVelocityPercentile(ActivityData $activity, float $percentile): float
+    {
+        $values = array_values(array_filter(
+            array_column($activity->getVelocityAveragePoints(), 'value'),
+            static fn (float $value): bool => $value > 0.0,
+        ));
+
+        if ([] === $values) {
+            return 0.0;
+        }
+
+        sort($values);
+
+        return $values[(int) floor((count($values) - 1) * $percentile)];
     }
 }
