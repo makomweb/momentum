@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
-use Stringable;
-
 final readonly class Velocity
 {
     public function __construct(public float $metersPerSecond = 0)
@@ -65,7 +63,7 @@ final readonly class Velocity
             'Run', 'Walk', 'Hike' => $this->asPace(PaceUnit::MINUTES_PER_KILOMETER),
             'Swim', 'RockClimbing' => $this->asPace(PaceUnit::MINUTES_PER_100_METERS),
             'Ride' => $this->asSpeed(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => $this->asSpeed(SpeedUnit::METERS_PER_SECOND)
+            default => $this->asSpeed(SpeedUnit::METERS_PER_SECOND),
         };
     }
 }

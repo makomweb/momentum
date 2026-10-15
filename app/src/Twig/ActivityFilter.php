@@ -15,8 +15,6 @@ use Twig\TwigFilter;
 
 final class ActivityFilter extends AbstractExtension
 {
-    private const PACE_PERCENTILE_MIN = 0.05;
-    private const PACE_PERCENTILE_MAX = 0.95;
     private const PACE_RANGE_PADDING = 0.1;
 
     private const COLOR_CLASSES = [
@@ -74,7 +72,7 @@ final class ActivityFilter extends AbstractExtension
         $type = $metaData->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getPaceBounds($activity)['max'],
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getVelocityBounds($activity)['max'],
             'Yoga' => Pace::ZERO()->value,
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
@@ -89,7 +87,7 @@ final class ActivityFilter extends AbstractExtension
         $type = $activity->getMetaData()->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getPaceBounds($activity)['min'],
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getVelocityBounds($activity)['min'],
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
     }
@@ -109,10 +107,19 @@ final class ActivityFilter extends AbstractExtension
     /**
      * @return array{min: float, max: float}
      */
-    private static function getPaceBounds(ActivityData $activity): array
+    private static function getVelocityBounds(ActivityData $activity): array
     {
-        $min = self::getVelocityPercentile($activity, self::PACE_PERCENTILE_MIN);
-        $max = self::getVelocityPercentile($activity, self::PACE_PERCENTILE_MAX);
+        $values = self::getVelocityAverageValues($activity);
+
+        if ([] === $values) {
+            return [
+                'min' => 0.0,
+                'max' => 0.0,
+            ];
+        }
+
+        $min = min($values);
+        $max = max($values);
         $padding = ($max - $min) * self::PACE_RANGE_PADDING;
 
         return [
@@ -121,19 +128,14 @@ final class ActivityFilter extends AbstractExtension
         ];
     }
 
-    private static function getVelocityPercentile(ActivityData $activity, float $percentile): float
+    /**
+     * @return list<float>
+     */
+    private static function getVelocityAverageValues(ActivityData $activity): array
     {
-        $values = array_values(array_filter(
+        return array_values(array_filter(
             array_column($activity->getVelocityAveragePoints(), 'value'),
             static fn (float $value): bool => $value > 0.0,
         ));
-
-        if ([] === $values) {
-            return 0.0;
-        }
-
-        sort($values);
-
-        return $values[(int) floor((count($values) - 1) * $percentile)];
     }
 }
