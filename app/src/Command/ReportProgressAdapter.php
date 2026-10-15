@@ -41,7 +41,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
             $activity->getStartDateLocalTime()->format(\DateTimeImmutable::RFC2822),
             $activity->getName(),
             $activity->getDistance(),
-            $activity->getAverageVelocity(),
+            $activity->getAverageVelocityAsStringable(),
         ]);
 
         ++$this->count;
