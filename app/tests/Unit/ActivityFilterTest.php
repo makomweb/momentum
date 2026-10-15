@@ -20,13 +20,8 @@ class ActivityFilterTest extends TestCase
         $min = ActivityFilter::getMinVelocity($activity);
         $max = ($this->getFilterCallable('y_axis_max'))($activity);
 
-        dump([
-            'min' => $min,
-            'max' => $max
-        ]);
-        
-        self::assertEqualsWithDelta(5.59, $min, 0.05);
-        self::assertEqualsWithDelta(6.36, $max, 0.05);
+        self::assertEqualsWithDelta(5.51, $min, 0.05);
+        self::assertEqualsWithDelta(6.44, $max, 0.05);
         self::assertLessThan($max, $min);
     }
 

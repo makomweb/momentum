@@ -15,6 +15,10 @@ use Twig\TwigFilter;
 
 final class ActivityFilter extends AbstractExtension
 {
+    private const PACE_PERCENTILE_MIN = 0.05;
+    private const PACE_PERCENTILE_MAX = 0.95;
+    private const PACE_RANGE_PADDING = 0.1;
+
     private const COLOR_CLASSES = [
         'run' => 'bg-amber-100',
         'walk' => 'bg-green-100',
@@ -70,7 +74,7 @@ final class ActivityFilter extends AbstractExtension
         $type = $metaData->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getVelocityPercentile($activity, 0.95),
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getPaceBounds($activity)['max'],
             'Yoga' => Pace::ZERO()->value,
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
@@ -85,7 +89,7 @@ final class ActivityFilter extends AbstractExtension
         $type = $activity->getMetaData()->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getVelocityPercentile($activity, 0.05),
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getPaceBounds($activity)['min'],
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
     }
@@ -100,6 +104,21 @@ final class ActivityFilter extends AbstractExtension
             'Ride' => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
+    }
+
+    /**
+     * @return array{min: float, max: float}
+     */
+    private static function getPaceBounds(ActivityData $activity): array
+    {
+        $min = self::getVelocityPercentile($activity, self::PACE_PERCENTILE_MIN);
+        $max = self::getVelocityPercentile($activity, self::PACE_PERCENTILE_MAX);
+        $padding = ($max - $min) * self::PACE_RANGE_PADDING;
+
+        return [
+            'min' => max(0.0, $min - $padding),
+            'max' => $max + $padding,
+        ];
     }
 
     private static function getVelocityPercentile(ActivityData $activity, float $percentile): float
