@@ -11,9 +11,11 @@ class ActivityFilterTest extends TestCase
 {
     public function test_me(): void
     {
-        $activity = ActivityDataFactory::createActivityData(14417573, 19881882510);
+        $activity = ActivityDataFactory::createActivityData(14417573, 20531248086);
 
         $result = ActivityFilter::getMinVelocity($activity);
+
+        dump($result);
 
         self::fail('Foobar!');
     }

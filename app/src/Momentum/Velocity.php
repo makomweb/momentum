@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Momentum;
 
+use Stringable;
+
 final readonly class Velocity
 {
     public function __construct(public float $metersPerSecond = 0)
@@ -18,6 +20,8 @@ final readonly class Velocity
     /** @param float[] $values */
     public static function max(array $values): self
     {
+        $values = array_diff($values, [0.0]);
+
         assert(!empty($values));
 
         return new self(max($values));
@@ -26,6 +30,8 @@ final readonly class Velocity
     /** @param float[] $values */
     public static function min(array $values): self
     {
+        $values = array_diff($values, [0.0]);
+
         assert(!empty($values));
 
         return new self(min($values));
@@ -53,13 +59,13 @@ final readonly class Velocity
         return Pace::fromMetersPerSecond($this->metersPerSecond)->as($unit);
     }
 
-    public function asStringable(string $activityType): \Stringable
+    public function asStringable(?string $activityType = null): \Stringable
     {
         return match ($activityType) {
             'Run', 'Walk', 'Hike' => $this->asPace(PaceUnit::MINUTES_PER_KILOMETER),
             'Swim', 'RockClimbing' => $this->asPace(PaceUnit::MINUTES_PER_100_METERS),
             'Ride' => $this->asSpeed(SpeedUnit::KILOMETERS_PER_HOUR),
-            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $activityType)),
+            default => $this->asSpeed(SpeedUnit::METERS_PER_SECOND)
         };
     }
 }

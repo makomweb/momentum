@@ -79,7 +79,7 @@ final class ActivityFilter extends AbstractExtension
         };
     }
 
-    private static function getMinVelocity(ActivityData $activity): float
+    public static function getMinVelocity(ActivityData $activity): float
     {
         if ($activity->getMetaData()->hasSpeed()) {
             return Speed::ZERO()->value;
@@ -87,26 +87,36 @@ final class ActivityFilter extends AbstractExtension
 
         $type = $activity->getMetaData()->getActivityType();
 
-        return match ($type) {
-            'Run', 'Swim', 'Walk' => 15.0,
-            'Hike' => 40.0,
-            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
-        };
-
-        // $min = Velocity::min(
-        //     array_map(
-        //         static fn (array $p) => $p['value'],
-        //         $activity->getVelocityRawPoints()
-        //     )
-        // );
-
-        // $type = $activity->getMetaData()->getActivityType();
-
         // return match ($type) {
-        //     'Run', 'Walk', 'Hike' => $min->asPace(PaceUnit::MINUTES_PER_KILOMETER)->value,
-        //     'Swim', 'RockClimbing' => $min->asPace(PaceUnit::MINUTES_PER_100_METERS)->value,
+        //     'Run', 'Swim', 'Walk' => 15.0,
+        //     'Hike' => 40.0,
         //     default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         // };
+
+        $values = array_map(
+            static fn (array $p) => $p['value'],
+            $activity->getVelocityRawPoints()
+        );
+
+        $min = Velocity::min($values);
+        $max = Velocity::max($values);
+
+        $type = $activity->getMetaData()->getActivityType();
+
+        dump([
+            'method' => __METHOD__,
+            'type' => $type,
+            'min' => $min,
+            'max' => $max,
+            'min_pace' => (string) $min->asPace(PaceUnit::MINUTES_PER_KILOMETER),
+            'max_pace' => (string) $max->asPace(PaceUnit::MINUTES_PER_KILOMETER),
+        ]);
+        
+        return match ($type) {
+            'Run', 'Walk', 'Hike' => $min->asPace(PaceUnit::MINUTES_PER_KILOMETER)->value,
+            'Swim', 'RockClimbing' => $min->asPace(PaceUnit::MINUTES_PER_100_METERS)->value,
+            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
+        };
     }
 
     public function getChartYAxisLabel(ActivityData $activity): string
