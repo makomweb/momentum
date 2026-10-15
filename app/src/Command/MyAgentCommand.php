@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\AI\RAG\MyAgent;
-use App\AI\RAG\OllamaProviderFactory;
+use App\AI\RAG\NeuronAdapter;
 use NeuronAI\Chat\Messages\Stream\Chunks\TextChunk;
 use NeuronAI\Chat\Messages\UserMessage;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class MyAgentCommand extends Command
 {
-    public function __construct(private OllamaProviderFactory $factory)
+    public function __construct(private NeuronAdapter $adapter)
     {
         parent::__construct();
     }
@@ -30,7 +30,7 @@ class MyAgentCommand extends Command
             ->addArgument(
                 'question',
                 InputArgument::OPTIONAL,
-                'The question or prompt to ask Ollama'
+                'The question or prompt to ask'
             );
     }
 
@@ -38,7 +38,7 @@ class MyAgentCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        MyAgent::initialize($this->factory);
+        MyAgent::initialize($this->adapter);
 
         try {
             $question = $input->getArgument('question') ?? 'What is PHP?';
