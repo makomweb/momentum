@@ -28,6 +28,7 @@ class MyChatBotCommand extends Command
     protected function configure(): void
     {
         $this
+            ->addArgument('strava_user_id', InputArgument::REQUIRED, 'Strava user ID')
             ->addArgument(
                 'question',
                 InputArgument::OPTIONAL,
@@ -40,6 +41,11 @@ class MyChatBotCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $stravaUserId = $input->getArgument('strava_user_id');
+        assert(is_string($stravaUserId));
+        $stravaUserId = (int) $stravaUserId;
+
+        $this->adapter->setStravaUserId($stravaUserId);
         MyChatbot::initialize($this->adapter);
 
         try {

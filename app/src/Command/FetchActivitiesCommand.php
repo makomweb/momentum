@@ -72,6 +72,7 @@ class FetchActivitiesCommand extends Command
             return Command::FAILURE;
         }
 
+        $this->adapter->setStravaUserId($stravaUserId);
         MyChatbot::initialize($this->adapter);
 
         try {
@@ -90,19 +91,20 @@ class FetchActivitiesCommand extends Command
      */
     private static function showTable(OutputInterface $output, array $activities): void
     {
-        $table = new Table($output);
-        $table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
+        if (!empty($activities)) {
+            $table = new Table($output);
+            $table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
 
-        foreach ($activities as $activity) {
-            $table->addRow([
-                $activity->getId(),
-                $activity->getStartDateLocalTime()->format(\DateTimeImmutable::RFC2822),
-                $activity->getName(),
-                $activity->getDistance(),
-                $activity->getAverageVelocityAsStringable(),
-            ]);
+            foreach ($activities as $activity) {
+                $table->addRow([
+                    $activity->getId(),
+                    $activity->getStartDateLocalTime()->format(\DateTimeImmutable::RFC2822),
+                    $activity->getName(),
+                    $activity->getDistance(),
+                    $activity->getAverageVelocityAsStringable(),
+                ]);
+            }
+            $table->render();
         }
-
-        $table->render();
     }
 }
