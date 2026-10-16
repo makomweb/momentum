@@ -2,6 +2,9 @@
 
 namespace App\Command;
 
+use App\AI\RAG\ActivityDocument;
+use App\AI\RAG\MyChatbot;
+use App\AI\RAG\NeuronAdapter;
 use App\Repository\ActivityRepository;
 use App\Strava\API\Activity;
 use App\Strava\API\ApiException;
@@ -23,6 +26,7 @@ class FetchActivitiesCommand extends Command
     public function __construct(
         private Synchronizer $synchronizer,
         private ActivityRepository $activities,
+        private NeuronAdapter $adapter,
     ) {
         parent::__construct();
     }
@@ -51,16 +55,28 @@ class FetchActivitiesCommand extends Command
 
             return Command::FAILURE;
         } catch (\Throwable $ex) {
-            $io->error(sprintf('Error: %s', $ex));
+            $io->error(sprintf('Error synchronizing: %s', $ex));
 
             return Command::FAILURE;
         }
+
+        $activities = [];
 
         try {
             $activities = $this->activities->findByStravaUser($stravaUserId);
             self::showTable($output, $activities);
         } catch (\Throwable $ex) {
-            $io->error(sprintf('Error: %s', $ex));
+            $io->error(sprintf('Error loading: %s', $ex));
+
+            return Command::FAILURE;
+        }
+
+        MyChatbot::initialize($this->adapter);
+
+        try {
+            MyChatbot::make()->ingest($this->yieldActivityDocuments($stravaUserId, $activities));
+        } catch (\Throwable $ex) {
+            $io->error(sprintf('Error ingesting: %s', $ex));
 
             return Command::FAILURE;
         }
@@ -87,5 +103,17 @@ class FetchActivitiesCommand extends Command
         }
 
         $table->render();
+    }
+
+    /**
+     * @param Activity[] $activities
+     *
+     * @return \Generator<ActivityDocument>
+     */
+    private function yieldActivityDocuments(int $stravaUserId, array $activities): \Generator
+    {
+        foreach ($activities as $activity) {
+            yield new ActivityDocument($stravaUserId, $activity);
+        }
     }
 }

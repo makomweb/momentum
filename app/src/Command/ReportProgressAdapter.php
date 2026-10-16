@@ -49,7 +49,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
 
     public function onFinish(): void
     {
-        if ($this->count){
+        if ($this->count) {
             $this->table->render();
         }
 

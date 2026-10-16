@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\AI\RAG\MyAgent;
 use App\AI\RAG\MyChatbot;
 use App\AI\RAG\NeuronAdapter;
 use NeuronAI\Chat\Messages\Stream\Chunks\TextChunk;
@@ -41,7 +40,7 @@ class MyChatBotCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        MyAgent::initialize($this->adapter);
+        MyChatbot::initialize($this->adapter);
 
         try {
             $question = $input->getArgument('question') ?? 'What is PHP?';
