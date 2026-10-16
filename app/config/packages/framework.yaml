@@ -2,6 +2,11 @@
 framework:
     secret: '%env(APP_SECRET)%'
     
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks:
+            - 'en'
+    
     session:
         cookie_secure: '%env(bool:SECURE_COOKIE)%'
         cookie_httponly: true

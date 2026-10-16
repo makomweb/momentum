@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\AI\RAG\ActivityDocument;
+use App\AI\RAG\DocumentFactory;
 use App\AI\RAG\MyChatbot;
 use App\AI\RAG\NeuronAdapter;
 use App\Repository\ActivityRepository;
@@ -27,6 +27,7 @@ class FetchActivitiesCommand extends Command
         private Synchronizer $synchronizer,
         private ActivityRepository $activities,
         private NeuronAdapter $adapter,
+        private DocumentFactory $documentFactory,
     ) {
         parent::__construct();
     }
@@ -74,7 +75,7 @@ class FetchActivitiesCommand extends Command
         MyChatbot::initialize($this->adapter);
 
         try {
-            MyChatbot::make()->ingest($this->yieldActivityDocuments($stravaUserId, $activities));
+            MyChatbot::make()->ingest($this->documentFactory->yieldDocuments($stravaUserId, $activities));
         } catch (\Throwable $ex) {
             $io->error(sprintf('Error ingesting: %s', $ex));
 
@@ -103,17 +104,5 @@ class FetchActivitiesCommand extends Command
         }
 
         $table->render();
-    }
-
-    /**
-     * @param Activity[] $activities
-     *
-     * @return \Generator<ActivityDocument>
-     */
-    private function yieldActivityDocuments(int $stravaUserId, array $activities): \Generator
-    {
-        foreach ($activities as $activity) {
-            yield new ActivityDocument($stravaUserId, $activity);
-        }
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\AI\RAG;
 
 use NeuronAI\Providers\AIProviderInterface;
+use NeuronAI\RAG\Document;
 use NeuronAI\RAG\Embeddings\EmbeddingsProviderInterface;
 use NeuronAI\RAG\RAG;
 use NeuronAI\RAG\VectorStore\VectorStoreInterface;
@@ -19,16 +20,12 @@ class MyChatbot extends RAG
     }
 
     /**
-     * @param iterable<ActivityDocument> $documents
+     * @param iterable<Document> $documents
      */
     public static function ingest(iterable $documents): void
     {
-        $documents = is_array($documents) ? $documents : iterator_to_array($documents);
         self::make()->addDocuments(
-            array_map(
-                static fn (ActivityDocument $doc) => $doc->getNeuronDocument(),
-                $documents
-            )
+            is_array($documents) ? $documents : iterator_to_array($documents)
         );
     }
 
