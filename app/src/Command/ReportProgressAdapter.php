@@ -41,7 +41,7 @@ final class ReportProgressAdapter implements ReportProgressInterface
             $activity->getStartDateLocalTime()->format(\DateTimeImmutable::RFC2822),
             $activity->getName(),
             $activity->getDistance(),
-            $activity->getAverageVelocity(),
+            $activity->getAverageVelocityAsStringable(),
         ]);
 
         ++$this->count;
@@ -49,7 +49,9 @@ final class ReportProgressAdapter implements ReportProgressInterface
 
     public function onFinish(): void
     {
-        $this->table->render();
+        if ($this->count) {
+            $this->table->render();
+        }
 
         $this->io->success(sprintf('✅ Synchronized %d activitie(s)', $this->count));
     }

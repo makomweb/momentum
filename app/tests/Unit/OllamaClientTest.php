@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit;
 
+use App\AI\Config;
 use App\AI\LLM\OllamaClient;
-use App\AI\OllamaConfig;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -28,7 +28,7 @@ final class OllamaClientTest extends TestCase
 
                 return new MockResponse('{"response":"PHP is a programming language."}');
             }),
-            new OllamaConfig('http://host.docker.internal:11434', 'llama3:latest'),
+            new Config('http://host.docker.internal:11434', 'llama3:latest', 'N/A'),
         );
 
         self::assertSame('PHP is a programming language.', $client->ask('Was ist PHP?'));
@@ -48,7 +48,7 @@ final class OllamaClientTest extends TestCase
 
                 return new MockResponse('{"response":"PHP is a programming language."}');
             }),
-            new OllamaConfig('http://host.docker.internal:11434/api', 'llama3:latest'),
+            new Config('http://host.docker.internal:11434/api', 'llama3:latest', 'N/A'),
         );
 
         self::assertSame('PHP is a programming language.', $client->ask('Was ist PHP?'));
@@ -65,7 +65,7 @@ final class OllamaClientTest extends TestCase
 
                 return new MockResponse('', ['http_code' => 200]);
             }),
-            new OllamaConfig('http://host.docker.internal:11434/api', 'llama3:latest'),
+            new Config('http://host.docker.internal:11434/api', 'llama3:latest', 'N/A'),
         );
 
         self::assertTrue($client->isAvailable());

@@ -1,0 +1,2 @@
+activity:
+  document_content: '{name} on {date}. A {type} activity covering {distance} at an average speed of {avg_speed} with a maximum speed of {max_speed}. Total elapsed time was {elapsed_time}. Recorded using {device}.'

@@ -13,12 +13,10 @@ use PHPUnit\Framework\TestCase;
 
 class ZoneDescriptionTest extends TestCase
 {
-    use AthleteFactory;
-
     #[Test]
     public function heart_rate_zone_description(): void
     {
-        $athlete = self::createAthlete(Pace::fromSecondsPerKilometer(240), Power::Zero(), new HeartRate(180));
+        $athlete = AthleteFactory::createAthlete(Pace::fromSecondsPerKilometer(240), Power::Zero(), new HeartRate(180));
 
         $description = new ZoneDescription($athlete);
 
@@ -32,7 +30,7 @@ class ZoneDescriptionTest extends TestCase
     #[Test]
     public function pace_zone_description(): void
     {
-        $athlete = self::createAthlete(Pace::fromSecondsPerKilometer(240), Power::Zero(), new HeartRate(180));
+        $athlete = AthleteFactory::createAthlete(Pace::fromSecondsPerKilometer(240), Power::Zero(), new HeartRate(180));
 
         $description = new ZoneDescription($athlete);
 

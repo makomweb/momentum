@@ -9,13 +9,14 @@ use App\Momentum\Pace;
 use App\Momentum\PaceUnit;
 use App\Momentum\Speed;
 use App\Momentum\SpeedUnit;
-use App\Momentum\Velocity;
 use App\Strava\ActivityData;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 final class ActivityFilter extends AbstractExtension
 {
+    private const PACE_RANGE_PADDING = 0.1;
+
     private const COLOR_CLASSES = [
         'run' => 'bg-amber-100',
         'walk' => 'bg-green-100',
@@ -63,23 +64,21 @@ final class ActivityFilter extends AbstractExtension
     private static function getMaxVelocity(ActivityData $activity): float
     {
         $metaData = $activity->getMetaData();
-        $maxVelocity = $metaData->getMaxVelocity();
 
         if ($metaData->hasSpeed()) {
-            return $maxVelocity->asSpeed()->multiply(1.1 /* add 10 % */)->value;
+            return $metaData->getMaxVelocity()->asSpeed()->multiply(1.1 /* add 10 % */)->value;
         }
 
         $type = $metaData->getActivityType();
 
         return match ($type) {
-            'Run', 'Walk', 'Hike' => $maxVelocity->asPace(PaceUnit::MINUTES_PER_KILOMETER)->multiply(1.1 /* add 10 % */)->value,
-            'Swim', 'RockClimbing' => $maxVelocity->asPace(PaceUnit::MINUTES_PER_100_METERS)->multiply(1.1 /* add 10 % */)->value,
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getVelocityBounds($activity)['max'],
             'Yoga' => Pace::ZERO()->value,
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
     }
 
-    private static function getMinVelocity(ActivityData $activity): float
+    public static function getMinVelocity(ActivityData $activity): float
     {
         if ($activity->getMetaData()->hasSpeed()) {
             return Speed::ZERO()->value;
@@ -88,25 +87,9 @@ final class ActivityFilter extends AbstractExtension
         $type = $activity->getMetaData()->getActivityType();
 
         return match ($type) {
-            'Run', 'Swim', 'Walk' => 15.0,
-            'Hike' => 40.0,
+            'Run', 'Walk', 'Hike', 'Swim', 'RockClimbing' => self::getVelocityBounds($activity)['min'],
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
-
-        // $min = Velocity::min(
-        //     array_map(
-        //         static fn (array $p) => $p['value'],
-        //         $activity->getVelocityRawPoints()
-        //     )
-        // );
-
-        // $type = $activity->getMetaData()->getActivityType();
-
-        // return match ($type) {
-        //     'Run', 'Walk', 'Hike' => $min->asPace(PaceUnit::MINUTES_PER_KILOMETER)->value,
-        //     'Swim', 'RockClimbing' => $min->asPace(PaceUnit::MINUTES_PER_100_METERS)->value,
-        //     default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
-        // };
     }
 
     public function getChartYAxisLabel(ActivityData $activity): string
@@ -119,5 +102,40 @@ final class ActivityFilter extends AbstractExtension
             'Ride' => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
+    }
+
+    /**
+     * @return array{min: float, max: float}
+     */
+    private static function getVelocityBounds(ActivityData $activity): array
+    {
+        $values = self::getVelocityAverageValues($activity);
+
+        if ([] === $values) {
+            return [
+                'min' => 0.0,
+                'max' => 0.0,
+            ];
+        }
+
+        $min = min($values);
+        $max = max($values);
+        $padding = ($max - $min) * self::PACE_RANGE_PADDING;
+
+        return [
+            'min' => max(0.0, $min - $padding),
+            'max' => $max + $padding,
+        ];
+    }
+
+    /**
+     * @return list<float>
+     */
+    private static function getVelocityAverageValues(ActivityData $activity): array
+    {
+        return array_values(array_filter(
+            array_column($activity->getVelocityAveragePoints(), 'value'),
+            static fn (float $value): bool => $value > 0.0,
+        ));
     }
 }

@@ -12,18 +12,18 @@ use NeuronAI\Tools\Toolkits\ToolkitInterface;
 
 class MyAgent extends Agent
 {
-    private static ?AIProviderFactoryInterface $factory = null;
+    private static ?NeuronAdapterInterface $adapter = null;
 
-    public static function initialize(AIProviderFactoryInterface $factory): void
+    public static function initialize(NeuronAdapterInterface $adapter): void
     {
-        self::$factory = $factory;
+        self::$adapter = $adapter;
     }
 
     protected function provider(): AIProviderInterface
     {
-        assert(self::$factory instanceof AIProviderFactoryInterface);
+        assert(self::$adapter instanceof NeuronAdapterInterface);
 
-        return self::$factory->create();
+        return self::$adapter->createAIProvider();
     }
 
     protected function instructions(): string

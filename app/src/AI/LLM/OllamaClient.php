@@ -2,7 +2,7 @@
 
 namespace App\AI\LLM;
 
-use App\AI\OllamaConfig;
+use App\AI\Config;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class OllamaClient
@@ -11,7 +11,7 @@ class OllamaClient
 
     public function __construct(
         private HttpClientInterface $httpClient,
-        private OllamaConfig $config,
+        private Config $config,
     ) {
     }
 
@@ -37,7 +37,7 @@ class OllamaClient
         ?float $topP = null,
     ): string {
         $payload = [
-            'model' => $this->config->model,
+            'model' => $this->config->llm,
             'prompt' => $prompt,
             'stream' => false,
             'temperature' => $temperature,
@@ -77,7 +77,7 @@ class OllamaClient
         float $temperature = 0.7,
     ): void {
         $payload = [
-            'model' => $this->config->model,
+            'model' => $this->config->llm,
             'prompt' => $prompt,
             'stream' => true,
             'temperature' => $temperature,
@@ -158,6 +158,6 @@ class OllamaClient
 
     public function getModel(): string
     {
-        return $this->config->model;
+        return $this->config->llm;
     }
 }

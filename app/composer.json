@@ -30,6 +30,7 @@
         "symfony/runtime": "^8.1",
         "symfony/security-bundle": "^8.1.7",
         "symfony/serializer": "^8.1.7",
+        "symfony/translation": "8.1.*",
         "symfony/twig-bundle": "^8.1.7",
         "symfony/yaml": "^8.1.6",
         "symfonycasts/tailwind-bundle": "^1.0"

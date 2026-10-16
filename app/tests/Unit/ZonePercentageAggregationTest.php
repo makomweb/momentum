@@ -24,8 +24,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class ZonePercentageAggregationTest extends TestCase
 {
-    use AthleteFactory;
-
     public function test_zone_percentage_aggregation_for_activity_18768361285(): void
     {
         // Load real activity data with 149% aggregation issue
@@ -74,7 +72,7 @@ final class ZonePercentageAggregationTest extends TestCase
             ]);
         }
 
-        $athlete = self::createAthlete($treshold, Power::Zero(), $maxHeartRate);
+        $athlete = AthleteFactory::createAthlete($treshold, Power::Zero(), $maxHeartRate);
 
         $endTime = $startTime->add(new \DateInterval('PT'.((int) end($timeData)).'S'));
         $activity = Activity::create($athlete, $endTime, $dataPoints);
