@@ -13,7 +13,7 @@ use App\Twig\TrainingMetricsFilter;
 use NeuronAI\RAG\Document;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class DocumentFactory
+final readonly class DocumentFactory implements DocumentFactoryInterface
 {
     public function __construct(
         private TranslatorInterface $translator,
@@ -70,7 +70,7 @@ final readonly class DocumentFactory
     {
         $stream = $this->cache->get($athlete->getId(), $activity->getId());
 
-        $report->progress();
+        $report->progress($activity);
 
         return new ActivityData($athlete, $activity, $stream);
     }

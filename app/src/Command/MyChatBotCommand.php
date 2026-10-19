@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\AI\RAG\MyChatbot;
-use App\AI\RAG\NeuronAdapter;
 use NeuronAI\Chat\Messages\Stream\Chunks\TextChunk;
 use NeuronAI\Chat\Messages\UserMessage;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,7 +18,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class MyChatBotCommand extends Command
 {
-    public function __construct(private NeuronAdapter $adapter)
+    public function __construct(private MyChatbot $chatbot)
     {
         parent::__construct();
     }
@@ -39,8 +38,7 @@ class MyChatBotCommand extends Command
         assert(is_string($stravaUserId));
         $stravaUserId = (int) $stravaUserId;
 
-        $this->adapter->setStravaUserId($stravaUserId);
-        MyChatbot::initialize($this->adapter);
+        $this->chatbot->setStravaUserId($stravaUserId);
 
         try {
             $question = $input->getArgument('question') ?? 'What is PHP?';
@@ -49,7 +47,7 @@ class MyChatBotCommand extends Command
             $io->writeln('🤖 MyChatbot: '.$question);
             $io->newLine();
 
-            $stream = MyChatbot::make()
+            $stream = $this->chatbot
                 ->setThreadId('chat_'.time())
                 ->stream(new UserMessage($question));
 

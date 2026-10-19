@@ -32,12 +32,12 @@ final class TrainingMetricsFilter extends AbstractExtension
     public function getDescription(TrainingMetrics $metrics): string
     {
         if ($metrics->isTooHard(self::MAX_HARD)) {
-            return '🔴 '.$this->translator->trans('training_metrics_suggestion.take_it_easy');
+            return $this->translator->trans('training_metrics_suggestion.get_some_recovery');
         }
 
         return $metrics->isBalanced(self::MAX_EASY, self::MAX_HARD)
-            ? '🟢 '.$this->translator->trans('training_metrics_suggestion.keep_it_up')
-            : '🟠 '.$this->translator->trans('training_metrics_suggestion.set_more_impulses');
+            ? $this->translator->trans('training_metrics_suggestion.keep_it_up')
+            : $this->translator->trans('training_metrics_suggestion.set_more_impulses');
     }
 
     private static function getBackgroundColor(TrainingMetrics $metrics): string

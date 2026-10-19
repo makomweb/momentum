@@ -164,6 +164,6 @@ error:
 
 # Training metrics
 training_metrics_suggestion:
-  take_it_easy: 'Take it easy.'
+  get_some_recovery: 'Get some recovery.'
   keep_it_up: 'Keep it up.'
   set_more_impulses: 'Set some more impulses.'

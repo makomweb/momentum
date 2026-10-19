@@ -10,6 +10,8 @@ use NeuronAI\RAG\VectorStore\VectorStoreInterface;
 
 interface NeuronAdapterInterface
 {
+    public function setStravaUserId(int $stravaUserId): void;
+
     public function createAIProvider(): AIProviderInterface;
 
     public function createEmbeddingsProvider(): EmbeddingsProviderInterface;
