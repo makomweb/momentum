@@ -11,6 +11,8 @@ framework:
         cookie_secure: '%env(bool:SECURE_COOKIE)%'
         cookie_httponly: true
         cookie_samesite: lax
+    
+    trusted_proxies: '127.0.0.1,REMOTE_ADDR'
 
 when@test:
     framework:
