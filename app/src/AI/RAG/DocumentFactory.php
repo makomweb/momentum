@@ -61,7 +61,7 @@ final readonly class DocumentFactory
                     'medium_percentage' => round($metrics->getMediumPercentage(), 0),
                     'hard_percentage' => round($metrics->getHardPercentage(), 0),
                     'suggestion' => $this->metricsFilter->getDescription($metrics),
-                    'duration' => FormatMovingTime::format($activity->getElapsedTime())
+                    'duration' => FormatMovingTime::format($activity->getElapsedTime()),
                 ]);
         }
     }

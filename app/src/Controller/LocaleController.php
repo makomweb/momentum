@@ -20,7 +20,7 @@ final class LocaleController extends AbstractController
             ->withExpires(time() + 365 * 24 * 60 * 60)
             ->withPath('/');
 
-        $response = new RedirectResponse($request->headers->get('Referer', '/'));
+        $response = new RedirectResponse($request->headers->get('Referer') ?? '/');
         $response->headers->setCookie($cookie);
 
         return $response;

@@ -13,7 +13,7 @@ final class LocaleListener
     public function __invoke(RequestEvent $event): void
     {
         $request = $event->getRequest();
-        
+
         if ($request->cookies->has('_locale')) {
             $locale = $request->cookies->get('_locale');
             if (in_array($locale, ['en', 'de'], true)) {
