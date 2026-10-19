@@ -5,7 +5,14 @@ namespace App\Command;
 use App\AI\RAG\DocumentFactory;
 use App\AI\RAG\MyChatbot;
 use App\AI\RAG\NeuronAdapter;
+use App\AI\RAG\ReportProgressInterface;
+use App\Entity\User;
+use App\Momentum\AthleteInterface;
+use App\Momentum\HeartRate;
+use App\Momentum\Pace;
+use App\Momentum\Power;
 use App\Repository\ActivityRepository;
+use App\Repository\UserRepository;
 use App\Strava\API\Activity;
 use App\Strava\API\ApiException;
 use App\Strava\Synchronizer;
@@ -28,6 +35,7 @@ class FetchActivitiesCommand extends Command
         private ActivityRepository $activities,
         private NeuronAdapter $adapter,
         private DocumentFactory $documentFactory,
+        private UserRepository $users,
     ) {
         parent::__construct();
     }
@@ -76,7 +84,14 @@ class FetchActivitiesCommand extends Command
         MyChatbot::initialize($this->adapter);
 
         try {
-            MyChatbot::make()->ingest($this->documentFactory->yieldDocuments($stravaUserId, $activities));
+            MyChatbot::make()
+                ->ingest(
+                    $this->documentFactory->yieldDocuments(
+                        $this->createAthlete($stravaUserId),
+                        $activities,
+                        $this->createReportAdapter($output)
+                    )
+                );
         } catch (\Throwable $ex) {
             $io->error(sprintf('Error ingesting: %s', $ex));
 
@@ -84,6 +99,74 @@ class FetchActivitiesCommand extends Command
         }
 
         return Command::SUCCESS;
+    }
+
+    private function createAthlete(int $stravaUserId): AthleteInterface
+    {
+        $user = $this->users->findByStravaId($stravaUserId);
+        assert($user instanceof User);
+
+        $athlete = new class($user) implements AthleteInterface {
+            public function __construct(private User $user)
+            {
+            }
+
+            public function getId(): int
+            {
+                return $this->user->getStravaId();
+            }
+
+            public function getName(): string
+            {
+                return $this->user->getName();
+            }
+
+            public function getRunTreshold(): Pace
+            {
+                return $this->user->getRunTreshold();
+            }
+
+            public function getCyclingTreshold(): Power
+            {
+                return $this->user->getCyclingTreshold();
+            }
+
+            public function getMaxHeartRate(): HeartRate
+            {
+                return $this->user->getMaxHeartRate();
+            }
+
+            public function getProfilePicture(): string
+            {
+                return $this->user->getProfilePictureMedium();
+            }
+
+            public function isConfigured(): bool
+            {
+                throw new \Exception('Not implemented');
+            }
+
+            public function toArray(): array
+            {
+                throw new \Exception('Not implemented');
+            }
+        };
+
+        return $athlete;
+    }
+
+    private function createReportAdapter(OutputInterface $output): ReportProgressInterface
+    {
+        return new class($output) implements ReportProgressInterface {
+            public function __construct(private OutputInterface $output)
+            {
+            }
+
+            public function onActivity(Activity $activity): void
+            {
+                $this->output->write('.');
+            }
+        };
     }
 
     /**

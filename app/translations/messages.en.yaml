@@ -1,2 +1,4 @@
 activity:
-  document_content: '{name} on {date}. A {type} activity covering {distance} at an average speed of {avg_speed} with a maximum speed of {max_speed}. Total elapsed time was {elapsed_time}. Recorded using {device}.'
+  document_content: '{name} on {date}. A {type} activity covering {distance} at an average speed of {avg_speed} with a maximum speed of {max_speed}. Total elapsed time was {elapsed_time}. Recorded using {device}. Du hast {easy_percentage} Prozent EASY, {medium_percentage} Prozent MEDIUM und {hard_percentage} Prozent HARD trainiert.'
+  good_balance: 'This training is a good balance of easy and hard work.'
+  requires_some_impulses: 'This training lacks some impulses.'

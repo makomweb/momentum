@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\AI\RAG;
 
+use App\Momentum\AthleteInterface;
+use App\Strava\ActivityData;
+use App\Strava\ActivityStreamCache;
 use App\Strava\API\Activity;
 use App\Twig\FormatMovingTime;
 use NeuronAI\RAG\Document;
@@ -13,6 +16,7 @@ final readonly class DocumentFactory
 {
     public function __construct(
         private TranslatorInterface $translator,
+        private ActivityStreamCache $cache,
     ) {
     }
 
@@ -21,9 +25,14 @@ final readonly class DocumentFactory
      *
      * @return \Generator<Document>
      */
-    public function yieldDocuments(int $stravaUserId, iterable $activities): \Generator
+    public function yieldDocuments(AthleteInterface $athlete, iterable $activities, ReportProgressInterface $report): \Generator
     {
         foreach ($activities as $activity) {
+            $metrics = $this->getActivityData($athlete, $activity, $report)->toArray()['metrics'];
+            $result = $this->translator->trans(
+                $metrics->isBalanced() ? 'activity.good_balance' : 'activity.requires_some_impulses'
+            );
+
             $content = $this->translator->trans(
                 'activity.document_content',
                 [
@@ -35,17 +44,29 @@ final readonly class DocumentFactory
                     '{max_speed}' => (string) $activity->getMaxVelocityAsStringable(),
                     '{elapsed_time}' => FormatMovingTime::format($activity->getElapsedTime()),
                     '{device}' => $activity->getDeviceName(),
+                    '{easy_percentage}' => round($metrics->getEasyPercentage(), 0),
+                    '{medium_percentage}' => round($metrics->getMediumPercentage(), 0),
+                    '{hard_percentage}' => round($metrics->getHardPercentage(), 0),
                 ],
             );
 
-            yield new Document($content)
+            yield new Document($content.' '.$result)
                 ->setSourceType(get_class($activity))
                 ->setSourceName($activity->getName())
                 ->setMetadata([
-                    'strava_user_id' => $stravaUserId,
+                    'strava_user_id' => $athlete->getId(),
                     'activity_id' => $activity->getId(),
                     ...array_diff_key($activity->data, array_flip(['id'])),
                 ]);
         }
+    }
+
+    private function getActivityData(AthleteInterface $athlete, Activity $activity, ReportProgressInterface $report): ActivityData
+    {
+        $stream = $this->cache->get($athlete->getId(), $activity->getId());
+
+        $report->onActivity($activity);
+
+        return new ActivityData($athlete, $activity, $stream);
     }
 }

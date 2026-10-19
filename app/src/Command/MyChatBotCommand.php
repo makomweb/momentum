@@ -10,7 +10,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -29,12 +28,7 @@ class MyChatBotCommand extends Command
     {
         $this
             ->addArgument('strava_user_id', InputArgument::REQUIRED, 'Strava user ID')
-            ->addArgument(
-                'question',
-                InputArgument::OPTIONAL,
-                'The question or prompt to ask'
-            )
-            ->addOption('index', 'i', InputOption::VALUE_OPTIONAL, 'index activities to seed the knowledge base', false);
+            ->addArgument('question', InputArgument::REQUIRED, 'The question or prompt to ask');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
