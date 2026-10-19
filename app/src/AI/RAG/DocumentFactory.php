@@ -25,7 +25,7 @@ final readonly class DocumentFactory
      *
      * @return \Generator<Document>
      */
-    public function yieldDocuments(AthleteInterface $athlete, iterable $activities, ReportProgressInterface $report): \Generator
+    public function yieldDocuments(AthleteInterface $athlete, array $activities, ReportProgressInterface $report): \Generator
     {
         foreach ($activities as $activity) {
             $metrics = $this->getActivityData($athlete, $activity, $report)->toArray()['metrics'];
@@ -65,7 +65,7 @@ final readonly class DocumentFactory
     {
         $stream = $this->cache->get($athlete->getId(), $activity->getId());
 
-        $report->onActivity($activity);
+        $report->progress();
 
         return new ActivityData($athlete, $activity, $stream);
     }

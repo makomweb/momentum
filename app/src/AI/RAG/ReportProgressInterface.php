@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\AI\RAG;
 
-use App\Strava\API\Activity;
-
 interface ReportProgressInterface
 {
-    public function onActivity(Activity $activity): void;
+    public function start(int $count): void;
+
+    public function progress(int $amount = 1): void;
+
+    public function finish(): void;
 }

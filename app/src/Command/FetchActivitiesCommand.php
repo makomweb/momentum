@@ -18,6 +18,7 @@ use App\Strava\API\ApiException;
 use App\Strava\Synchronizer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -83,19 +84,24 @@ class FetchActivitiesCommand extends Command
         $this->adapter->setStravaUserId($stravaUserId);
         MyChatbot::initialize($this->adapter);
 
+        $report = $this->createReportAdapter($output);
+        $report->start(count($activities));
+
         try {
             MyChatbot::make()
                 ->ingest(
                     $this->documentFactory->yieldDocuments(
                         $this->createAthlete($stravaUserId),
                         $activities,
-                        $this->createReportAdapter($output)
+                        $report
                     )
                 );
         } catch (\Throwable $ex) {
             $io->error(sprintf('Error ingesting: %s', $ex));
 
             return Command::FAILURE;
+        } finally {
+            $report->finish();
         }
 
         return Command::SUCCESS;
@@ -158,13 +164,33 @@ class FetchActivitiesCommand extends Command
     private function createReportAdapter(OutputInterface $output): ReportProgressInterface
     {
         return new class($output) implements ReportProgressInterface {
+            private ?ProgressBar $progressBar = null;
+
             public function __construct(private OutputInterface $output)
             {
             }
 
-            public function onActivity(Activity $activity): void
+            public function start(int $count): void
             {
-                $this->output->write('.');
+                assert(is_null($this->progressBar), sprintf('You already called %s::start()!', self::class));
+                assert($count > 0);
+
+                $this->progressBar = new ProgressBar($this->output, $count);
+            }
+
+            public function progress(int $steps = 1): void
+            {
+                assert($this->progressBar instanceof ProgressBar, sprintf('You must call %s::start() first!', self::class));
+                assert($steps > 0);
+
+                $this->progressBar->advance($steps);
+            }
+
+            public function finish(): void
+            {
+                assert($this->progressBar instanceof ProgressBar, sprintf('You must call %s::start() first!', self::class));
+
+                $this->progressBar->finish();
             }
         };
     }
