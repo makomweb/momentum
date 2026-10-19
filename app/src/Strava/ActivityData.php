@@ -143,13 +143,6 @@ final class ActivityData
 
     public function hasVelocityData(): bool
     {
-        // $nonZeroPoints = array_filter(
-        //     $this->getVelocityRawPoints(),
-        //     static fn (array $p) => $p['value'] > 0.0,
-        // );
-
-        // dump(['count_velocity_raw_points' => count($nonZeroPoints)]);
-
         foreach ($this->yieldVelocityRawPoints() as $point) {
             if ($point['value'] > 0.0) {
                 return true;
@@ -161,13 +154,6 @@ final class ActivityData
 
     public function hasHeartRateData(): bool
     {
-        // $nonZeroPoints = array_filter(
-        //     $this->getHeartRatePoints(),
-        //     static fn (array $p) => $p['value'] > 0,
-        // );
-
-        // dump(['count_heart_rate_points' => count($nonZeroPoints)]);
-
         foreach ($this->yieldHeartRatePoints() as $point) {
             if ($point['value'] > 0) {
                 return true;

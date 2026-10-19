@@ -29,16 +29,16 @@ final class FormatMovingTime extends AbstractExtension
 
         if ($hours > 0) {
             if ($minutes > 0) {
-                return sprintf('%dh %dmin %ds', $hours, $minutes, $seconds);
+                return sprintf('%d h %d min %d s', $hours, $minutes, $seconds);
             }
 
-            return sprintf('%dh %ds', $hours, $seconds);
+            return sprintf('%d h %d s', $hours, $seconds);
         }
 
         if ($minutes > 0) {
-            return sprintf('%dmin %ds', $minutes, $seconds);
+            return sprintf('%d min %d s', $minutes, $seconds);
         }
 
-        return sprintf('%ds', $seconds);
+        return sprintf('%d s', $seconds);
     }
 }

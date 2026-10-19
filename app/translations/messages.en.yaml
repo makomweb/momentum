@@ -1,2 +1,169 @@
+# Auth
+auth:
+  login:
+    title: 'Momentum'
+    subtitle: 'Analyze your Strava activities'
+    remember_me: 'Keep me logged in for 30 days'
+    button: 'Login with Strava'
+    info_title: 'ℹ️ What we need:'
+    info_text: 'We''ll request access to your activities. Your data is used only for syncing your activities to Momentum.'
+
+# Navigation
+nav:
+  momentum: 'Momentum'
+  strava_id: 'Strava-ID:'
+  settings: 'Settings'
+  about: 'About'
+  logout: 'Logout'
+
+# Footer
+footer:
+  copyright: 'Momentum. Licensed under'
+  mit: 'MIT'
+  version: 'Version'
+
+# Activities
+activities:
+  index:
+    title: 'Recent Activities'
+    sync_button: 'Sync from Strava'
+    no_config: 'Please configure your profile to analyze activities.'
+    configure_link: 'Configure now →'
+    configure_title: 'Configure profile to analyze'
+    no_activities: 'No activities yet'
+    no_activities_help: 'Click the "Sync from Strava" button to fetch your activities'
+    sync_now: 'Sync Now'
+    syncing: 'Syncing...'
+
+# Activity Details
 activity:
-  document_content: '{name} on {date}. A {type} activity covering {distance} at an average speed of {avg_speed} with a maximum speed of {max_speed}. Total elapsed time was {elapsed_time}. Recorded using {device}.'
+  distance: 'Distance'
+  moving_time: 'Moving Time'
+  speed: 'Speed'
+  pace: 'Pace'
+  view_details: 'View details →'
+  avg: 'Avg.'
+  max: 'Max.'
+  avg_heart_rate: 'Avg. Heart Rate'
+  max_heart_rate: 'Max. Heart Rate'
+  avg_power: 'Avg. Power'
+  easy_zone: 'Easy (Z1-2)'
+  medium_zone: 'Medium (Z3)'
+  hard_zone: 'Hard (Z4-5)'
+  heart_rate_zones: 'Heart Rate Zones'
+  pace_zones: 'Pace Zones'
+  pace_zone_transitions: 'Pace Zone Transitions'
+  share: 'Share'
+  share_activity: 'Share Activity'
+  link_expires_in: 'Link expires in'
+  days_7: '7 days'
+  days_30: '30 days'
+  days_60: '60 days'
+  days_1_year: '1 year'
+  share_link: 'Share Link'
+  copy: 'Copy'
+  expires: 'Expires'
+  generating_link: 'Generating share link...'
+  generate_link: 'Generate Link'
+  training_zones: 'Training Zones'
+  zones_description: 'Your running effort is categorized into five training zones based on pace and heart rate data. Zones help optimize your training by ensuring you''re working at the right intensity for your goals.'
+  configure_threshold: 'To see zone analysis, please configure your threshold pace in your profile settings.'
+  no_data_available: 'No data available for analysis. This activity may not have complete stream data.'
+  heart_rate_over_time: 'Heart Rate Over Time'
+  time_label: 'Time (HH:MM:SS)'
+  heart_rate_label: 'Heart Rate (bpm)'
+  copied: 'Copied!'
+  document_content: '{name} on {date}. A {type} activity covering {distance} at an average speed of {avg_speed} with a maximum speed of {max_speed}. Total elapsed time was {elapsed_time}. Recorded using {device}. You spent {easy_percentage} percent in easy and {hard_percentage} percent in the hard zones, while {medium_percentage} percent was inbetween. {suggestion}'
+
+# Activity Analysis Empty/No Stream
+analysis:
+  no_activities_found: 'No Activities Found'
+  no_activities_yet: 'You haven''t synced any activities yet. Start by fetching your Strava activities using the commands below.'
+  to_get_started: 'To get started, run:'
+  activities_command: 'docker compose exec app bin/console app:activities <STRAVA_USER_ID>'
+  stream_command: 'docker compose exec app bin/console app:stream <ACTIVITY_ID> -u <STRAVA_USER_ID>'
+  back_to_dashboard: 'Back to Dashboard'
+  no_stream_data: 'No Stream Data Available'
+  no_stream_yet: 'This activity doesn''t have stream data yet, or there was an error fetching it.'
+  stream_data_info: 'Stream data includes velocity, heart rate, and elevation information over time.'
+  try_fetching: 'Try fetching the stream data:'
+  fetch_command: 'docker compose exec app bin/console app:stream <ACTIVITY_ID>'
+  retry: 'Retry'
+
+# Profile Settings
+settings:
+  title: 'Profile settings'
+  subtitle: 'Configure the values used for pace and heart rate zone analysis.'
+  run_threshold_label: 'Run treshold (minutes per kilometer)'
+  run_threshold_help: 'Used to calculate pace zones for running activities.'
+  cycling_threshold_label: 'Cycling treshold (watt)'
+  cycling_threshold_help: 'Used to calculate pace zones for cycling activities.'
+  max_heart_rate_label: 'Max heart rate (bpm)'
+  max_heart_rate_help: 'Used to calculate heart rate zones when stream data includes heart rate.'
+  save_button: 'Save settings'
+  reset_cache_button: 'Reset cache'
+  back_button: 'Back to activities'
+  current_values: 'Current values'
+  run_threshold: 'Run treshold:'
+  cycling_threshold: 'Cycling treshold:'
+  max_heart_rate: 'Max heart rate:'
+  not_set: 'Not set'
+  reset_confirm: 'Are you sure you want to reset the cache? This will delete all cached activities.'
+  reset_success: 'Cache reset successfully'
+  reset_error: 'Error resetting cache:'
+  language: 'Language'
+
+# About
+about:
+  title: 'About Momentum'
+  subtitle: 'Learn more about this project and how it works.'
+  what_is: 'What is Momentum?'
+  description: 'Momentum is an open-source activity analysis tool that integrates with the Strava API to provide detailed insights into your running, cycling, swimming, and other athletic activities. It tracks training zones, heart rate patterns, and helps you understand your workout distribution.'
+  features: 'Features'
+  feature_1: 'Heart rate zone analysis'
+  feature_2: 'Pace zone tracking for runners'
+  feature_3: 'Training metrics and insights'
+  feature_4: 'Activity stream visualization'
+  feature_5: 'Customizable zone configurations'
+  license: 'License'
+  license_text: 'Momentum is released under the'
+  license_name: 'MIT License'
+  license_info: '. This is a permissive open-source license that allows you to use, modify, and distribute the software freely.'
+  read_license: 'Read the full license'
+  privacy: 'Data Privacy'
+  privacy_text_1: 'Momentum'
+  privacy_text_2: 'only reads'
+  privacy_text_3: 'your activity data from Strava. It does not modify, delete, or alter any data on your Strava account. Your activities are analyzed locally to provide insights without any changes being made to Strava.'
+  technology: 'Technology'
+  built_with: 'Built with'
+  tech_1: 'Symfony 8'
+  tech_2: 'Tailwind CSS'
+  tech_3: 'Doctrine ORM'
+  tech_4: 'Strava API'
+  tech_info: '. Hosted and managed locally or on your own infrastructure.'
+  open_source: 'Open Source'
+  open_source_text: 'Momentum is completely open source and free to use. The source code is available on GitHub, and community contributions are welcome. Join us in improving activity analysis for athletes everywhere.'
+  back_to_activities: 'Back to activities'
+
+# Share
+share:
+  running_moment: 'Running Moment'
+  activity_not_found: 'Activity Not Found'
+  activity_not_found_text: 'The activity you''re looking for doesn''t exist.'
+  share_link_expired: 'Share Link Expired'
+  share_link_expired_text: 'This share link is no longer valid. Please ask the runner for a fresh share link.'
+  stream_not_available: 'Running Moment'
+  stream_not_available_text: 'Stream data for this activity is not available.'
+  refresh_icon: '↻'
+
+# Error
+error:
+  configuration_required: 'Configuration Required'
+  configure_profile: 'Configure Profile'
+  back_to_activities: 'Back to Activities'
+
+# Training metrics
+training_metrics_suggestion:
+  take_it_easy: 'Take it easy.'
+  keep_it_up: 'Keep it up.'
+  set_more_impulses: 'Set some more impulses.'

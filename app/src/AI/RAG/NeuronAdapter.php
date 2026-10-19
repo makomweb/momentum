@@ -12,10 +12,17 @@ use NeuronAI\RAG\Embeddings\OllamaEmbeddingsProvider;
 use NeuronAI\RAG\VectorStore\FileVectorStore;
 use NeuronAI\RAG\VectorStore\VectorStoreInterface;
 
-final readonly class NeuronAdapter implements NeuronAdapterInterface
+final class NeuronAdapter implements NeuronAdapterInterface
 {
-    public function __construct(private Config $config)
+    private ?int $stravaUserId = null;
+
+    public function __construct(private readonly Config $config)
     {
+    }
+
+    public function setStravaUserId(int $stravaUserId): void
+    {
+        $this->stravaUserId = $stravaUserId;
     }
 
     public function createAIProvider(): AIProviderInterface
@@ -36,9 +43,11 @@ final readonly class NeuronAdapter implements NeuronAdapterInterface
 
     public function createVectorStore(): VectorStoreInterface
     {
+        assert(is_int($this->stravaUserId), sprintf('Call %s::setStravaId() first!', __CLASS__));
+
         return new FileVectorStore(
             directory: __DIR__,
-            name: 'demo'
+            name: sprintf('strava_activities_%d', $this->stravaUserId)
         );
     }
 }

@@ -10,8 +10,8 @@
 <main class="max-w-2xl mx-auto px-4 py-8 flex-grow">
     <section class="bg-white rounded border border-gray-200 max-w-2xl w-full">
         <div class="border-b border-gray-200 p-4">
-            <h1 class="text-2xl font-bold mb-1">Profile settings</h1>
-            <p class="text-gray-600 text-sm">Configure the values used for pace and heart rate zone analysis.</p>
+            <h1 class="text-2xl font-bold mb-1">{{ 'settings.title'|trans }}</h1>
+            <p class="text-gray-600 text-sm">{{ 'settings.subtitle'|trans }}</p>
         </div>
 
         <div class="p-4">
@@ -28,11 +28,24 @@
                 </div>
             {% endfor %}
 
+            <!-- Language Section -->
+            <div class="mb-6 pb-6 border-b border-gray-200">
+                <label class="block text-xs font-semibold text-gray-600 mb-3">{{ 'settings.language'|trans }}</label>
+                <div class="flex gap-2">
+                    <a href="{{ path('set_locale', {lang: 'en'}) }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-semibold rounded transition">
+                        🇬🇧 English
+                    </a>
+                    <a href="{{ path('set_locale', {lang: 'de'}) }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-semibold rounded transition">
+                        🇩🇪 Deutsch
+                    </a>
+                </div>
+            </div>
+
             <form method="post" class="space-y-4">
                 <input type="hidden" name="_token" value="{{ csrf_token }}">
                 
                 <div>
-                    <label for="run_treshold_per_kilometer" class="block text-xs font-semibold text-gray-600 mb-2">Run treshold (minutes per kilometer)</label>
+                    <label for="run_treshold_per_kilometer" class="block text-xs font-semibold text-gray-600 mb-2">{{ 'settings.run_threshold_label'|trans }}</label>
                     <input
                         type="number"
                         step="0.01"
@@ -43,11 +56,11 @@
                         value="{{ run_treshold is null ? '' : run_treshold.value }}"
                         placeholder="e.g. 4.50"
                     >
-                    <p class="text-gray-600 text-xs mt-1">Used to calculate pace zones for running activities.</p>
+                    <p class="text-gray-600 text-xs mt-1">{{ 'settings.run_threshold_help'|trans }}</p>
                 </div>
                 
                 <div>
-                    <label for="cycling_treshold_watt" class="block text-xs font-semibold text-gray-600 mb-2">Cycling treshold (watt)</label>
+                    <label for="cycling_treshold_watt" class="block text-xs font-semibold text-gray-600 mb-2">{{ 'settings.cycling_threshold_label'|trans }}</label>
                     <input
                         type="number"
                         step="1"
@@ -58,11 +71,11 @@
                         value="{{ cycling_treshold is null ? '' : cycling_treshold.watts }}"
                         placeholder="e.g. 120"
                     >
-                    <p class="text-gray-600 text-xs mt-1">Used to calculate pace zones for cycling activities.</p>
+                    <p class="text-gray-600 text-xs mt-1">{{ 'settings.cycling_threshold_help'|trans }}</p>
                 </div>
 
                 <div>
-                    <label for="max_heart_rate" class="block text-xs font-semibold text-gray-600 mb-2">Max heart rate (bpm)</label>
+                    <label for="max_heart_rate" class="block text-xs font-semibold text-gray-600 mb-2">{{ 'settings.max_heart_rate_label'|trans }}</label>
                     <input
                         type="number"
                         step="1"
@@ -73,28 +86,28 @@
                         value="{{ max_heart_rate.isValid() ? max_heart_rate.bpm : '' }}"
                         placeholder="e.g. 180"
                     >
-                    <p class="text-gray-600 text-xs mt-1">Used to calculate heart rate zones when stream data includes heart rate.</p>
+                    <p class="text-gray-600 text-xs mt-1">{{ 'settings.max_heart_rate_help'|trans }}</p>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-200">
                     <button type="submit" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold rounded transition">
-                        Save settings
+                        {{ 'settings.save_button'|trans }}
                     </button>
                     <button type="button" onclick="resetCache()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded transition">
-                        Reset cache
+                        {{ 'settings.reset_cache_button'|trans }}
                     </button>
                     <a href="{{ path('activities_index') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm font-semibold rounded transition text-center no-underline">
-                        Back to activities
+                        {{ 'settings.back_button'|trans }}
                     </a>
                 </div>
             </form>
 
             <div class="bg-gray-50 rounded border border-gray-200 p-3 mt-4">
-                <div class="font-semibold text-sm mb-2 text-gray-700">Current values</div>
+                <div class="font-semibold text-sm mb-2 text-gray-700">{{ 'settings.current_values'|trans }}</div>
                 <div class="text-sm space-y-1 text-gray-600">
-                    <div><span>Run treshold:</span> <span class="font-semibold text-gray-900">{{ run_treshold }}</span></div>
-                    <div><span>Cycling treshold:</span> <span class="font-semibold text-gray-900">{{ cycling_treshold }}</span></div>
-                    <div><span>Max heart rate:</span> <span class="font-semibold text-gray-900">{{ max_heart_rate is null ? 'Not set' : max_heart_rate }}</span></div>
+                    <div><span>{{ 'settings.run_threshold'|trans }}</span> <span class="font-semibold text-gray-900">{{ run_treshold }}</span></div>
+                    <div><span>{{ 'settings.cycling_threshold'|trans }}</span> <span class="font-semibold text-gray-900">{{ cycling_treshold }}</span></div>
+                    <div><span>{{ 'settings.max_heart_rate'|trans }}</span> <span class="font-semibold text-gray-900">{{ max_heart_rate is null ? ('settings.not_set'|trans) : max_heart_rate }}</span></div>
                 </div>
             </div>
         </div>
@@ -105,7 +118,7 @@
 
 <script>
 function resetCache() {
-    if (confirm('Are you sure you want to reset the cache? This will delete all cached activities.')) {
+    if (confirm('{{ 'settings.reset_confirm'|trans }}')) {
         fetch('{{ path("activities_clear") }}', {
             method: 'DELETE',
             headers: {
@@ -119,11 +132,11 @@ function resetCache() {
             throw new Error('Failed to reset cache');
         })
         .then(data => {
-            alert('Cache reset successfully');
+            alert('{{ 'settings.reset_success'|trans }}');
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error resetting cache: ' + error.message);
+            alert('{{ 'settings.reset_error'|trans }}' + error.message);
         });
     }
 }
