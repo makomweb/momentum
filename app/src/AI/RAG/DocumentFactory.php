@@ -9,6 +9,7 @@ use App\Strava\ActivityData;
 use App\Strava\ActivityStreamCache;
 use App\Strava\API\Activity;
 use App\Twig\FormatMovingTime;
+use App\Twig\TrainingMetricsFilter;
 use NeuronAI\RAG\Document;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -17,6 +18,7 @@ final readonly class DocumentFactory
     public function __construct(
         private TranslatorInterface $translator,
         private ActivityStreamCache $cache,
+        private TrainingMetricsFilter $metricsFilter,
     ) {
     }
 
@@ -29,9 +31,6 @@ final readonly class DocumentFactory
     {
         foreach ($activities as $activity) {
             $metrics = $this->getActivityData($athlete, $activity, $report)->toArray()['metrics'];
-            $result = $this->translator->trans(
-                $metrics->isBalanced() ? 'activity.good_balance' : 'activity.requires_some_impulses'
-            );
 
             $content = $this->translator->trans(
                 'activity.document_content',
@@ -47,16 +46,22 @@ final readonly class DocumentFactory
                     '{easy_percentage}' => round($metrics->getEasyPercentage(), 0),
                     '{medium_percentage}' => round($metrics->getMediumPercentage(), 0),
                     '{hard_percentage}' => round($metrics->getHardPercentage(), 0),
+                    '{suggestion}' => $this->metricsFilter->getDescription($metrics),
                 ],
             );
 
-            yield new Document($content.' '.$result)
+            yield new Document($content)
                 ->setSourceType(get_class($activity))
                 ->setSourceName($activity->getName())
                 ->setMetadata([
                     'strava_user_id' => $athlete->getId(),
                     'activity_id' => $activity->getId(),
-                    ...array_diff_key($activity->data, array_flip(['id'])),
+                    ...array_diff_key($activity->data, array_flip(['id', 'elapsed_time', 'moving_time'])),
+                    'easy_percentage' => round($metrics->getEasyPercentage(), 0),
+                    'medium_percentage' => round($metrics->getMediumPercentage(), 0),
+                    'hard_percentage' => round($metrics->getHardPercentage(), 0),
+                    'suggestion' => $this->metricsFilter->getDescription($metrics),
+                    'duration' => FormatMovingTime::format($activity->getElapsedTime())
                 ]);
         }
     }

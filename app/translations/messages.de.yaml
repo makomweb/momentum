@@ -1,2 +1,11 @@
 activity:
-  document_content: '{name} am {date}. Eine {type}-Aktivität über {distance} mit einer Durchschnittsgeschwindigkeit von {avg_speed} und einer Höchstgeschwindigkeit von {max_speed}. Die Gesamtverstrichene Zeit betrug {elapsed_time}. Aufgezeichnet mit {device}.'
+  document_content: '{name} am {date}. Eine {type}-Aktivität über {distance} mit einer Durchschnittsgeschwindigkeit von {avg_speed} und einer Höchstgeschwindigkeit von {max_speed}. Die Gesamtverstrichene Zeit betrug {elapsed_time}. Aufgezeichnet mit {device}. Du hast {easy_percentage} Prozent easy und {hard_percentage} Prozent hard trainiert, dabei warst du {medium_percentage} Prozent im mittleren Bereich. {suggestion}'
+training_metrics_suggestion:
+  take_it_easy: 'Achte auf genügend Erholung.'
+  keep_it_up: 'Mach weiter so.'
+  set_more_impulses: 'Entweder langsamer oder intensiver.'
+
+# Profile Settings
+settings:
+  title: 'Profil Einstellungen'
+  subtitle: 'Konfiguriere diese Werte, um Pace und Herzfrequenzzonen zu analysieren.'
