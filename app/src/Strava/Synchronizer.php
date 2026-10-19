@@ -6,6 +6,7 @@ namespace App\Strava;
 
 use App\Strava\API\Activity;
 use App\Strava\API\ActivityFetcher;
+use App\Strava\API\TokenExpiredException;
 use Psr\Log\LoggerInterface;
 
 final readonly class Synchronizer
@@ -62,6 +63,8 @@ final readonly class Synchronizer
     {
         try {
             return $this->fetcher->fetch(stravaUserId: $stravaUserId, page: $page, after: $after);
+        } catch (TokenExpiredException $ex) {
+            throw $ex;
         } catch (\Throwable $ex) {
             $this->logger->error(
                 sprintf('Fetching page %d after %s has failed due to %s (%s)',
