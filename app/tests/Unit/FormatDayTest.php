@@ -3,12 +3,14 @@
 namespace App\Tests\Unit;
 
 use App\Twig\FormatLocalDateTime;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[AllowMockObjectsWithoutExpectations]
 class FormatDayTest extends TestCase
 {
     private FormatLocalDateTime $filter;

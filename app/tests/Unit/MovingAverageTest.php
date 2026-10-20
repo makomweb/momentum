@@ -106,7 +106,7 @@ class MovingAverageTest extends TestCase
             self::assertGreaterThanOrEqual($start, $timestamp);
 
             $distance = $data->getDistance();
-            self::assertGreaterThanOrEqual(0.0, $distance);
+            self::assertGreaterThanOrEqual(0.0, $distance->meters);
 
             $heartRate = $data->getHeartRate();
             self::assertGreaterThan(60.0, $heartRate->bpm);
