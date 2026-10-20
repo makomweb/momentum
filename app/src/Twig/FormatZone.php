@@ -12,7 +12,9 @@ use Twig\TwigFilter;
 
 final class FormatZone extends AbstractExtension
 {
-    public function __construct(private TranslatorInterface $translator) {}
+    public function __construct(private TranslatorInterface $translator)
+    {
+    }
 
     /**
      * @return TwigFilter[]
@@ -25,12 +27,12 @@ final class FormatZone extends AbstractExtension
         ];
     }
 
-    public static function getZoneColor(HeartRateZone|PaceZone $zone): string
+    public static function getZoneColor(string $value, string $type): string
     {
         return match (true) {
-            ($zone instanceof HeartRateZone) => self::getHeartRateZoneColor($zone),
-            ($zone instanceof PaceZone) => self::getPaceZoneColor($zone),
-            default => throw new \Exception('Unsupported zone type!'),
+            in_array($type, ['hf', 'hr', 'heart_rate', 'pulse']) => self::getHeartRateZoneColor(HeartRateZone::from($value)),
+            in_array($type, ['pace', 'speed', 'velocity']) => self::getPaceZoneColor(PaceZone::from($value)),
+            default => throw new \Exception(sprintf('Combination %s (value) and %s (type) not supported!', $value, $type)),
         };
     }
 
@@ -60,8 +62,7 @@ final class FormatZone extends AbstractExtension
     {
         return match (true) {
             ($zone instanceof HeartRateZone) => $this->getHeartRateZoneLabel($zone),
-            ($zone instanceof PaceZone) => $this->getPaceZoneLabel($zone),
-            default => throw new \Exception('Unsupported zone type!'),
+            default => $this->getPaceZoneLabel($zone),
         };
     }
 

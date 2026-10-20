@@ -192,7 +192,7 @@ final class ActivityController extends AbstractController
             }
         };
 
-        $analysisData = self::createAnalysisData($athlete, $activity, $stream);
+        $analysisData = $this->createAnalysisData($athlete, $activity, $stream);
 
         $data = [
             ...$activity->data,
@@ -216,8 +216,8 @@ final class ActivityController extends AbstractController
      *     metrics: TrainingMetrics,
      *     pace_zone_sessions: array<Session>,
      *     heart_rate_zone_sessions: array<Session>,
-     *     pace_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
-     *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
+     *     pace_stats: array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>,
+     *     hr_stats: array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>,
      * }
      */
     private function createAnalysisData(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): array

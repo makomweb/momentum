@@ -262,8 +262,8 @@ final class ActivityData
      *     metrics: TrainingMetrics,
      *     pace_zone_sessions: array<Session>,
      *     heart_rate_zone_sessions: array<Session>,
-     *     pace_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
-     *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
+     *     pace_stats: array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>,
+     *     hr_stats: array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>
      * }
      */
     public function toArray(): array
@@ -273,8 +273,8 @@ final class ActivityData
         $paceZoneSessions = $sessions->getPaceZoneSessions();
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
-        $paceStats = Statistics::fromSessions($this->athlete, $paceZoneSessions, PaceZone::cases());
-        $hrStats = Statistics::fromSessions($this->athlete, $heartRateZoneSessions, HeartRateZone::cases());
+        $paceStats = Statistics::fromSessions($paceZoneSessions, PaceZone::cases());
+        $hrStats = Statistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
         // Use zone session totals instead of moving_time
         // This ensures percentages always aggregate to 100%
@@ -285,8 +285,10 @@ final class ActivityData
         $hrStatsArray = $hrStats->toArray($totalHrSeconds);
 
         // Localize zone descriptions
-        $zoneDescription = new ZoneDescription($this->athlete);
-        $localizedZoneDescription = new LocalizedZoneDescription($zoneDescription, $this->translator);
+        $localizedZoneDescription = new LocalizedZoneDescription(
+            new ZoneDescription($this->athlete),
+            $this->translator
+        );
 
         $paceStatsArray = $this->localizeStats($paceStatsArray, $localizedZoneDescription);
         $hrStatsArray = $this->localizeStats($hrStatsArray, $localizedZoneDescription);
@@ -305,9 +307,9 @@ final class ActivityData
     }
 
     /**
-     * @param array<array{zone: string, description: string, duration_seconds: int, duration_percentage: float}> $stats
+     * @param array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}> $stats
      *
-     * @return array<array{zone: string, description: string, duration_seconds: int, duration_percentage: float}>
+     * @return array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>
      */
     private function localizeStats(array $stats, LocalizedZoneDescription $localizedZoneDescription): array
     {

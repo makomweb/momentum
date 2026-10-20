@@ -267,10 +267,10 @@
         velocityData.zoneColors = [
             {% for session in pace_zone_sessions %}
                 {
-                    name: '{{ session.zone.value }}',
+                    name: '{{ session.zone | zone_label }}',
                     startTime: '{{ session.start.format('H:i:s') }}',
                     endTime: '{{ session.end.format('H:i:s') }}',
-                    color: '{{ session.zone | zone_color }}'
+                    color: '{{ session.zone.value | zone_color('pace') }}'
                 }{{ not loop.last ? ',' : '' }}
             {% endfor %}
         ];
@@ -348,10 +348,10 @@
         heartRateData.zoneColors = [
             {% for session in heart_rate_zone_sessions %}
                 {
-                    name: '{{ session.zone.value }}',
+                    name: '{{ session.zone | zone_label }}',
                     startTime: '{{ session.start.format('H:i:s') }}',
                     endTime: '{{ session.end.format('H:i:s') }}',
-                    color: '{{ session.zone.getColor() }}'
+                    color: '{{ session.zone.value | zone_color('hf') }}'
                 }{{ not loop.last ? ',' : '' }}
             {% endfor %}
         ];
