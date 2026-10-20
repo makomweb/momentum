@@ -1,0 +1,132 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit;
+
+use App\Twig\FormatLocalDateTime;
+use PHPUnit\Framework\TestCase;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+class FormatLocalDateTimeTest extends TestCase
+{
+    private FormatLocalDateTime $filter;
+    private TranslatorInterface $translator;
+
+    protected function setUp(): void
+    {
+        $this->translator = $this->createMock(TranslatorInterface::class);
+        $this->filter = new FormatLocalDateTime($this->translator);
+    }
+
+    public function test_formats_today_in_german(): void
+    {
+        $this->translator->expects($this->once())
+            ->method('getLocale')
+            ->willReturn('de');
+
+        $this->translator->expects($this->once())
+            ->method('trans')
+            ->with('date.today')
+            ->willReturn('Heute');
+
+        $today = new \DateTimeImmutable();
+        $result = $this->filter->format($today);
+
+        $this->assertStringContainsString('Heute', $result);
+        $this->assertStringContainsString(':', $result);
+    }
+
+    public function test_formats_yesterday_in_german(): void
+    {
+        $this->translator->expects($this->any())
+            ->method('getLocale')
+            ->willReturn('de');
+
+        $this->translator->expects($this->once())
+            ->method('trans')
+            ->with('date.yesterday')
+            ->willReturn('Gestern');
+
+        $yesterday = (new \DateTimeImmutable())->modify('-1 day');
+        $result = $this->filter->format($yesterday);
+
+        $this->assertStringContainsString('Gestern', $result);
+    }
+
+    public function test_formats_past_date_in_german(): void
+    {
+        $this->translator->expects($this->any())
+            ->method('getLocale')
+            ->willReturn('de');
+
+        $pastDate = new \DateTimeImmutable('2026-10-01 14:30:00');
+        $result = $this->filter->format($pastDate);
+
+        // German date format should be D, d.m.Y · H:i
+        $this->assertStringContainsString('.', $result);
+        $this->assertStringContainsString('14:30', $result);
+        // Check for German day abbreviation (e.g., Mi for Mittwoch)
+        $this->assertMatchesRegularExpression('/^(Mo|Di|Mi|Do|Fr|Sa|So)/', $result);
+    }
+
+    public function test_formats_today_in_english(): void
+    {
+        $this->translator->expects($this->once())
+            ->method('getLocale')
+            ->willReturn('en');
+
+        $this->translator->expects($this->once())
+            ->method('trans')
+            ->with('date.today')
+            ->willReturn('Today');
+
+        $today = new \DateTimeImmutable();
+        $result = $this->filter->format($today);
+
+        $this->assertStringContainsString('Today', $result);
+        $this->assertStringContainsString(':', $result);
+    }
+
+    public function test_formats_past_date_in_english(): void
+    {
+        $this->translator->expects($this->any())
+            ->method('getLocale')
+            ->willReturn('en');
+
+        $pastDate = new \DateTimeImmutable('2026-10-01 14:30:00');
+        $result = $this->filter->format($pastDate);
+
+        // English date format should be D, m/d/Y · H:i
+        $this->assertStringContainsString('/', $result);
+        $this->assertStringContainsString('14:30', $result);
+        // Check for English day abbreviation
+        $this->assertMatchesRegularExpression('/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/', $result);
+    }
+
+    public function test_german_date_format_uses_dot_as_separator(): void
+    {
+        $this->translator->expects($this->any())
+            ->method('getLocale')
+            ->willReturn('de');
+
+        $testDate = new \DateTimeImmutable('2026-10-15 10:45:00');
+        $result = $this->filter->format($testDate);
+
+        // German format: d.m.Y (day.month.year)
+        $this->assertMatchesRegularExpression('/\d+\.\d+\.\d+/', $result);
+    }
+
+    public function test_english_date_format_uses_slash_as_separator(): void
+    {
+        $this->translator->expects($this->any())
+            ->method('getLocale')
+            ->willReturn('en');
+
+        $testDate = new \DateTimeImmutable('2026-10-15 10:45:00');
+        $result = $this->filter->format($testDate);
+
+        // English format: m/d/Y (month/day/year)
+        $this->assertMatchesRegularExpression('/\d+\/\d+\/\d+/', $result);
+    }
+}

@@ -163,6 +163,11 @@ error:
   configure_profile: 'Profil konfigurieren'
   back_to_activities: 'Zurück zu Aktivitäten'
 
+# Date/Time formatting
+date:
+  today: 'Heute'
+  yesterday: 'Gestern'
+
 # Training metrics
 training_metrics_suggestion:
   get_some_recovery: 'Achte auf genügend Erholung.'
