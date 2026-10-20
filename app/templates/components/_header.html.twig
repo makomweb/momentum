@@ -1,7 +1,7 @@
 <header class="sticky top-0 z-10 bg-sky-500 border-b border-sky-600">
     <nav class="flex items-center justify-between px-4 py-4">
         <a href="{{ path('activities_index') }}" class="font-bold text-lg no-underline text-white">
-            Momentum
+            {{ 'nav.momentum'|trans }}
         </a>
         
         {% if app.user %}
@@ -18,17 +18,17 @@
                     {% endif %}
                     <div class="text-sm text-white">
                         <div class="font-medium">{{ user.name }}</div>
-                        <div class="text-xs text-sky-100">Strava-ID: {{ user.stravaId }}</div>
+                        <div class="text-xs text-sky-100">{{ 'nav.strava_id'|trans }} {{ user.stravaId }}</div>
                     </div>
                 </button>
 
                 <div id="menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded shadow-lg border border-gray-200 z-20">
-                    <a href="{{ path('profile_settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t">Settings</a>
-                    <a href="{{ path('about') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-200">About</a>
+                    <a href="{{ path('profile_settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t">{{ 'nav.settings'|trans }}</a>
+                    <a href="{{ path('about') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-200">{{ 'nav.about'|trans }}</a>
                     
                     <form method="post" action="{{ path('logout') }}" class="block">
                         <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
-                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-b border-t border-gray-200">Logout</button>
+                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-b border-t border-gray-200">{{ 'nav.logout'|trans }}</button>
                     </form>
                 </div>
             </div>

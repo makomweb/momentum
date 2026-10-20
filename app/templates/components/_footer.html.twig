@@ -2,11 +2,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-4 py-4 sm:py-6">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm text-gray-600">
             <div class="text-center sm:text-left">
-                &copy; {{ "now" | date("Y") }} Momentum. Licensed under <a href="https://opensource.org/licenses/MIT" class="text-sky-600 hover:text-sky-700" target="_blank">MIT</a>.
+                &copy; {{ "now" | date("Y") }} {{ 'footer.copyright'|trans }} <a href="https://opensource.org/licenses/MIT" class="text-sky-600 hover:text-sky-700" target="_blank">{{ 'footer.mit'|trans }}</a>.
             </div>
             <div class="flex items-center gap-4">
-                <span>Version {{ appVersion }}</span>
-                <a href="{{ path('about') }}" class="text-sky-600 hover:text-sky-700">About</a>
+                <span>{{ 'footer.version'|trans }} {{ appVersion }}</span>
+                <a href="{{ path('about') }}" class="text-sky-600 hover:text-sky-700">{{ 'nav.about'|trans }}</a>
             </div>
         </div>
     </div>
