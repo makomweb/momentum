@@ -7,11 +7,14 @@ namespace App\Strava;
 use App\Momentum\Distance;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class ActivityMetaData
 {
-    public function __construct(private Activity $activity)
-    {
+    public function __construct(
+        private Activity $activity,
+        private TranslatorInterface $translator,
+    ) {
     }
 
     public function getActivityType(): string
@@ -58,22 +61,26 @@ final readonly class ActivityMetaData
     {
         $type = $this->getActivityType();
 
-        return match ($type) {
-            'Run', 'Walk', 'Hike', 'RockClimbing' => 'Pace',
-            'Ride', 'Swim' => 'Speed',
+        $key = match ($type) {
+            'Run', 'Walk', 'Hike', 'RockClimbing' => 'activity.label_pace',
+            'Ride', 'Swim' => 'activity.label_speed',
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
         };
+
+        return $this->translator->trans($key);
     }
 
     public function getVelocityChartTitle(): string
     {
         $type = $this->getActivityType();
 
-        return match ($type) {
-            'Run', 'Walk', 'Hike', 'RockClimbing' => 'Pace Over Time',
-            'Swim', 'Ride' => 'Speed Over Time',
+        $key = match ($type) {
+            'Run', 'Walk', 'Hike', 'RockClimbing' => 'activity.pace_over_time',
+            'Swim', 'Ride' => 'activity.speed_over_time',
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
         };
+
+        return $this->translator->trans($key);
     }
 
     public function hasSpeed(): bool

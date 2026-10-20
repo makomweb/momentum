@@ -72,6 +72,6 @@ final readonly class DocumentFactory implements DocumentFactoryInterface
 
         $report->progress($activity);
 
-        return new ActivityData($athlete, $activity, $stream);
+        return new ActivityData($athlete, $activity, $stream, $this->translator);
     }
 }

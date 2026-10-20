@@ -19,6 +19,7 @@ use App\Momentum\Statistics;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\Velocity;
 use App\Strava\API\Activity;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ActivityData
 {
@@ -28,12 +29,13 @@ final class ActivityData
         private AthleteInterface $athlete,
         private Activity $activity,
         private ActivityStream $stream,
+        private TranslatorInterface $translator,
     ) {
     }
 
     public function getMetaData(): ActivityMetaData
     {
-        return new ActivityMetaData($this->activity);
+        return new ActivityMetaData($this->activity, $this->translator);
     }
 
     /**

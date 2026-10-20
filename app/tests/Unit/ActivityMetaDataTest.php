@@ -70,6 +70,6 @@ class ActivityMetaDataTest extends TestCase
          * } $mergedData */
         $mergedData = [...$prototTypeData, ...$data];
 
-        return new ActivityMetaData(Activity::fromRawData($mergedData));
+        return new ActivityMetaData(Activity::fromRawData($mergedData), new TranslatorStub());
     }
 }

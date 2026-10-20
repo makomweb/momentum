@@ -27,6 +27,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/activity', name: 'activity_')]
 final class ActivityController extends AbstractController
@@ -37,6 +38,7 @@ final class ActivityController extends AbstractController
         private ActivityShareToken $shareToken,
         private AthleteInterface $athlete,
         private UserRepository $users,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -73,7 +75,7 @@ final class ActivityController extends AbstractController
             ]);
         }
 
-        $data = self::createAnalysisData($this->athlete, $activity, $stream);
+        $data = $this->createAnalysisData($this->athlete, $activity, $stream);
 
         return $this->render('activity/analysis.html.twig', $data);
     }
@@ -218,9 +220,9 @@ final class ActivityController extends AbstractController
      *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
      * }
      */
-    private static function createAnalysisData(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): array
+    private function createAnalysisData(AthleteInterface $athlete, Activity $activity, ActivityStream $stream): array
     {
-        $activityData = new ActivityData($athlete, $activity, $stream);
+        $activityData = new ActivityData($athlete, $activity, $stream, $this->translator);
 
         return $activityData->toArray();
     }

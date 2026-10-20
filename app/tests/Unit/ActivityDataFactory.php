@@ -50,7 +50,8 @@ final readonly class ActivityDataFactory
         return new ActivityData(
             AthleteFactory::createAthlete(new Pace(5.00, PaceUnit::MINUTES_PER_KILOMETER), Power::ZERO(), new HeartRate(180)),
             Activity::fromRawData($data),
-            $factory->fromJsonFile($filePath)
+            $factory->fromJsonFile($filePath),
+            new TranslatorStub(),
         );
     }
 }
