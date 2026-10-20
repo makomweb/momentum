@@ -15,14 +15,14 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Home: ./index.md
-  - Architecture:
+  - ⚙️ Architecture:
       - Overview: ./architecture/index.md
       - Deptrac Validation: ./architecture/deptrac.md
       - Design Patterns: ./architecture/patterns.md
       - Strava API Flow: ./architecture/strava-flow.md
-  - 🧠 RAG Brainstorming:
-      - Overview: ./brainstorming/index.md
-      - Features & Roadmap: ./brainstorming/01-features-roadmap.md
-      - OpenAI vs. Ollama: ./brainstorming/02-provider-comparison.md
-      - Smart Training Plans: ./brainstorming/03-smart-training-plans.md
-      - Vector Store Comparison: ./brainstorming/04-vector-store-comparison.md
+  - 🧠 RAG:
+      - Overview: ./rag/index.md
+      - Features & Roadmap: ./rag/01-features-roadmap.md
+      - OpenAI vs. Ollama: ./rag/02-provider-comparison.md
+      - Smart Training Plans: ./rag/03-smart-training-plans.md
+      - Vector Store Comparison: ./rag/04-vector-store-comparison.md
