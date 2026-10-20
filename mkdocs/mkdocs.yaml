@@ -20,6 +20,9 @@ nav:
       - Deptrac Validation: ./architecture/deptrac.md
       - Design Patterns: ./architecture/patterns.md
       - Strava API Flow: ./architecture/strava-flow.md
-  - Toolbox-Exception-Hierarchy:
-      - Before: ./architecture/before.md
-      - After: ./architecture/after.md
+  - 🧠 RAG Brainstorming:
+      - Overview: ./brainstorming/index.md
+      - Features & Roadmap: ./brainstorming/01-features-roadmap.md
+      - OpenAI vs. Ollama: ./brainstorming/02-provider-comparison.md
+      - Smart Training Plans: ./brainstorming/03-smart-training-plans.md
+      - Vector Store Comparison: ./brainstorming/04-vector-store-comparison.md
