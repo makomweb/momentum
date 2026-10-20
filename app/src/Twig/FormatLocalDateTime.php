@@ -28,7 +28,7 @@ final class FormatLocalDateTime extends AbstractExtension
         if (null === $template) {
             $template = match ($locale) {
                 'de' => 'D, d.m.Y · H:i',
-                default => 'D, m/d/Y · H:i',
+                default => 'D, m/d/Y · g:i A',
             };
         }
 
@@ -37,14 +37,16 @@ final class FormatLocalDateTime extends AbstractExtension
 
         if ($dateTime->format('Y-m-d') === $today->format('Y-m-d')) {
             $todayLabel = $this->translator->trans('date.today');
+            $timeFormat = 'de' === $locale ? 'H:i' : 'g:i A';
 
-            return sprintf('%s · %s', $todayLabel, $dateTime->format('H:i'));
+            return sprintf('%s · %s', $todayLabel, $dateTime->format($timeFormat));
         }
 
         if ($dateTime->format('Y-m-d') === $yesterday->format('Y-m-d')) {
             $yesterdayLabel = $this->translator->trans('date.yesterday');
+            $timeFormat = 'de' === $locale ? 'H:i' : 'g:i A';
 
-            return sprintf('%s · %s', $yesterdayLabel, $dateTime->format('H:i'));
+            return sprintf('%s · %s', $yesterdayLabel, $dateTime->format($timeFormat));
         }
 
         return $this->formatLocalizedDate($dateTime, $template, $locale);
@@ -66,11 +68,20 @@ final class FormatLocalDateTime extends AbstractExtension
                 'Jul' => 'Jul', 'Aug' => 'Aug', 'Sep' => 'Sep', 'Oct' => 'Oct', 'Nov' => 'Nov', 'Dec' => 'Dec'],
         };
 
+        $amPmNames = match ($locale) {
+            'de' => ['AM' => 'AM', 'PM' => 'PM'],
+            default => ['AM' => 'AM', 'PM' => 'PM'],
+        };
+
         foreach ($dayNames as $en => $localized) {
             $formatted = str_replace($en, $localized, $formatted);
         }
 
         foreach ($monthNames as $en => $localized) {
+            $formatted = str_replace($en, $localized, $formatted);
+        }
+
+        foreach ($amPmNames as $en => $localized) {
             $formatted = str_replace($en, $localized, $formatted);
         }
 

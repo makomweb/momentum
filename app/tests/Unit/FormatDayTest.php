@@ -50,7 +50,7 @@ class FormatDayTest extends TestCase
         return [
             [$today, 'Today · '],
             [$yesterday, 'Yesterday · '],
-            [$otherDate, 'Sun, 08/23/2026 · 17:02'],
+            [$otherDate, 'Sun, 08/23/2026 · 5:02 PM'],
         ];
     }
 }

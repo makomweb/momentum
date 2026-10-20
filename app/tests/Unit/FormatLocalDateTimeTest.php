@@ -106,9 +106,9 @@ class FormatLocalDateTimeTest extends TestCase
         $pastDate = new \DateTimeImmutable('2026-10-01 14:30:00');
         $result = $this->filter->format($pastDate);
 
-        // English date format should be D, m/d/Y · H:i
+        // English date format should be D, m/d/Y · g:i A (12-hour format with AM/PM)
         $this->assertStringContainsString('/', $result);
-        $this->assertStringContainsString('14:30', $result);
+        $this->assertStringContainsString('PM', $result);
         // Check for English day abbreviation
         $this->assertMatchesRegularExpression('/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/', $result);
     }
@@ -137,7 +137,34 @@ class FormatLocalDateTimeTest extends TestCase
         $testDate = new \DateTimeImmutable('2026-10-15 10:45:00');
         $result = $this->filter->format($testDate);
 
-        // English format: m/d/Y (month/day/year)
+        // English format: m/d/Y (month/day/year) with 12-hour time
         $this->assertMatchesRegularExpression('/\d+\/\d+\/\d+/', $result);
+        $this->assertMatchesRegularExpression('/\d+:\d+\s(AM|PM)/', $result);
+    }
+
+    public function test_english_morning_time_uses_am(): void
+    {
+        $this->translator
+            ->expects(self::any())
+            ->method('getLocale')
+            ->willReturn('en');
+
+        $morningDate = new \DateTimeImmutable('2026-10-15 08:30:00');
+        $result = $this->filter->format($morningDate);
+
+        $this->assertStringContainsString('AM', $result);
+    }
+
+    public function test_english_afternoon_time_uses_pm(): void
+    {
+        $this->translator
+            ->expects(self::any())
+            ->method('getLocale')
+            ->willReturn('en');
+
+        $afternoonDate = new \DateTimeImmutable('2026-10-15 14:30:00');
+        $result = $this->filter->format($afternoonDate);
+
+        $this->assertStringContainsString('PM', $result);
     }
 }
