@@ -270,7 +270,7 @@
                     name: '{{ session.zone.value }}',
                     startTime: '{{ session.start.format('H:i:s') }}',
                     endTime: '{{ session.end.format('H:i:s') }}',
-                    color: '{{ session.zone.getColor() }}'
+                    color: '{{ session.zone | zone_color }}'
                 }{{ not loop.last ? ',' : '' }}
             {% endfor %}
         ];

@@ -6,11 +6,11 @@ namespace App\Momentum;
 
 enum HeartRateZone: string
 {
-    case ZONE_1 = 'Warm-up/Light';
-    case ZONE_2 = 'Easy/Recovery';
-    case ZONE_3 = 'Aerobic/Moderate';
-    case ZONE_4 = 'Threshold/Hard';
-    case ZONE_5 = 'Maximum/Sprinting';
+    case ZONE_1 = 'Warm-up';
+    case ZONE_2 = 'Recovery';
+    case ZONE_3 = 'Aerobic';
+    case ZONE_4 = 'Threshold';
+    case ZONE_5 = 'Maximum';
 
     /**
      * Calculate depending on max. HF.
@@ -25,17 +25,6 @@ enum HeartRateZone: string
             $percentage >= 70 => self::ZONE_3,
             $percentage >= 60 => self::ZONE_2,
             default => self::ZONE_1,
-        };
-    }
-
-    public function getColor(): string
-    {
-        return match ($this) {
-            self::ZONE_1 => '#1e88e5', // Blue - Warm-up/Light
-            self::ZONE_2 => '#43a047', // Green - Easy/Recovery
-            self::ZONE_3 => '#ffa726', // Orange - Aerobic/Moderate
-            self::ZONE_4 => '#e53935', // Red - Threshold/Hard
-            self::ZONE_5 => '#8e24aa', // Purple - Maximum/Sprinting
         };
     }
 
