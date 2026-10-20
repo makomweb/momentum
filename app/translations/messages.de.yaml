@@ -155,6 +155,7 @@ share:
   stream_not_available: 'Lauf-Moment'
   stream_not_available_text: 'Stream-Daten für diese Aktivität sind nicht verfügbar.'
   refresh_icon: '↻'
+  about_link: 'Über Momentum'
 
 # Error
 error:

@@ -9,10 +9,10 @@
 
 <div class="flex-grow space-y-4 p-4">
     <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold">Recent Activities</h2>
+        <h2 class="text-2xl font-bold">{{ 'activities.index.title'|trans }}</h2>
         <button class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-semibold" id="syncButton" onclick="handleSync()">
             <span id="syncIcon">↻</span>
-            <span id="syncText">Sync from Strava</span>
+            <span id="syncText">{{ 'activities.index.sync_button'|trans }}</span>
         </button>
     </div>
 
@@ -21,8 +21,8 @@
             <div class="text-xl flex-shrink-0">⚠️</div>
             <div class="flex-grow">
                 <p class="m-0 text-sm">
-                    Please configure your profile to analyze activities.
-                    <a href="{{ path('profile_settings') }}" class="font-semibold hover:underline">Configure now →</a>
+                    {{ 'activities.index.no_config'|trans }}
+                    <a href="{{ path('profile_settings') }}" class="font-semibold hover:underline">{{ 'activities.index.configure_link'|trans }}</a>
                 </p>
             </div>
         </div>
@@ -36,7 +36,7 @@
                         {% include 'activity/_card.html.twig' %}
                         {% if not is_configured %}
                             <div class="absolute inset-0 flex items-center justify-center bg-white/70 rounded">
-                                <small class="text-gray-600 font-semibold text-center px-2">Configure profile to analyze</small>
+                                <small class="text-gray-600 font-semibold text-center px-2">{{ 'activities.index.configure_title'|trans }}</small>
                             </div>
                         {% endif %}
                     </div>
@@ -45,10 +45,10 @@
         {% else %}
             <div class="text-center p-12">
                 <div class="text-5xl mb-3 opacity-50">📭</div>
-                <h3 class="text-lg font-semibold mb-1">No activities yet</h3>
-                <p class="text-gray-600 mb-4 text-sm">Click the "Sync from Strava" button to fetch your activities</p>
+                <h3 class="text-lg font-semibold mb-1">{{ 'activities.index.no_activities'|trans }}</h3>
+                <p class="text-gray-600 mb-4 text-sm">{{ 'activities.index.no_activities_help'|trans }}</p>
                 <button class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-medium" onclick="handleSync()">
-                    Sync Now
+                    {{ 'activities.index.sync_now'|trans }}
                 </button>
             </div>
         {% endif %}
@@ -65,7 +65,7 @@
 
         button.disabled = true;
         icon.classList.add('animate-spin');
-        text.textContent = 'Syncing...';
+        text.textContent = '{{ 'activities.index.syncing'|trans }}';
 
         try {
             // Trigger sync
@@ -91,13 +91,13 @@
                 eventSource.close();
                 button.disabled = false;
                 icon.classList.remove('animate-spin');
-                text.textContent = 'Sync from Strava';
+                text.textContent = '{{ 'activities.index.sync_button'|trans }}';
             };
         } catch (error) {
             console.error('Sync error:', error);
             button.disabled = false;
             icon.classList.remove('animate-spin');
-            text.textContent = 'Sync from Strava';
+            text.textContent = '{{ 'activities.index.sync_button'|trans }}';
         }
     }
 </script>

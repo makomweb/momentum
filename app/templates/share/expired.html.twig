@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Share Link Expired</title>
+    <title>{{ 'share.share_link_expired'|trans }}</title>
     <style>
         * {
             margin: 0;
@@ -47,9 +47,9 @@
 <body>
     <div class="container">
         <div class="icon">⏰</div>
-        <h1>Share Link Expired</h1>
+        <h1>{{ 'share.share_link_expired'|trans }}</h1>
         <p>{{ message }}</p>
-        <p>This share link is no longer valid. Please ask the runner for a fresh share link.</p>
+        <p>{{ 'share.share_link_expired_text'|trans }}</p>
     </div>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ activity_name }} - Running Moment</title>
+    <title>{{ activity_name }} - {{ 'share.stream_not_available'|trans }}</title>
     <style>
         * {
             margin: 0;
@@ -48,7 +48,7 @@
     <div class="container">
         <div class="icon">📊</div>
         <h1>{{ activity_name }}</h1>
-        <p>Stream data for this activity is not available.</p>
+        <p>{{ 'share.stream_not_available_text'|trans }}</p>
     </div>
 </body>
 </html>
