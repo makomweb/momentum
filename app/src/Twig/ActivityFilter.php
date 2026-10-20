@@ -53,10 +53,11 @@ final class ActivityFilter extends AbstractExtension
         return match ($type) {
             'Run' => '🏃‍♂️',
             'RockClimbing' => '🧗🏻‍♂️',
-            'Walk' => '🚶‍♂️',
+            'Walk' => '🚶🏽‍♀️',
             'Hike' => '🥾',
             'Swim' => '🏊‍♀️',
             'Ride' => '🚴‍♂️',
+            'Yoga' => '🧘🏻‍♀️',
             default => '🥇',
         };
     }
