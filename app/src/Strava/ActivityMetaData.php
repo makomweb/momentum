@@ -83,6 +83,32 @@ final readonly class ActivityMetaData
         return $this->translator->trans($key);
     }
 
+    public function getVelocityLabel(): string
+    {
+        $type = $this->getActivityType();
+
+        $key = match ($type) {
+            'Run', 'Walk', 'Hike', 'RockClimbing' => 'activity.pace',
+            'Swim', 'Ride' => 'activity.speed',
+            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
+        };
+
+        return $this->translator->trans($key);
+    }
+
+    public function getHeartRateLabel(): string
+    {
+        $type = $this->getActivityType();
+
+        $key = match ($type) {
+            'Run', 'Walk', 'Hike', 'RockClimbing' => 'activity.pace',
+            'Swim', 'Ride' => 'activity.speed',
+            default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $this->getActivityType())),
+        };
+
+        return $this->translator->trans($key);
+    }
+
     public function hasSpeed(): bool
     {
         $type = $this->getActivityType();

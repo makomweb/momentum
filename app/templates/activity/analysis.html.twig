@@ -231,7 +231,7 @@
         ],
         datasets: [
             {
-                label: 'Velocity',
+                label: '{{ meta_data.getVelocityLabel() }}',
                 data: [
                     {% for point in activity_data.getVelocityRawPoints() %}
                         {{ point.value }}{{ not loop.last ? ',' : '' }}
@@ -310,7 +310,7 @@
                     ticks: { font: { size: 12 } },
                     title: {
                         display: true,
-                        text: 'Time (HH:MM:SS)',
+                        text: '{{ activity_data | x_axis_label }}',
                         font: { size: 13, weight: 600 }
                     }
                 }
@@ -328,7 +328,7 @@
             {% endfor %}
         ],
         datasets: [{
-            label: 'Heart Rate (bpm)',
+            label: '{{ activity_data | y_axis_hf_label }}',
             data: [
                 {% for point in activity_data.getHeartRatePoints() %}
                     {{ point.value }}{{ not loop.last ? ',' : '' }}
@@ -377,7 +377,7 @@
                     ticks: { font: { size: 12 } },
                     title: {
                         display: true,
-                        text: 'Heart Rate (bpm)',
+                        text: '{{ activity_data | y_axis_hf_label }}',
                         font: { size: 13, weight: 600 }
                     }
                 },
@@ -385,7 +385,7 @@
                     ticks: { font: { size: 12 } },
                     title: {
                         display: true,
-                        text: 'Time (HH:MM:SS)',
+                        text: '{{ activity_data | x_axis_label }}',
                         font: { size: 13, weight: 600 }
                     }
                 }

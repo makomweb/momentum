@@ -43,6 +43,8 @@ final class ActivityFilter extends AbstractExtension
             new TwigFilter('y_axis_max', self::getMaxVelocity(...)),
             new TwigFilter('y_axis_min', self::getMinVelocity(...)),
             new TwigFilter('y_axis_label', self::getChartYAxisLabel(...)),
+            new TwigFilter('x_axis_label', self::getChartXAxisLabel(...)),
+            new TwigFilter('y_axis_hf_label', self::getChartYAxisHeartRateLabel(...)),
         ];
     }
 
@@ -119,6 +121,16 @@ final class ActivityFilter extends AbstractExtension
         };
 
         return $this->translator->trans('activity.velocity_diagram_y_axis_label', $data);
+    }
+
+    public function getChartXAxisLabel(ActivityData $activity): string
+    {
+        return $this->translator->trans('activity.diagram_x_axis_label');
+    }
+
+    public function getChartYAxisHeartRateLabel(ActivityData $activity): string
+    {
+        return $this->translator->trans('activity.heart_rate_diagram_y_axis_label');
     }
 
     /**
