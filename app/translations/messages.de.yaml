@@ -1,11 +1,169 @@
+# Auth
+auth:
+  login:
+    title: 'Momentum'
+    subtitle: 'Analysiere deine Strava-Aktivitäten'
+    remember_me: 'Halte mich 30 Tage lang angemeldet'
+    button: 'Mit Strava anmelden'
+    info_title: 'ℹ️ Das benötigen wir:'
+    info_text: 'Wir benötigen Zugriff auf deine Aktivitäten. Deine Daten werden nur für die Synchronisierung deiner Aktivitäten mit Momentum verwendet.'
+
+# Navigation
+nav:
+  momentum: 'Momentum'
+  strava_id: 'Strava-ID:'
+  settings: 'Einstellungen'
+  about: 'Über'
+  logout: 'Abmelden'
+
+# Footer
+footer:
+  copyright: 'Momentum. Lizenziert unter'
+  mit: 'MIT'
+  version: 'Version'
+
+# Activities
+activities:
+  index:
+    title: 'Aktuelle Aktivitäten'
+    sync_button: 'Von Strava synchronisieren'
+    no_config: 'Bitte konfiguriere dein Profil, um Aktivitäten zu analysieren.'
+    configure_link: 'Jetzt konfigurieren →'
+    configure_title: 'Profil konfigurieren zum Analysieren'
+    no_activities: 'Noch keine Aktivitäten'
+    no_activities_help: 'Klicke auf den Button "Von Strava synchronisieren", um deine Aktivitäten zu laden'
+    sync_now: 'Jetzt synchronisieren'
+    syncing: 'Wird synchronisiert...'
+
+# Activity Details
 activity:
-  document_content: '{name} am {date}. Eine {type}-Aktivität über {distance} mit einer Durchschnittsgeschwindigkeit von {avg_speed} und einer Höchstgeschwindigkeit von {max_speed}. Die Gesamtverstrichene Zeit betrug {elapsed_time}. Aufgezeichnet mit {device}. Du hast {easy_percentage} Prozent easy und {hard_percentage} Prozent hard trainiert, dabei warst du {medium_percentage} Prozent im mittleren Bereich. {suggestion}'
-training_metrics_suggestion:
-  get_some_recovery: 'Achte auf genügend Erholung.'
-  keep_it_up: 'Mach weiter so.'
-  set_more_impulses: 'Entweder langsamer oder intensiver.'
+  distance: 'Entfernung'
+  moving_time: 'Aktive Zeit'
+  speed: 'Geschwindigkeit'
+  pace: 'Tempo'
+  view_details: 'Details anzeigen →'
+  avg: 'Ø'
+  max: 'Max.'
+  avg_heart_rate: 'Ø Herzfrequenz'
+  max_heart_rate: 'Max. Herzfrequenz'
+  avg_power: 'Ø Leistung'
+  easy_zone: 'Easy (Z1-2)'
+  medium_zone: 'Mittel (Z3)'
+  hard_zone: 'Hard (Z4-5)'
+  heart_rate_zones: 'Herzfrequenzzonen'
+  pace_zones: 'Tempozonen'
+  pace_zone_transitions: 'Tempozonenwechsel'
+  share: 'Teilen'
+  share_activity: 'Aktivität teilen'
+  link_expires_in: 'Link verfällt in'
+  days_7: '7 Tage'
+  days_30: '30 Tage'
+  days_60: '60 Tage'
+  days_1_year: '1 Jahr'
+  share_link: 'Freigabelink'
+  copy: 'Kopieren'
+  expires: 'Verfällt'
+  generating_link: 'Freigabelink wird generiert...'
+  generate_link: 'Link generieren'
+  training_zones: 'Trainingszonen'
+  zones_description: 'Dein Trainingsaufwand wird basierend auf Tempo- und Herzfrequenzdaten in fünf Trainingszonen eingeteilt. Zonen helfen dir, dein Training zu optimieren, indem du sicherstellst, dass du mit der richtigen Intensität für deine Ziele trainierst.'
+  configure_threshold: 'Um die Zonenanalyse zu sehen, bitte konfiguriere dein Temposchwelle in den Profileinstellungen.'
+  no_data_available: 'Keine Daten für die Analyse verfügbar. Diese Aktivität könnte unvollständige Stream-Daten haben.'
+  heart_rate_over_time: 'Herzfrequenz über Zeit'
+  time_label: 'Zeit (HH:MM:SS)'
+  heart_rate_label: 'Herzfrequenz (bpm)'
+  copied: 'Kopiert!'
+  document_content: '{name} am {date}. Eine {type}-Aktivität über {distance} mit einer Durchschnittsgeschwindigkeit von {avg_speed} und einer Höchstgeschwindigkeit von {max_speed}. Die gesamte verstrichene Zeit betrug {elapsed_time}. Aufgezeichnet mit {device}. Du hast {easy_percentage} Prozent im Easy- und {hard_percentage} Prozent im Hard-Bereich trainiert, während {medium_percentage} Prozent im mittleren Bereich waren. {suggestion}'
+
+# Activity Analysis Empty/No Stream
+analysis:
+  no_activities_found: 'Keine Aktivitäten gefunden'
+  no_activities_yet: 'Du hast noch keine Aktivitäten synchronisiert. Beginne damit, deine Strava-Aktivitäten mit den folgenden Befehlen zu laden.'
+  to_get_started: 'Führe Folgendes aus, um zu beginnen:'
+  activities_command: 'docker compose exec app bin/console app:activities <STRAVA_USER_ID>'
+  stream_command: 'docker compose exec app bin/console app:stream <ACTIVITY_ID> -u <STRAVA_USER_ID>'
+  back_to_dashboard: 'Zurück zum Dashboard'
+  no_stream_data: 'Keine Stream-Daten verfügbar'
+  no_stream_yet: 'Diese Aktivität hat noch keine Stream-Daten, oder es gab einen Fehler beim Abrufen.'
+  stream_data_info: 'Stream-Daten enthalten Geschwindigkeit, Herzfrequenz und Höheninformationen über die Zeit.'
+  try_fetching: 'Versuche, die Stream-Daten zu laden:'
+  fetch_command: 'docker compose exec app bin/console app:stream <ACTIVITY_ID>'
+  retry: 'Erneut versuchen'
 
 # Profile Settings
 settings:
-  title: 'Profil Einstellungen'
-  subtitle: 'Konfiguriere diese Werte, um Pace und Herzfrequenzzonen zu analysieren.'
+  title: 'Profileinstellungen'
+  subtitle: 'Konfiguriere die Werte für die Tempo- und Herzfrequenzzonenanalyse.'
+  run_threshold_label: 'Lauftempo-Schwelle (Minuten pro Kilometer)'
+  run_threshold_help: 'Wird zur Berechnung der Tempozonen für Laufaktivitäten verwendet.'
+  cycling_threshold_label: 'Radsport-Schwelle (Watt)'
+  cycling_threshold_help: 'Wird zur Berechnung der Leistungszonen für Radfahraktivitäten verwendet.'
+  max_heart_rate_label: 'Max. Herzfrequenz (bpm)'
+  max_heart_rate_help: 'Wird zur Berechnung der Herzfrequenzzonen verwendet, wenn Stream-Daten Herzfrequenz enthalten.'
+  save_button: 'Einstellungen speichern'
+  reset_cache_button: 'Cache zurücksetzen'
+  back_button: 'Zurück zu Aktivitäten'
+  current_values: 'Aktuelle Werte'
+  run_threshold: 'Lauftempo-Schwelle:'
+  cycling_threshold: 'Radsport-Schwelle:'
+  max_heart_rate: 'Max. Herzfrequenz:'
+  not_set: 'Nicht gesetzt'
+  reset_confirm: 'Möchtest du wirklich den Cache zurücksetzen? Dies löscht alle zwischengespeicherten Aktivitäten.'
+  reset_success: 'Cache erfolgreich zurückgesetzt'
+  reset_error: 'Fehler beim Zurücksetzen des Cache:'
+  language: 'Sprache'
+
+# About
+about:
+  title: 'Über Momentum'
+  subtitle: 'Erfahre mehr über dieses Projekt und wie es funktioniert.'
+  what_is: 'Was ist Momentum?'
+  description: 'Momentum ist ein Open-Source-Aktivitätsanalyse-Tool, das sich mit der Strava API integriert, um detaillierte Einblicke in deine Lauf-, Rad-, Schwimm- und anderen Sportaktivitäten zu geben. Es verfolgt Trainingszonen, Herzfrequenzmuster und hilft dir, deine Trainingsverteilung zu verstehen.'
+  features: 'Funktionen'
+  feature_1: 'Herzfrequentzonen-Analyse'
+  feature_2: 'Tempozone-Verfolgung für Läufer'
+  feature_3: 'Trainingsmetriken und Einsichten'
+  feature_4: 'Aktivitäts-Stream-Visualisierung'
+  feature_5: 'Anpassbare Zonenkonfiguration'
+  license: 'Lizenz'
+  license_text: 'Momentum wird unter der'
+  license_name: 'MIT-Lizenz'
+  license_info: ' veröffentlicht. Dies ist eine permissive Open-Source-Lizenz, die dir erlaubt, die Software frei zu nutzen, zu ändern und zu verteilen.'
+  read_license: 'Lies die vollständige Lizenz'
+  privacy: 'Datenschutz'
+  privacy_text_1: 'Momentum'
+  privacy_text_2: 'liest nur'
+  privacy_text_3: 'deine Aktivitätsdaten von Strava. Es ändert, löscht oder verändert keine Daten in deinem Strava-Konto. Deine Aktivitäten werden lokal analysiert, um Einblicke zu geben, ohne dass Änderungen an Strava vorgenommen werden.'
+  technology: 'Technologie'
+  built_with: 'Gebaut mit'
+  tech_1: 'Symfony 8'
+  tech_2: 'Tailwind CSS'
+  tech_3: 'Doctrine ORM'
+  tech_4: 'Strava API'
+  tech_info: '. Gehostet und verwaltet lokal oder in deiner eigenen Infrastruktur.'
+  open_source: 'Open Source'
+  open_source_text: 'Momentum ist vollständig Open Source und kostenlos. Der Quellcode ist auf GitHub verfügbar, und Community-Beiträge sind willkommen. Hilf uns, die Aktivitätsanalyse für Athleten überall zu verbessern.'
+  back_to_activities: 'Zurück zu Aktivitäten'
+
+# Share
+share:
+  running_moment: 'Lauf-Moment'
+  activity_not_found: 'Aktivität nicht gefunden'
+  activity_not_found_text: 'Die Aktivität, die du suchst, existiert nicht.'
+  share_link_expired: 'Freigabelink abgelaufen'
+  share_link_expired_text: 'Dieser Freigabelink ist nicht mehr gültig. Bitte frag den Läufer nach einem neuen Freigabelink.'
+  stream_not_available: 'Lauf-Moment'
+  stream_not_available_text: 'Stream-Daten für diese Aktivität sind nicht verfügbar.'
+  refresh_icon: '↻'
+
+# Error
+error:
+  configuration_required: 'Konfiguration erforderlich'
+  configure_profile: 'Profil konfigurieren'
+  back_to_activities: 'Zurück zu Aktivitäten'
+
+# Training metrics
+training_metrics_suggestion:
+  get_some_recovery: 'Achte auf genügend Erholung.'
+  keep_it_up: 'Mach weiter so.'
+  set_more_impulses: 'Setze mehr Impulse.'
