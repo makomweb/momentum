@@ -21,6 +21,7 @@ final class LocaleListener
             $locale = $request->cookies->get('_locale');
             if (in_array($locale, self::SUPPORTED_LOCALES, true)) {
                 $request->setLocale($locale);
+
                 return;
             }
         }
@@ -33,6 +34,7 @@ final class LocaleListener
             foreach ($locales as $locale) {
                 if (in_array($locale, self::SUPPORTED_LOCALES, true)) {
                     $request->setLocale($locale);
+
                     return;
                 }
             }
@@ -42,6 +44,9 @@ final class LocaleListener
         $request->setLocale('en');
     }
 
+    /**
+     * @return array<int, string>
+     */
     private function parseAcceptLanguage(string $acceptLanguage): array
     {
         $locales = [];
@@ -50,7 +55,7 @@ final class LocaleListener
         foreach ($parts as $part) {
             $part = trim($part);
             // Extract language code before semicolon (q-value)
-            if (strpos($part, ';') !== false) {
+            if (false !== strpos($part, ';')) {
                 [$locale] = explode(';', $part);
             } else {
                 $locale = $part;
@@ -58,7 +63,7 @@ final class LocaleListener
 
             $locale = trim($locale);
             // Convert "de-DE" to "de"
-            if (strpos($locale, '-') !== false) {
+            if (false !== strpos($locale, '-')) {
                 [$locale] = explode('-', $locale);
             }
 

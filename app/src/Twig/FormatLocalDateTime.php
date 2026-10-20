@@ -10,7 +10,9 @@ use Twig\TwigFilter;
 
 final class FormatLocalDateTime extends AbstractExtension
 {
-    public function __construct(private readonly TranslatorInterface $translator) {}
+    public function __construct(private readonly TranslatorInterface $translator)
+    {
+    }
 
     public function getFilters(): array
     {
@@ -22,8 +24,8 @@ final class FormatLocalDateTime extends AbstractExtension
     public function format(\DateTimeInterface $dateTime, ?string $template = null): string
     {
         $locale = $this->translator->getLocale();
-        
-        if ($template === null) {
+
+        if (null === $template) {
             $template = match ($locale) {
                 'de' => 'D, d.m.Y · H:i',
                 default => 'D, m/d/Y · H:i',
@@ -35,11 +37,13 @@ final class FormatLocalDateTime extends AbstractExtension
 
         if ($dateTime->format('Y-m-d') === $today->format('Y-m-d')) {
             $todayLabel = $this->translator->trans('date.today');
+
             return sprintf('%s · %s', $todayLabel, $dateTime->format('H:i'));
         }
 
         if ($dateTime->format('Y-m-d') === $yesterday->format('Y-m-d')) {
             $yesterdayLabel = $this->translator->trans('date.yesterday');
+
             return sprintf('%s · %s', $yesterdayLabel, $dateTime->format('H:i'));
         }
 
@@ -49,7 +53,7 @@ final class FormatLocalDateTime extends AbstractExtension
     private function formatLocalizedDate(\DateTimeInterface $dateTime, string $template, string $locale): string
     {
         $formatted = $dateTime->format($template);
-        
+
         $dayNames = match ($locale) {
             'de' => ['Mon' => 'Mo', 'Tue' => 'Di', 'Wed' => 'Mi', 'Thu' => 'Do', 'Fri' => 'Fr', 'Sat' => 'Sa', 'Sun' => 'So'],
             default => ['Mon' => 'Mon', 'Tue' => 'Tue', 'Wed' => 'Wed', 'Thu' => 'Thu', 'Fri' => 'Fri', 'Sat' => 'Sat', 'Sun' => 'Sun'],
@@ -57,9 +61,9 @@ final class FormatLocalDateTime extends AbstractExtension
 
         $monthNames = match ($locale) {
             'de' => ['Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mär', 'Apr' => 'Apr', 'May' => 'Mai', 'Jun' => 'Jun',
-                     'Jul' => 'Jul', 'Aug' => 'Aug', 'Sep' => 'Sep', 'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Dez'],
+                'Jul' => 'Jul', 'Aug' => 'Aug', 'Sep' => 'Sep', 'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Dez'],
             default => ['Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mar', 'Apr' => 'Apr', 'May' => 'May', 'Jun' => 'Jun',
-                        'Jul' => 'Jul', 'Aug' => 'Aug', 'Sep' => 'Sep', 'Oct' => 'Oct', 'Nov' => 'Nov', 'Dec' => 'Dec'],
+                'Jul' => 'Jul', 'Aug' => 'Aug', 'Sep' => 'Sep', 'Oct' => 'Oct', 'Nov' => 'Nov', 'Dec' => 'Dec'],
         };
 
         foreach ($dayNames as $en => $localized) {

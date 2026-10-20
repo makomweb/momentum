@@ -5,13 +5,14 @@ namespace App\Tests\Unit;
 use App\Twig\FormatLocalDateTime;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FormatDayTest extends TestCase
 {
     private FormatLocalDateTime $filter;
-    private TranslatorInterface $translator;
+    private MockObject&TranslatorInterface $translator;
 
     protected function setUp(): void
     {
@@ -23,7 +24,7 @@ class FormatDayTest extends TestCase
                 'date.yesterday' => 'Yesterday',
                 default => $key,
             });
-        
+
         $this->filter = new FormatLocalDateTime($this->translator);
     }
 

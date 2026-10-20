@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Unit;
 
 use App\Twig\FormatLocalDateTime;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FormatLocalDateTimeTest extends TestCase
 {
     private FormatLocalDateTime $filter;
-    private TranslatorInterface $translator;
+    private MockObject&TranslatorInterface $translator;
 
     protected function setUp(): void
     {
@@ -21,11 +22,13 @@ class FormatLocalDateTimeTest extends TestCase
 
     public function test_formats_today_in_german(): void
     {
-        $this->translator->expects($this->once())
+        $this->translator
+            ->expects(self::once())
             ->method('getLocale')
             ->willReturn('de');
 
-        $this->translator->expects($this->once())
+        $this->translator
+            ->expects(self::once())
             ->method('trans')
             ->with('date.today')
             ->willReturn('Heute');
@@ -39,11 +42,13 @@ class FormatLocalDateTimeTest extends TestCase
 
     public function test_formats_yesterday_in_german(): void
     {
-        $this->translator->expects($this->any())
+        $this->translator
+            ->expects(self::any())
             ->method('getLocale')
             ->willReturn('de');
 
-        $this->translator->expects($this->once())
+        $this->translator
+            ->expects(self::once())
             ->method('trans')
             ->with('date.yesterday')
             ->willReturn('Gestern');
@@ -56,7 +61,8 @@ class FormatLocalDateTimeTest extends TestCase
 
     public function test_formats_past_date_in_german(): void
     {
-        $this->translator->expects($this->any())
+        $this->translator
+            ->expects(self::any())
             ->method('getLocale')
             ->willReturn('de');
 
@@ -72,11 +78,13 @@ class FormatLocalDateTimeTest extends TestCase
 
     public function test_formats_today_in_english(): void
     {
-        $this->translator->expects($this->once())
+        $this->translator
+            ->expects(self::once())
             ->method('getLocale')
             ->willReturn('en');
 
-        $this->translator->expects($this->once())
+        $this->translator
+            ->expects(self::once())
             ->method('trans')
             ->with('date.today')
             ->willReturn('Today');
@@ -90,7 +98,8 @@ class FormatLocalDateTimeTest extends TestCase
 
     public function test_formats_past_date_in_english(): void
     {
-        $this->translator->expects($this->any())
+        $this->translator
+            ->expects(self::any())
             ->method('getLocale')
             ->willReturn('en');
 
@@ -106,7 +115,8 @@ class FormatLocalDateTimeTest extends TestCase
 
     public function test_german_date_format_uses_dot_as_separator(): void
     {
-        $this->translator->expects($this->any())
+        $this->translator
+            ->expects(self::any())
             ->method('getLocale')
             ->willReturn('de');
 
@@ -119,7 +129,8 @@ class FormatLocalDateTimeTest extends TestCase
 
     public function test_english_date_format_uses_slash_as_separator(): void
     {
-        $this->translator->expects($this->any())
+        $this->translator
+            ->expects(self::any())
             ->method('getLocale')
             ->willReturn('en');
 
