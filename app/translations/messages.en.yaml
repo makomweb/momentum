@@ -93,6 +93,16 @@ activity:
   z3_zone: 'Z3 - Medium'
   z4_zone: 'Z4 - Hard'
   z5_zone: 'Z5 - Maximum'
+  hr_zone_1: 'Warm-up/Light'
+  hr_zone_2: 'Easy/Recovery'
+  hr_zone_3: 'Aerobic/Moderate'
+  hr_zone_4: 'Threshold/Hard'
+  hr_zone_5: 'Maximum/Sprinting'
+  pace_zone_1: 'Recovery'
+  pace_zone_2: 'Basis'
+  pace_zone_3: 'Tempo'
+  pace_zone_4: 'Threshold'
+  pace_zone_5: 'VO2max'
 
 # Activity Analysis Empty/No Stream
 analysis:

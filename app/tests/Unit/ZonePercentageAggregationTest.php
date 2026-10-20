@@ -83,7 +83,6 @@ final class ZonePercentageAggregationTest extends TestCase
         // Strava moving_time (actual time when moving, excluding pauses)
         $stravaMovingTime = 3196; // As reported by user
 
-        // Calculate moving time (similar to Activity::getMovingTimeSeconds)
         $paceSessions = $activity->getPaceZoneSessions();
         $hrSessions = $activity->getHeartRateSessions();
 

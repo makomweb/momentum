@@ -18,6 +18,7 @@ use App\Momentum\SpeedUnit;
 use App\Momentum\Statistics;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\Velocity;
+use App\Momentum\ZoneDescription;
 use App\Strava\API\Activity;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -283,6 +284,13 @@ final class ActivityData
         $paceStatsArray = $paceStats->toArray($totalPaceSeconds);
         $hrStatsArray = $hrStats->toArray($totalHrSeconds);
 
+        // Localize zone descriptions
+        $zoneDescription = new ZoneDescription($this->athlete);
+        $localizedZoneDescription = new LocalizedZoneDescription($zoneDescription, $this->translator);
+
+        $paceStatsArray = $this->localizeStats($paceStatsArray, $localizedZoneDescription);
+        $hrStatsArray = $this->localizeStats($hrStatsArray, $localizedZoneDescription);
+
         return [
             'activity_id' => $this->activity->getId(),
             'profile_picture' => $this->athlete->getProfilePicture(),
@@ -294,6 +302,32 @@ final class ActivityData
             'heart_rate_zone_sessions' => $heartRateZoneSessions,
             'hr_stats' => $hrStatsArray,
         ];
+    }
+
+    /**
+     * @param array<array{zone: string, description: string, duration_seconds: int, duration_percentage: float}> $stats
+     *
+     * @return array<array{zone: string, description: string, duration_seconds: int, duration_percentage: float}>
+     */
+    private function localizeStats(array $stats, LocalizedZoneDescription $localizedZoneDescription): array
+    {
+        return array_map(function (array $stat) use ($localizedZoneDescription): array {
+            // Try to find the zone and localize it
+            foreach (PaceZone::cases() as $zone) {
+                if ($zone->value === $stat['zone']) {
+                    $stat['description'] = $localizedZoneDescription->getDescription($zone);
+                    break;
+                }
+            }
+            foreach (HeartRateZone::cases() as $zone) {
+                if ($zone->value === $stat['zone']) {
+                    $stat['description'] = $localizedZoneDescription->getDescription($zone);
+                    break;
+                }
+            }
+
+            return $stat;
+        }, $stats);
     }
 
     private function convertVelocity(Velocity $velocity): float
