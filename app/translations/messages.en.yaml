@@ -74,6 +74,21 @@ activity:
   heart_rate_label: 'Heart Rate (bpm)'
   copied: 'Copied!'
   document_content: '{name} on {date}. A {type} activity covering {distance} at an average speed of {avg_speed} with a maximum speed of {max_speed}. Total elapsed time was {elapsed_time}. Recorded using {device}. You spent {easy_percentage} percent in easy and {hard_percentage} percent in the hard zones, while {medium_percentage} percent was inbetween. {suggestion}'
+  easy: 'Easy'
+  medium: 'Medium'
+  hard: 'Hard'
+  recovery: 'Recovery'
+  warm_up_light: 'Warm-up/Light'
+  aerobic: 'Aerobic'
+  tempo: 'Tempo'
+  threshold: 'Threshold'
+  vo2_max: 'VO2 Max'
+  anaerobic: 'Anaerobic'
+  z1_zone: 'Z1 - Recovery'
+  z2_zone: 'Z2 - Easy'
+  z3_zone: 'Z3 - Medium'
+  z4_zone: 'Z4 - Hard'
+  z5_zone: 'Z5 - Maximum'
 
 # Activity Analysis Empty/No Stream
 analysis:

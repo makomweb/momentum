@@ -105,9 +105,9 @@
 
     <!-- Training Zones -->
     <div>
-        <h2 class="text-2xl font-bold mb-2">Training Zones</h2>
+        <h2 class="text-2xl font-bold mb-2">{{ 'activity.training_zones'|trans }}</h2>
         <p class="text-sm text-gray-600 mb-4">
-            Your running effort is categorized into five training zones based on pace and heart rate data. Zones help optimize your training by ensuring you're working at the right intensity for your goals.
+            {{ 'activity.zones_description'|trans }}
         </p>
 
         {% if meta_data.usesPaceZones() and pace_zone_sessions | length > 0 %}
@@ -139,7 +139,7 @@
 
         {% elseif app.user.getTreshold().isZero() %}
             <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-                To see zone analysis, please configure your threshold pace in your profile settings.
+                {{ 'activity.configure_threshold'|trans }}
             </div>
         {% endif %}
     </div>
@@ -147,7 +147,7 @@
     <!-- Charts -->
     {% if not activity_data.hasAnyData() %}
         <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-            No data available for analysis. This activity may not have complete stream data.
+            {{ 'activity.no_data_available'|trans }}
         </div>
     {% else %}
         {% if activity_data.hasVelocityData() %}
@@ -161,7 +161,7 @@
 
         {% if activity_data.hasHeartRateData() %}
             <div>
-                <h3 class="text-2xl font-bold mb-3">Heart Rate Over Time</h3>
+                <h3 class="text-2xl font-bold mb-3">{{ 'activity.heart_rate_over_time'|trans }}</h3>
                 <div class="h-80 bg-white border-gray-200 rounded border p-4">
                     <canvas id="heartRateChart"></canvas>
                 </div>

@@ -74,6 +74,21 @@ activity:
   heart_rate_label: 'Herzfrequenz (bpm)'
   copied: 'Kopiert!'
   document_content: '{name} am {date}. Eine {type}-Aktivität über {distance} mit einer Durchschnittsgeschwindigkeit von {avg_speed} und einer Höchstgeschwindigkeit von {max_speed}. Die gesamte verstrichene Zeit betrug {elapsed_time}. Aufgezeichnet mit {device}. Du hast {easy_percentage} Prozent im Easy- und {hard_percentage} Prozent im Hard-Bereich trainiert, während {medium_percentage} Prozent im mittleren Bereich waren. {suggestion}'
+  easy: 'Easy'
+  medium: 'Mittel'
+  hard: 'Hard'
+  recovery: 'Erholung'
+  warm_up_light: 'Warm-up/Leicht'
+  aerobic: 'Aerob'
+  tempo: 'Tempo'
+  threshold: 'Schwellwert'
+  vo2_max: 'VO2-Max'
+  anaerobic: 'Anaerob'
+  z1_zone: 'Z1 - Erholung'
+  z2_zone: 'Z2 - Easy'
+  z3_zone: 'Z3 - Mittel'
+  z4_zone: 'Z4 - Hard'
+  z5_zone: 'Z5 - Maximum'
 
 # Activity Analysis Empty/No Stream
 analysis:
