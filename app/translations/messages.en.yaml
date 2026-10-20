@@ -103,6 +103,10 @@ activity:
   pace_zone_3: 'Tempo'
   pace_zone_4: 'Threshold'
   pace_zone_5: 'VO2max'
+  # name: Speed|Pace (unit: km/h|min/km)
+  velocity_diagram_y_axis_label: 'name (unit)'
+  heart_rate_diagram_y_axis_label: 'Heart Rate (bpm)'
+  diagram_x_axis_label: 'Time (HH:MM:SS)'
 
 # Activity Analysis Empty/No Stream
 analysis:

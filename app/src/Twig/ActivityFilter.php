@@ -10,6 +10,7 @@ use App\Momentum\PaceUnit;
 use App\Momentum\Speed;
 use App\Momentum\SpeedUnit;
 use App\Strava\ActivityData;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -26,6 +27,10 @@ final class ActivityFilter extends AbstractExtension
         'yoga' => 'bg-fuchsia-100',
         'weighttraining' => 'bg-purple-100',
     ];
+
+    public function __construct(private TranslatorInterface $translator)
+    {
+    }
 
     /**
      * @return TwigFilter[]
@@ -97,12 +102,23 @@ final class ActivityFilter extends AbstractExtension
     {
         $type = $activity->getMetaData()->getActivityType();
 
-        return match ($type) {
-            'Run', 'Walk', 'Hike', 'RockClimbing' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_KILOMETER->value),
-            'Swim' => sprintf('Pace (%s)', PaceUnit::MINUTES_PER_100_METERS->value),
-            'Ride' => sprintf('Speed (%s)', SpeedUnit::KILOMETERS_PER_HOUR->value),
+        $data = match ($type) {
+            'Run', 'Walk', 'Hike', 'RockClimbing' => [
+                'name' => $this->translator->trans('activity.label_pace'),
+                'unit' => PaceUnit::MINUTES_PER_KILOMETER->value,
+            ],
+            'Swim' => [
+                'name' => $this->translator->trans('activity.label_pace'),
+                'unit' => PaceUnit::MINUTES_PER_100_METERS->value,
+            ],
+            'Ride' => [
+                'name' => $this->translator->trans('activity.label_speed'),
+                'unit' => SpeedUnit::KILOMETERS_PER_HOUR->value,
+            ],
             default => throw new \InvalidArgumentException(sprintf('Actitiy type "%s" is not supported!', $type)),
         };
+
+        return $this->translator->trans('activity.velocity_diagram_y_axis_label', $data);
     }
 
     /**
