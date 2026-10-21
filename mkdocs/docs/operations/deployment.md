@@ -90,7 +90,7 @@ Sessions are stored in **Redis** (not filesystem) to:
 # On your local machine or CI/CD runner:
 
 KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm install momentum ./helm/momentum \
-  --set-string app.image=makomweb/momentum:latest \
+  --set-string app.image=<your-docker-registry>/momentum:latest \
   --set-string app.secret="$(openssl rand -hex 32)" \
   --set-string strava.clientId=YOUR_CLIENT_ID \
   --set-string strava.clientSecret=YOUR_CLIENT_SECRET \
@@ -101,7 +101,7 @@ Or with **Ingress + Let's Encrypt (Traefik + cert-manager)**:
 
 ```bash
 KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm install momentum ./helm/momentum \
-  --set-string app.image=makomweb/momentum:latest \
+  --set-string app.image=<your-docker-registry>/momentum:latest \
   --set-string app.secret="$(openssl rand -hex 32)" \
   --set-string strava.clientId=YOUR_CLIENT_ID \
   --set-string strava.clientSecret=YOUR_CLIENT_SECRET \
@@ -139,20 +139,22 @@ helm list
 
 ```bash
 # On your local machine:
-ssh-keygen -t ed25519 -f ~/.ssh/hetzner_deploy -C "gitlab-deploy"
+ssh-keygen -t ed25519 -f ~/.ssh/cd_deploy_key -C "gitlab-deployment"
 ```
 
-#### 2. Add Public Key to Hetzner Server
+**⚠️ Security Note**: Never commit SSH private keys to version control. This key will be stored securely in GitLab CI/CD Variables.
+
+#### 2. Add Public Key to Deployment Server
 
 ```bash
 # Copy public key to clipboard:
-cat ~/.ssh/hetzner_deploy.pub | pbcopy
+cat ~/.ssh/cd_deploy_key.pub | pbcopy
 
 # Or manually:
-cat ~/.ssh/hetzner_deploy.pub
+cat ~/.ssh/cd_deploy_key.pub
 ```
 
-Then add it to your Hetzner server via web frontend under SSH Keys.
+Then add it to your server via web frontend under SSH Keys (or SSH configuration).
 
 #### 3. Add Private Key to GitLab CI/CD Variables
 
@@ -160,11 +162,13 @@ Then add it to your Hetzner server via web frontend under SSH Keys.
 2. Click **Add variable**
 3. Fill in:
    - **Name**: `SSH_PRIVATE_KEY`
-   - **Value**: Paste the private key (from `~/.ssh/hetzner_deploy`)
+   - **Value**: Paste the **entire contents** of the private key file (from `~/.ssh/cd_deploy_key`)
    - **Type**: `File`
-   - **Protected**: ✅ (checked)
-   - **Masked**: ❌ (unchecked - File type handles multi-line content)
+   - **Protected**: ✅ (checked) - Only available on protected branches
+   - **Masked**: ❌ (unchecked - File type handles multi-line content automatically)
 4. Click **Add variable**
+
+**⚠️ Important**: The private key file contents should never appear in logs or be shared. GitLab encrypts this variable securely.
 
 #### 4. Verify Required CI/CD Variables
 
@@ -172,13 +176,15 @@ Ensure these are set in **GitLab Project > Settings > CI/CD > Variables**:
 
 | Variable | Purpose | Example |
 |----------|---------|---------|
-| `SSH_PRIVATE_KEY` | SSH private key (File) | (contents of ~/.ssh/hetzner_deploy) |
-| `DEPLOY_HOST` | Hetzner server IP/hostname | `123.45.67.89` or `server.example.com` |
-| `DEPLOY_USER` | SSH user | `root` or `ubuntu` |
-| `DOCKERHUB_USERNAME` | Docker Hub user | `makomweb` |
-| `DOCKERHUB_TOKEN` | Docker Hub access token | (from Docker Hub settings) |
+| `SSH_PRIVATE_KEY` | SSH private key (File) | (contents of ~/.ssh/cd_deploy_key) |
+| `DEPLOY_HOST` | Server IP/hostname | `example.com` or `192.0.2.1` |
+| `DEPLOY_USER` | SSH user on server | `ubuntu` or `root` |
+| `DOCKERHUB_USERNAME` | Docker Hub username | `<your-dockerhub-username>` |
+| `DOCKERHUB_TOKEN` | Docker Hub access token | (from Docker Hub account settings) |
 
 **Protected?** Yes - these should only be available on protected branches (master).
+
+**⚠️ Secret Variables**: `SSH_PRIVATE_KEY` and `DOCKERHUB_TOKEN` are sensitive. GitLab encrypts them and prevents them from appearing in logs.
 
 ### Deployment Workflow
 
@@ -209,7 +215,7 @@ See `.gitlab-ci.yml` for details. Key deployment command:
 ```bash
 helm upgrade momentum /tmp/helm/momentum \
   --reuse-values \
-  --set-string app.image=makomweb/momentum:$CI_COMMIT_SHA \
+  --set-string app.image=<your-docker-registry>/momentum:$CI_COMMIT_SHA \
   --set-string app.pullPolicy=Always
 ```
 
@@ -239,7 +245,7 @@ helm repo update
 ```bash
 helm upgrade momentum ./helm/momentum \
   --reuse-values \
-  --set-string app.image=makomweb/momentum:$COMMIT_SHA \
+  --set-string app.image=<your-docker-registry>/momentum:$COMMIT_SHA \
   --set-string app.pullPolicy=Always
 ```
 
@@ -255,7 +261,7 @@ helm upgrade momentum ./helm/momentum \
 
 ```bash
 helm upgrade momentum ./helm/momentum \
-  --set-string app.image=makomweb/momentum:latest \
+  --set-string app.image=<your-docker-registry>/momentum:latest \
   --set-string app.pullPolicy=Always \
   --set-string strava.redirectUri=https://your-domain.com/momentum/exchange-token
 ```
@@ -356,11 +362,11 @@ helm rollback momentum 3
 #### SSH Connection Issues (GitLab CI)
 
 ```bash
-# Test SSH access manually:
-ssh -i ~/.ssh/hetzner_deploy user@server "helm list"
+# Test SSH access manually (never share the private key file):
+ssh -i ~/.ssh/cd_deploy_key <deploy-user>@<deploy-host> "helm list"
 
-# Check known_hosts:
-ssh-keyscan -H your-server >> ~/.ssh/known_hosts
+# Add server to known_hosts to avoid interactive prompts in CI:
+ssh-keyscan -H <deploy-host> >> ~/.ssh/known_hosts
 ```
 
 #### Network Policy Blocking Traffic
@@ -459,14 +465,46 @@ kubectl rollout status deployment/momentum-app
 
 ---
 
-## Security Notes
+## Security Best Practices
 
-- `DEPLOY_SSH_KEY` should be **protected** (master branch only) in GitLab
-- SSH key permissions must be `600` (script handles this)
-- `APP_SECRET` should be a strong random value (generated with `openssl rand -hex 32`)
-- Keep credentials in Kubernetes Secrets, not in Helm values
-- Use HTTPS only in production (`SECURE_COOKIE=true`)
-- Network policies restrict egress to required ports only
+### Secrets Management
+
+- **SSH Keys**: 
+  - Never commit private keys to version control
+  - Use GitLab CI/CD Variables (Protected) for all SSH keys
+  - Regenerate keys if ever exposed
+  - Store locally with strict permissions: `chmod 600 ~/.ssh/cd_deploy_key`
+
+- **Access Tokens**:
+  - `DOCKERHUB_TOKEN` should be a Personal Access Token (not your main password)
+  - Revoke tokens if compromised
+  - Rotate tokens periodically
+  - Use scoped tokens with minimal required permissions
+
+- **API Credentials**:
+  - `STRAVA_CLIENT_SECRET` must never appear in logs or commits
+  - Store in GitLab Protected Variables only
+  - Never log sensitive values in pipeline output
+
+### Branch Protection
+
+- GitLab CI/CD protected variables are **only available on protected branches**
+- Protect `master` branch to prevent unauthorized deployments
+- Require approval before merging changes to deployment configuration
+
+### Key Rotation
+
+1. Generate new SSH key: `ssh-keygen -t ed25519 -f ~/.ssh/cd_deploy_key_new`
+2. Add public key to server
+3. Update GitLab CI/CD variable `SSH_PRIVATE_KEY`
+4. Remove old public key from server authorized_keys
+5. Delete local old key file: `rm ~/.ssh/cd_deploy_key`
+
+### Infrastructure Anonymity
+
+- Use placeholder names in documentation (e.g., `<deploy-host>`, `<your-username>`)
+- Keep specific server addresses, provider names, and actual usernames out of public repos
+- Document infrastructure separately in secure location
 
 ### Production Security Architecture
 

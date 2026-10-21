@@ -20,6 +20,13 @@ nav:
       - Deptrac Validation: ./architecture/deptrac.md
       - Design Patterns: ./architecture/patterns.md
       - Strava API Flow: ./architecture/strava-flow.md
+  - 🚀 Operations:
+      - Overview: ./operations/index.md
+      - Deployment Guide: ./operations/deployment.md
+      - Rate Limiting: ./operations/rate-limiting.md
+  - 💻 Development:
+      - Overview: ./development/index.md
+      - Async Task Processing: ./development/async-tasks.md
   - 🧠 RAG:
       - Overview: ./rag/index.md
       - Features & Roadmap: ./rag/01-features-roadmap.md
