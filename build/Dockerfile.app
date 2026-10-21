@@ -32,8 +32,16 @@ WORKDIR /app
 RUN install-php-extensions \
     intl \
     mysqli \
-    pdo_mysql \
-    redis
+    pdo_mysql && \
+    apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/* && \
+    git clone --depth 1 https://github.com/phpredis/phpredis.git /tmp/phpredis && \
+    cd /tmp/phpredis && \
+    phpize && \
+    ./configure && \
+    make && \
+    make install && \
+    docker-php-ext-enable redis && \
+    rm -rf /tmp/phpredis
 
 # Copy vendor from builder (compiled dependencies)
 COPY --from=builder /app/vendor /app/vendor
