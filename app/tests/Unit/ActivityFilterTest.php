@@ -43,7 +43,7 @@ class ActivityFilterTest extends TestCase
 
     private function getFilter(string $name): TwigFilter
     {
-        foreach ((new ActivityFilter())->getFilters() as $filter) {
+        foreach ((new ActivityFilter(new TranslatorStub()))->getFilters() as $filter) {
             if ($filter->getName() === $name) {
                 return $filter;
             }

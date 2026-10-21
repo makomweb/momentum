@@ -41,6 +41,10 @@ activity:
   moving_time: 'Moving Time'
   speed: 'Speed'
   pace: 'Pace'
+  label_pace: 'Pace'
+  label_speed: 'Speed'
+  pace_over_time: 'Pace Over Time'
+  speed_over_time: 'Speed Over Time'
   view_details: 'View details →'
   avg: 'Avg.'
   max: 'Max.'
@@ -74,6 +78,35 @@ activity:
   heart_rate_label: 'Heart Rate (bpm)'
   copied: 'Copied!'
   document_content: '{name} on {date}. A {type} activity covering {distance} at an average speed of {avg_speed} with a maximum speed of {max_speed}. Total elapsed time was {elapsed_time}. Recorded using {device}. You spent {easy_percentage} percent in easy and {hard_percentage} percent in the hard zones, while {medium_percentage} percent was inbetween. {suggestion}'
+  easy: 'Easy'
+  medium: 'Medium'
+  hard: 'Hard'
+  recovery: 'Recovery'
+  warm_up_light: 'Warm-up/Light'
+  aerobic: 'Aerobic'
+  tempo: 'Tempo'
+  threshold: 'Threshold'
+  vo2_max: 'VO2 Max'
+  anaerobic: 'Anaerobic'
+  z1_zone: 'Z1 - Recovery'
+  z2_zone: 'Z2 - Easy'
+  z3_zone: 'Z3 - Medium'
+  z4_zone: 'Z4 - Hard'
+  z5_zone: 'Z5 - Maximum'
+  hr_zone_1: 'Warm-up'
+  hr_zone_2: 'Recovery'
+  hr_zone_3: 'Aerobic'
+  hr_zone_4: 'Threshold'
+  hr_zone_5: 'Maximum'
+  pace_zone_1: 'Recovery'
+  pace_zone_2: 'Basis'
+  pace_zone_3: 'Tempo'
+  pace_zone_4: 'Threshold'
+  pace_zone_5: 'VO2max'
+  # name: Speed|Pace (unit: km/h|min/km)
+  velocity_diagram_y_axis_label: 'name (unit)'
+  heart_rate_diagram_y_axis_label: 'Heart Rate (bpm)'
+  diagram_x_axis_label: 'Time (HH:MM:SS)'
 
 # Activity Analysis Empty/No Stream
 analysis:
@@ -155,6 +188,7 @@ share:
   stream_not_available: 'Running Moment'
   stream_not_available_text: 'Stream data for this activity is not available.'
   refresh_icon: '↻'
+  about_link: 'About Momentum'
 
 # Error
 error:
@@ -162,8 +196,13 @@ error:
   configure_profile: 'Configure Profile'
   back_to_activities: 'Back to Activities'
 
+# Date/Time formatting
+date:
+  today: 'Today'
+  yesterday: 'Yesterday'
+
 # Training metrics
 training_metrics_suggestion:
-  take_it_easy: 'Take it easy.'
+  get_some_recovery: 'Get some recovery.'
   keep_it_up: 'Keep it up.'
   set_more_impulses: 'Set some more impulses.'

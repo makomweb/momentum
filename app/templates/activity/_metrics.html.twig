@@ -7,7 +7,7 @@
     <div class="space-y-2 overflow-y-auto flex-grow">
         <div>
             <div class="flex justify-between items-start mb-1">
-                <div class="text-xs font-semibold">Easy (Z1-2)</div>
+                <div class="text-xs font-semibold">{{ 'activity.easy_zone'|trans }}</div>
                 <div class="text-xs font-bold text-blue-600">{{ metrics.getEasyPercentage() | number_format(1, '.') }}%</div>
             </div>
             <div class="w-full bg-gray-200 rounded h-1.5">
@@ -16,7 +16,7 @@
         </div>
         <div>
             <div class="flex justify-between items-start mb-1">
-                <div class="text-xs font-semibold">Medium (Z3)</div>
+                <div class="text-xs font-semibold">{{ 'activity.medium_zone'|trans }}</div>
                 <div class="text-xs font-bold text-amber-600">{{ metrics.getMediumPercentage() | number_format(1, '.') }}%</div>
             </div>
             <div class="w-full bg-gray-200 rounded h-1.5">
@@ -25,7 +25,7 @@
         </div>
         <div>
             <div class="flex justify-between items-start mb-1">
-                <div class="text-xs font-semibold">Hard (Z4-5)</div>
+                <div class="text-xs font-semibold">{{ 'activity.hard_zone'|trans }}</div>
                 <div class="text-xs font-bold text-red-600">{{ metrics.getHardPercentage() | number_format(1, '.') }}%</div>
             </div>
             <div class="w-full bg-gray-200 rounded h-1.5">

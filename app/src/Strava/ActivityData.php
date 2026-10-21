@@ -18,7 +18,9 @@ use App\Momentum\SpeedUnit;
 use App\Momentum\Statistics;
 use App\Momentum\TrainingMetrics;
 use App\Momentum\Velocity;
+use App\Momentum\ZoneDescription;
 use App\Strava\API\Activity;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ActivityData
 {
@@ -28,12 +30,13 @@ final class ActivityData
         private AthleteInterface $athlete,
         private Activity $activity,
         private ActivityStream $stream,
+        private TranslatorInterface $translator,
     ) {
     }
 
     public function getMetaData(): ActivityMetaData
     {
-        return new ActivityMetaData($this->activity);
+        return new ActivityMetaData($this->activity, $this->translator);
     }
 
     /**
@@ -259,8 +262,8 @@ final class ActivityData
      *     metrics: TrainingMetrics,
      *     pace_zone_sessions: array<Session>,
      *     heart_rate_zone_sessions: array<Session>,
-     *     pace_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
-     *     hr_stats: array<array{zone: string, duration_seconds: int, duration_percentage: float}>,
+     *     pace_stats: array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>,
+     *     hr_stats: array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>
      * }
      */
     public function toArray(): array
@@ -270,8 +273,8 @@ final class ActivityData
         $paceZoneSessions = $sessions->getPaceZoneSessions();
 
         $metrics = TrainingMetrics::fromSessions($paceZoneSessions);
-        $paceStats = Statistics::fromSessions($this->athlete, $paceZoneSessions, PaceZone::cases());
-        $hrStats = Statistics::fromSessions($this->athlete, $heartRateZoneSessions, HeartRateZone::cases());
+        $paceStats = Statistics::fromSessions($paceZoneSessions, PaceZone::cases());
+        $hrStats = Statistics::fromSessions($heartRateZoneSessions, HeartRateZone::cases());
 
         // Use zone session totals instead of moving_time
         // This ensures percentages always aggregate to 100%
@@ -280,6 +283,15 @@ final class ActivityData
 
         $paceStatsArray = $paceStats->toArray($totalPaceSeconds);
         $hrStatsArray = $hrStats->toArray($totalHrSeconds);
+
+        // Localize zone descriptions
+        $localizedZoneDescription = new LocalizedZoneDescription(
+            new ZoneDescription($this->athlete),
+            $this->translator
+        );
+
+        $paceStatsArray = $this->localizeStats($paceStatsArray, $localizedZoneDescription);
+        $hrStatsArray = $this->localizeStats($hrStatsArray, $localizedZoneDescription);
 
         return [
             'activity_id' => $this->activity->getId(),
@@ -292,6 +304,32 @@ final class ActivityData
             'heart_rate_zone_sessions' => $heartRateZoneSessions,
             'hr_stats' => $hrStatsArray,
         ];
+    }
+
+    /**
+     * @param array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}> $stats
+     *
+     * @return array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>
+     */
+    private function localizeStats(array $stats, LocalizedZoneDescription $localizedZoneDescription): array
+    {
+        return array_map(function (array $stat) use ($localizedZoneDescription): array {
+            // Try to find the zone and localize it
+            foreach (PaceZone::cases() as $zone) {
+                if ($zone->value === $stat['zone']) {
+                    $stat['description'] = $localizedZoneDescription->getDescription($zone);
+                    break;
+                }
+            }
+            foreach (HeartRateZone::cases() as $zone) {
+                if ($zone->value === $stat['zone']) {
+                    $stat['description'] = $localizedZoneDescription->getDescription($zone);
+                    break;
+                }
+            }
+
+            return $stat;
+        }, $stats);
     }
 
     private function convertVelocity(Velocity $velocity): float

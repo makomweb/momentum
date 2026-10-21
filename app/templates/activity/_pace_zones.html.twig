@@ -1,5 +1,5 @@
 <div class="bg-white border border-gray-200 rounded p-4 flex flex-col h-full overflow-hidden" style="max-height: 15rem;">
-    <h3 class="text-sm font-semibold mb-3 flex-shrink-0">Pace Zones</h3>
+    <h3 class="text-sm font-semibold mb-3 flex-shrink-0">{{ 'activity.pace_zones'|trans }}</h3>
     <div class="space-y-2 overflow-y-auto flex-grow">
         {% for stat in pace_stats %}
             {% set zone = stat.zone %}
@@ -8,10 +8,10 @@
             <div>
                 <div class="flex justify-between items-start mb-1">
                     <div class="text-xs font-semibold">{{ description }}</div>
-                    <div class="text-xs font-bold" style="color: {{ zone | format_zone_color('pace') }};">{{ percentage | number_format(1, '.') }}%</div>
+                    <div class="text-xs font-bold" style="color: {{ zone | zone_color('pace') }};">{{ percentage | number_format(1, '.') }}%</div>
                 </div>
                 <div class="w-full bg-gray-200 rounded h-1.5">
-                    <div class="h-full rounded" style="width: {{ percentage }}%; background: {{ zone | format_zone_color('pace') }};"></div>
+                    <div class="h-full rounded" style="width: {{ percentage }}%; background: {{ zone | zone_color('pace') }};"></div>
                 </div>
             </div>
         {% endfor %}

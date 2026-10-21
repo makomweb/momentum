@@ -83,20 +83,20 @@ final class ZonePercentageAggregationTest extends TestCase
         // Strava moving_time (actual time when moving, excluding pauses)
         $stravaMovingTime = 3196; // As reported by user
 
-        // Calculate moving time (similar to Activity::getMovingTimeSeconds)
         $paceSessions = $activity->getPaceZoneSessions();
         $hrSessions = $activity->getHeartRateSessions();
 
         // When using total zone seconds (correct for unit test):
-        $paceStatistics = Statistics::fromSessions($athlete, $paceSessions, PaceZone::cases());
+        $paceStatistics = Statistics::fromSessions($paceSessions, PaceZone::cases());
         $paceStatsArrayCorrect = $paceStatistics->toArray($totalZoneSeconds);
+
         $paceTotalPercentageCorrect = array_sum(array_column($paceStatsArrayCorrect, 'duration_percentage'));
 
         // When using Strava moving_time (reproduces the 149% bug):
         $paceStatsArrayWithBug = $paceStatistics->toArray($stravaMovingTime);
         $paceTotalPercentageWithBug = array_sum(array_column($paceStatsArrayWithBug, 'duration_percentage'));
 
-        $hrStatistics = Statistics::fromSessions($athlete, $hrSessions, HeartRateZone::cases());
+        $hrStatistics = Statistics::fromSessions($hrSessions, HeartRateZone::cases());
         $hrStatsArrayCorrect = $hrStatistics->toArray($totalZoneSeconds);
         $hrTotalPercentageCorrect = array_sum(array_column($hrStatsArrayCorrect, 'duration_percentage'));
 

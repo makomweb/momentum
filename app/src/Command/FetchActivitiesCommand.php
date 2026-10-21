@@ -2,24 +2,11 @@
 
 namespace App\Command;
 
-use App\AI\RAG\DocumentFactory;
 use App\AI\RAG\MyChatbot;
-use App\AI\RAG\NeuronAdapter;
-use App\AI\RAG\ReportProgressInterface;
-use App\Entity\User;
-use App\Momentum\AthleteInterface;
-use App\Momentum\HeartRate;
-use App\Momentum\Pace;
-use App\Momentum\Power;
-use App\Repository\ActivityRepository;
-use App\Repository\UserRepository;
-use App\Strava\API\Activity;
 use App\Strava\API\ApiException;
 use App\Strava\Synchronizer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,10 +20,7 @@ class FetchActivitiesCommand extends Command
 {
     public function __construct(
         private Synchronizer $synchronizer,
-        private ActivityRepository $activities,
-        private NeuronAdapter $adapter,
-        private DocumentFactory $documentFactory,
-        private UserRepository $users,
+        private MyChatbot $chatbot,
     ) {
         parent::__construct();
     }
@@ -70,150 +54,14 @@ class FetchActivitiesCommand extends Command
             return Command::FAILURE;
         }
 
-        $activities = [];
-
         try {
-            $activities = $this->activities->findByStravaUser($stravaUserId);
-            self::showTable($output, $activities);
-        } catch (\Throwable $ex) {
-            $io->error(sprintf('Error loading: %s', $ex));
-
-            return Command::FAILURE;
-        }
-
-        $this->adapter->setStravaUserId($stravaUserId);
-        MyChatbot::initialize($this->adapter);
-
-        $report = $this->createReportAdapter($output);
-        $report->start(count($activities));
-
-        try {
-            MyChatbot::make()
-                ->ingest(
-                    $this->documentFactory->yieldDocuments(
-                        $this->createAthlete($stravaUserId),
-                        $activities,
-                        $report
-                    )
-                );
+            $this->chatbot->ingest($stravaUserId, IngestionProgressAdapter::create($output));
         } catch (\Throwable $ex) {
             $io->error(sprintf('Error ingesting: %s', $ex));
 
             return Command::FAILURE;
-        } finally {
-            $report->finish();
         }
 
         return Command::SUCCESS;
-    }
-
-    private function createAthlete(int $stravaUserId): AthleteInterface
-    {
-        $user = $this->users->findByStravaId($stravaUserId);
-        assert($user instanceof User);
-
-        $athlete = new class($user) implements AthleteInterface {
-            public function __construct(private User $user)
-            {
-            }
-
-            public function getId(): int
-            {
-                return $this->user->getStravaId();
-            }
-
-            public function getName(): string
-            {
-                return $this->user->getName();
-            }
-
-            public function getRunTreshold(): Pace
-            {
-                return $this->user->getRunTreshold();
-            }
-
-            public function getCyclingTreshold(): Power
-            {
-                return $this->user->getCyclingTreshold();
-            }
-
-            public function getMaxHeartRate(): HeartRate
-            {
-                return $this->user->getMaxHeartRate();
-            }
-
-            public function getProfilePicture(): string
-            {
-                return $this->user->getProfilePictureMedium();
-            }
-
-            public function isConfigured(): bool
-            {
-                throw new \Exception('Not implemented');
-            }
-
-            public function toArray(): array
-            {
-                throw new \Exception('Not implemented');
-            }
-        };
-
-        return $athlete;
-    }
-
-    private function createReportAdapter(OutputInterface $output): ReportProgressInterface
-    {
-        return new class($output) implements ReportProgressInterface {
-            private ?ProgressBar $progressBar = null;
-
-            public function __construct(private OutputInterface $output)
-            {
-            }
-
-            public function start(int $count): void
-            {
-                assert(is_null($this->progressBar), sprintf('You already called %s::start()!', self::class));
-                assert($count > 0);
-
-                $this->progressBar = new ProgressBar($this->output, $count);
-            }
-
-            public function progress(int $steps = 1): void
-            {
-                assert($this->progressBar instanceof ProgressBar, sprintf('You must call %s::start() first!', self::class));
-                assert($steps > 0);
-
-                $this->progressBar->advance($steps);
-            }
-
-            public function finish(): void
-            {
-                assert($this->progressBar instanceof ProgressBar, sprintf('You must call %s::start() first!', self::class));
-
-                $this->progressBar->finish();
-            }
-        };
-    }
-
-    /**
-     * @param Activity[] $activities
-     */
-    private static function showTable(OutputInterface $output, array $activities): void
-    {
-        if (!empty($activities)) {
-            $table = new Table($output);
-            $table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
-
-            foreach ($activities as $activity) {
-                $table->addRow([
-                    $activity->getId(),
-                    $activity->getStartDateLocalTime()->format(\DateTimeImmutable::RFC2822),
-                    $activity->getName(),
-                    $activity->getDistance(),
-                    $activity->getAverageVelocityAsStringable(),
-                ]);
-            }
-            $table->render();
-        }
     }
 }

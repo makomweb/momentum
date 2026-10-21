@@ -3,12 +3,33 @@
 namespace App\Tests\Unit;
 
 use App\Twig\FormatLocalDateTime;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[AllowMockObjectsWithoutExpectations]
 class FormatDayTest extends TestCase
 {
+    private FormatLocalDateTime $filter;
+    private MockObject&TranslatorInterface $translator;
+
+    protected function setUp(): void
+    {
+        $this->translator = $this->createMock(TranslatorInterface::class);
+        $this->translator->method('getLocale')->willReturn('en');
+        $this->translator->method('trans')
+            ->willReturnCallback(fn ($key) => match ($key) {
+                'date.today' => 'Today',
+                'date.yesterday' => 'Yesterday',
+                default => $key,
+            });
+
+        $this->filter = new FormatLocalDateTime($this->translator);
+    }
+
     #[Test]
     #[DataProvider('provideTestData')]
     /**
@@ -17,7 +38,7 @@ class FormatDayTest extends TestCase
     public function format_day_should_work(\DateTimeImmutable $actual, string $prefix): void
     {
         \assert(!empty($prefix));
-        self::assertStringStartsWith($prefix, FormatLocalDateTime::format($actual));
+        self::assertStringStartsWith($prefix, $this->filter->format($actual));
     }
 
     /** @return array<array{0: \DateTimeImmutable, 1: non-empty-string}> */
@@ -31,7 +52,7 @@ class FormatDayTest extends TestCase
         return [
             [$today, 'Today · '],
             [$yesterday, 'Yesterday · '],
-            [$otherDate, 'Sun, 23 Aug 2026 · 17:02'],
+            [$otherDate, 'Sun, 08/23/2026 · 5:02 PM'],
         ];
     }
 }

@@ -15,7 +15,7 @@ class HeartRateZoneTest extends TestCase
         // With max HR of 200: 100-120 bpm
         $zone = HeartRateZone::calculate(100, 200);
         self::assertEquals(HeartRateZone::ZONE_1, $zone);
-        self::assertEquals('Warm-up/Light', $zone->value);
+        self::assertEquals('Warm-up', $zone->value);
     }
 
     #[Test]
@@ -33,7 +33,7 @@ class HeartRateZoneTest extends TestCase
         // With max HR of 200: 120-140 bpm
         $zone = HeartRateZone::calculate(130, 200);
         self::assertEquals(HeartRateZone::ZONE_2, $zone);
-        self::assertEquals('Easy/Recovery', $zone->value);
+        self::assertEquals('Recovery', $zone->value);
     }
 
     #[Test]
@@ -51,7 +51,7 @@ class HeartRateZoneTest extends TestCase
         // With max HR of 200: 140-160 bpm
         $zone = HeartRateZone::calculate(150, 200);
         self::assertEquals(HeartRateZone::ZONE_3, $zone);
-        self::assertEquals('Aerobic/Moderate', $zone->value);
+        self::assertEquals('Aerobic', $zone->value);
     }
 
     #[Test]
@@ -69,7 +69,7 @@ class HeartRateZoneTest extends TestCase
         // With max HR of 200: 160-180 bpm
         $zone = HeartRateZone::calculate(170, 200);
         self::assertEquals(HeartRateZone::ZONE_4, $zone);
-        self::assertEquals('Threshold/Hard', $zone->value);
+        self::assertEquals('Threshold', $zone->value);
     }
 
     #[Test]
@@ -87,7 +87,7 @@ class HeartRateZoneTest extends TestCase
         // With max HR of 200: 180-200 bpm
         $zone = HeartRateZone::calculate(190, 200);
         self::assertEquals(HeartRateZone::ZONE_5, $zone);
-        self::assertEquals('Maximum/Sprinting', $zone->value);
+        self::assertEquals('Maximum', $zone->value);
     }
 
     #[Test]

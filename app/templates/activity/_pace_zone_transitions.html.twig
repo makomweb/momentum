@@ -1,5 +1,5 @@
 <div class="bg-white border border-gray-200 rounded p-4 flex flex-col lg:h-full overflow-hidden" style="max-height: 15rem;">
-    <h3 class="text-sm font-semibold mb-3 flex-shrink-0">Pace Zone Transitions</h3>
+    <h3 class="text-sm font-semibold mb-3 flex-shrink-0">{{ 'activity.pace_zone_transitions'|trans }}</h3>
     <div class="space-y-2 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
         {% for session in pace_zone_sessions %}
             <div class="flex items-center justify-between gap-3 p-2 border-l-4" style="background: {{ session.zone.getColor() }}11; border-left-color: {{ session.zone.getColor() }};">
