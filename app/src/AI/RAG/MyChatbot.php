@@ -38,7 +38,8 @@ class MyChatbot extends RAG
 
         $activities = $this->activities->findByStravaUser($stravaUserId);
 
-        $this->addDocuments(
+        // Avoid duplicates by replacing the documents for existing activities:
+        $this->reindexBySource(
             iterator_to_array(
                 $this->documentFactory->yieldDocuments(
                     $this->createAthlete($stravaUserId),
