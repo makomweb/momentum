@@ -43,7 +43,7 @@ class FetchActivitiesCommand extends Command
         $io->title(sprintf('Syncing activities for Strava user %d', $stravaUserId));
 
         try {
-            $this->synchronizer->sync($stravaUserId, new ReportProgressAdapter($output, $io));
+            $this->synchronizer->sync($stravaUserId, DownloadProgressAdapter::create($output));
         } catch (ApiException $ex) {
             $io->error($ex->getMessage());
 

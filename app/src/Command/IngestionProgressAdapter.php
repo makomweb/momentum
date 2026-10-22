@@ -11,8 +11,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class IngestionProgressAdapter implements ReportProgressInterface
 {
     private function __construct(
-        private ProgressIndicator $progress,
-        private Table $table,
+        private readonly ProgressIndicator $progress,
+        private readonly Table $table,
+        private int $count = 0,
     ) {
         $progress->start('Ingesting...');
         $table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
@@ -28,8 +29,11 @@ final class IngestionProgressAdapter implements ReportProgressInterface
 
     public function __destruct()
     {
-        $this->progress->finish('Finished');
-        $this->table->render();
+        $this->progress->finish(sprintf('Ingested %d activitie(s)', $this->count));
+
+        if ($this->count) {
+            $this->table->render();
+        }
     }
 
     public function progress(Activity $activity): void
@@ -43,5 +47,7 @@ final class IngestionProgressAdapter implements ReportProgressInterface
             $activity->getDistance(),
             $activity->getAverageVelocityAsStringable(),
         ]);
+
+        ++$this->count;
     }
 }

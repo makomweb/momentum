@@ -6,7 +6,7 @@ namespace App\Strava;
 
 use App\Strava\API\Activity;
 
-interface ReportProgressInterface
+interface DownloadProgressInterface
 {
     public function onStart(?Activity $resumeAfter): void;
 

@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\AI\RAG\MyAgent;
-use App\AI\RAG\NeuronAdapter;
 use NeuronAI\Chat\Messages\Stream\Chunks\TextChunk;
 use NeuronAI\Chat\Messages\UserMessage;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,7 +18,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class MyAgentCommand extends Command
 {
-    public function __construct(private NeuronAdapter $adapter)
+    public function __construct(private MyAgent $agent)
     {
         parent::__construct();
     }
@@ -38,8 +37,6 @@ class MyAgentCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        MyAgent::initialize($this->adapter);
-
         try {
             $question = $input->getArgument('question') ?? 'What is PHP?';
             assert(is_string($question));
@@ -47,7 +44,7 @@ class MyAgentCommand extends Command
             $io->writeln('🤖 MyAgent: '.$question);
             $io->newLine();
 
-            $stream = MyAgent::make()
+            $stream = $this->agent
                 ->setThreadId('chat_'.time())
                 ->stream(new UserMessage($question));
 

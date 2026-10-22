@@ -52,7 +52,7 @@ final readonly class DocumentFactory implements DocumentFactoryInterface
 
             yield new Document($content)
                 ->setSourceType(get_class($activity))
-                ->setSourceName($activity->getName())
+                ->setSourceName(sprintf('%s (Activity-ID %d)', $activity->getName(), $activity->getId()))
                 ->setMetadata([
                     'strava_user_id' => $athlete->getId(),
                     'activity_id' => $activity->getId(),
