@@ -3,30 +3,31 @@
 namespace App\Command;
 
 use App\Strava\API\Activity;
-use App\Strava\ReportProgressInterface;
+use App\Strava\DownloadProgressInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
-final class ReportProgressAdapter implements ReportProgressInterface
+final class DownloadProgressAdapter implements DownloadProgressInterface
 {
-    private Table $table;
-
-    public function __construct(
-        OutputInterface $output,
-        private readonly SymfonyStyle $io,
-        public int $count = 0,
+    private function __construct(
+        private readonly OutputInterface $output,
+        private readonly Table $table,
+        private int $count = 0,
     ) {
-        $this->table = new Table($output);
         $this->table->setHeaders(['ID', 'Date', 'Name', 'Distance', 'Velocity']);
+    }
+
+    public static function create(OutputInterface $output): self
+    {
+        return new self($output, new Table($output));
     }
 
     public function onStart(?Activity $resumeAfter): void
     {
         if ($resumeAfter) {
-            $this->io->info(sprintf('🚀 Resume after "%s"', $resumeAfter));
+            $this->output->writeln(sprintf('🚀 Resume after "%s"', $resumeAfter));
         } else {
-            $this->io->info('🚀 Start synchronizing');
+            $this->output->writeln('🚀 Start synchronizing');
         }
     }
 
@@ -53,6 +54,6 @@ final class ReportProgressAdapter implements ReportProgressInterface
             $this->table->render();
         }
 
-        $this->io->success(sprintf('✅ Synchronized %d activitie(s)', $this->count));
+        $this->output->writeln(sprintf('✅ Synchronized %d activitie(s)', $this->count));
     }
 }

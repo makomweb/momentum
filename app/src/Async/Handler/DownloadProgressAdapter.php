@@ -3,10 +3,10 @@
 namespace App\Async\Handler;
 
 use App\Strava\API\Activity;
-use App\Strava\ReportProgressInterface;
+use App\Strava\DownloadProgressInterface;
 use Psr\Log\LoggerInterface;
 
-final class ReportProgressAdapter implements ReportProgressInterface
+final class DownloadProgressAdapter implements DownloadProgressInterface
 {
     public function __construct(
         private LoggerInterface $logger,

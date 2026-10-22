@@ -30,7 +30,7 @@ final readonly class SyncActivitiesMessageHandler
 
         $this->logger->info(sprintf('Syncing activities for user "%d"', $stravaUserId));
 
-        $adapter = new ReportProgressAdapter($this->logger);
+        $adapter = new DownloadProgressAdapter($this->logger);
 
         try {
             $this->synchronizer->sync($stravaUserId, $adapter);

@@ -21,7 +21,7 @@ final readonly class Synchronizer
     /**
      * Sync activities for a Strava user, resuming from last activity.
      */
-    public function sync(int $stravaUserId, ReportProgressInterface $progress): void
+    public function sync(int $stravaUserId, DownloadProgressInterface $progress): void
     {
         $page = 1;
         $last = $this->repository->findLastOrNull($stravaUserId);
