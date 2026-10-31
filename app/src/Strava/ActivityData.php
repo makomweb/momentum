@@ -290,8 +290,8 @@ final class ActivityData
             $this->translator
         );
 
-        $paceStatsArray = $this->localizeStats($paceStatsArray, $localizedZoneDescription);
-        $hrStatsArray = $this->localizeStats($hrStatsArray, $localizedZoneDescription);
+        $paceStatsArray = $this->localizePaceStats($paceStatsArray, $localizedZoneDescription);
+        $hrStatsArray = $this->localizeHeartRateStats($hrStatsArray, $localizedZoneDescription);
 
         return [
             'activity_id' => $this->activity->getId(),
@@ -311,16 +311,28 @@ final class ActivityData
      *
      * @return array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>
      */
-    private function localizeStats(array $stats, LocalizedZoneDescription $localizedZoneDescription): array
+    private function localizePaceStats(array $stats, LocalizedZoneDescription $localizedZoneDescription): array
     {
         return array_map(function (array $stat) use ($localizedZoneDescription): array {
-            // Try to find the zone and localize it
             foreach (PaceZone::cases() as $zone) {
                 if ($zone->value === $stat['zone']) {
                     $stat['description'] = $localizedZoneDescription->getDescription($zone);
                     break;
                 }
             }
+
+            return $stat;
+        }, $stats);
+    }
+
+    /**
+     * @param array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}> $stats
+     *
+     * @return array<array{type: string, zone: int|string, duration_seconds: int, duration_percentage: float}>
+     */
+    private function localizeHeartRateStats(array $stats, LocalizedZoneDescription $localizedZoneDescription): array
+    {
+        return array_map(function (array $stat) use ($localizedZoneDescription): array {
             foreach (HeartRateZone::cases() as $zone) {
                 if ($zone->value === $stat['zone']) {
                     $stat['description'] = $localizedZoneDescription->getDescription($zone);
